@@ -1,0 +1,46 @@
+from typing import Any
+from abc import ABC, abstractmethod
+
+State = Any
+
+
+class RLAgent(ABC):
+    def __init__(self,
+                 episodes: int,
+                 decaying_eps: bool,
+                 epsilon: float,
+                 learning_rate: float,
+                 gamma: float,
+                 problem_name: str,
+                 env_name: str
+                 ):
+        self.episodes = episodes
+        self.decaying_eps = decaying_eps
+        self.epsilon = epsilon
+        self.learning_rate = learning_rate
+        self.gamma = gamma
+        self.problem_name = problem_name
+        self.env_name = env_name
+        self.env = None
+        self.states_counter = {}
+
+    @abstractmethod
+    def learn(self):
+        pass
+
+    def class_name(self):
+        return self.__class__.__name__
+
+    def get_actions_probabilities(self, observation):
+        raise Exception("function get_actions_probabilities is unimplemented")
+
+    def get_number_of_unique_states(self):
+        return len(self.states_counter)
+
+    def update_states_counter(self, observation_str: str):
+        if observation_str in self.states_counter:
+            self.states_counter[observation_str] = self.states_counter[observation_str] + 1
+        else:
+            self.states_counter[observation_str] = 1
+        if len(self.states_counter) % 200 == 0:
+            print(f"probably error to many {len(self.states_counter)}")
