@@ -8,24 +8,6 @@ from torch.utils.data import DataLoader
 
 from ml.sequential.lstm_model import LstmObservations, train_metric_model
 
-# move from here all these helper functions
-def softmax(x):
-    """Compute softmax values for each element of a 1D array."""
-    exp_x = np.exp(x - np.max(x))  # Subtract the maximum value to avoid numerical instability
-    return exp_x / np.sum(exp_x)
-
-def stochastic_softmax_selection(actions_probs):
-    action_probs_softmax = softmax(actions_probs) # give higher probabilities to actions with higher rewards and vice versa
-    return np.random.choice(len(actions_probs), p=action_probs_softmax)
-
-def stochastic_selection(actions_probs):
-    return np.random.choice(len(actions_probs), p=actions_probs)
-
-def stochastic_selection(actions_probs):
-    return np.argmax(actions_probs)
-
-
-    
 ### IMPLEMENT MORE SELECTION METHODS, MAKE SURE action_probs IS AS IT SEEMS: list of action-probability 'es ###
     
 
@@ -45,7 +27,7 @@ class GramlRecognizer(ABC):
             self.agents.append(agent)
             
         # train the network so it will find a metric for the observations of the base agents such that traces of agents to different goals are far from one another
-        train_samples, dev_samples = generate_datasets(10000, self.agents, stochastic_softmax_selection)
+        train_samples, dev_samples = generate_datasets(10000, self.agents, agent.stochastic_softmax_selection)
         train_dataset = GRDataset(train_samples)
         dev_dataset = GRDataset(dev_samples)
         model = LstmObservations(10, max_episode_length=20)

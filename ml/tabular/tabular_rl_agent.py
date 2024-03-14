@@ -124,3 +124,19 @@ class TabularRLAgent(RLAgent):
             Any: [description]
         """""
         return self.softmax_policy(state)
+
+    # MOVE FROM HERE
+    def softmax(x):
+        """Compute softmax values for each element of a 1D array."""
+        exp_x = np.exp(x - np.max(x))  # Subtract the maximum value to avoid numerical instability
+        return exp_x / np.sum(exp_x)
+    
+    def stochastic_softmax_selection(actions_probs):
+        action_probs_softmax = softmax(actions_probs) # give higher probabilities to actions with higher rewards and vice versa
+        return np.random.choice(len(actions_probs), p=action_probs_softmax)
+
+    def stochastic_selection(actions_probs):
+        return np.random.choice(len(actions_probs), p=actions_probs)
+
+    def greedy_selection(actions_probs):
+        return np.argmax(actions_probs)
