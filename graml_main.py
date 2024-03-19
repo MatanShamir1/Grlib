@@ -2,6 +2,7 @@ from consts import MINIGRID_PROBLEMS
 import scripts.file_system as file_system
 from recognizer import GramlRecognizer
 from ml import TabularQLearner
+from metrics.metrics import greedy_selection
 import os
 import pickle
 
@@ -25,7 +26,7 @@ def init():
         # GET THIS OUT TO A FUNCTION
         actor = TabularQLearner(env_name=env_name, problem_name = problem_list[0])
         actor.learn()
-        steps = actor.generate_observation(actor.greedy_selection)
+        steps = actor.generate_observation(greedy_selection)
         if not os.path.exists(observation_path):
             os.makedirs(observation_path)
         with open(f'{observation_path}/obs1.0.pkl', 'wb') as f:

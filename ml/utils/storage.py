@@ -21,6 +21,8 @@ def get_storage_dir():
 def _get_models_directory_name():
     return "models"
 
+def _get_datasets_directory_name():
+    return "siamese_datasets"
 
 def _get_observations_directory_name():
     return "observations"
@@ -41,6 +43,8 @@ def get_observations_dir(env_name):
 def get_model_dir(env_name, model_name, class_name):
     return os.path.join(get_env_dir(env_name=env_name), _get_models_directory_name(), model_name, class_name)
 
+def get_siamese_dataset_path(env_name, problem_names_list):
+    return os.path.join(get_env_dir(env_name=env_name), _get_datasets_directory_name(), ''.join(problem_names_list))
 
 def get_status_path(model_dir):
     return os.path.join(model_dir, "status.pt")

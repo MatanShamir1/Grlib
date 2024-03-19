@@ -233,8 +233,6 @@ class TabularQLearner(TabularRLAgent):
         done_times = 0
         patience = 0
         converged_at = None
-        with open("/home/dsi/matans/Final_Project/GoalRecognitionAsRL/exp.txt", "w") as file:
-                file.write(f'hllo')
         max_r = float("-inf")
         print(f"{self._learned_episodes}->{self.episodes}")
         if self._learned_episodes >= self.episodes:
@@ -265,8 +263,6 @@ class TabularQLearner(TabularRLAgent):
                 action = self.agent_step(reward, next_tabular_state)
                 tstep += 1
                 episode_r += reward
-            with open("/home/dsi/matans/Final_Project/GoalRecognitionAsRL/tsteps.txt", "w") as file:
-                file.write(f'tstep is: {tstep} and tsteps is: {tsteps} and done is: {done}')
             self._learned_episodes = self._learned_episodes + 1
             if done:  # One last update at the terminal state
                 self.agent_end(reward)
@@ -366,19 +362,18 @@ class TabularQLearner(TabularRLAgent):
             episode terminates.
         """
         
-        obs, _ = self.environment.reset()
+        obs, _ = self.env.reset()
         MAX_STEPS = 20
         done = False
         steps = []
         for step_index in range(MAX_STEPS):
-            x, y = self.environment.unwrapped.agent_pos
+            x, y = self.env.unwrapped.agent_pos
             str_state = "({},{}):{}".format(x, y, obs['direction'])
             action_probs = self.q_table[str_state] / np.sum(self.q_table[str_state])  # Normalize probabilities
             action = action_selection_method(action_probs)
-            steps.append(((obs, self.environment.unwrapped.agent_pos), action))
-            obs, reward, terminated, truncated, _ = self.environment.step(action)
+            steps.append(((obs, self.env.unwrapped.agent_pos), action))
+            obs, reward, terminated, truncated, _ = self.env.step(action)
             done = terminated | truncated
             if done:
-                print("done!!!!")
                 break
         return steps

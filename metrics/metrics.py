@@ -53,6 +53,30 @@ def softmax(values: List[float]) -> List[float]:
     """
     return [(math.exp(q)) / sum([math.exp(_q) for _q in values]) for q in values]
 
+def amplify(values, alpha=1.0):
+    """Computes amplified softmax probabilities for an array of values
+    Args:
+        values (list): Input values for which to compute softmax
+        alpha (float): Amplification factor, where alpha > 1 increases differences between probabilities
+    Returns:
+        np.array: amplified softmax probabilities
+    """
+    values = np.concatenate((values[:3], values[-1:]))**alpha # currently only choose to turn, move forward or finish
+    return values / np.sum(values)
+
+def stochastic_amplified_selection(actions_probs, alpha=15.0):
+    action_probs_amplified = amplify(actions_probs, alpha)
+    choice = np.random.choice(len(action_probs_amplified), p=action_probs_amplified)
+    if choice == 3:
+        choice = 6
+    return choice
+
+def stochastic_selection(actions_probs):
+    return np.random.choice(len(actions_probs), p=actions_probs)
+
+def greedy_selection(actions_probs):
+    return np.argmax(actions_probs)
+
 
 def traj_to_policy(observations: List[Tuple[State, Any]], actions: Discrete, epsilon: float = 0.) -> Dict[
     str, List[float]]:

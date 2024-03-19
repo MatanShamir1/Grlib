@@ -30,3 +30,13 @@ def md5(file_path: str):
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
+
+def get_md5(file_path_list: List[str]):
+    return [(file_path, md5(file_path=file_path)) for file_path in file_path_list]
+
+
+def print_md5(file_path_list: List[str]):
+    md5_of_observations = get_md5(file_path_list=file_path_list)
+    for file_name, file_md5 in md5_of_observations:
+        print(f"{file_name}:{file_md5}")
+    print("")
