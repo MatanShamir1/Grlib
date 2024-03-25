@@ -37,19 +37,24 @@ def init():
         recognizer = GramlRecognizer(TabularQLearner, env_name, problem_list, grid_size)
         print("### STARTING DOMAIN LEARNING PHASE ###")
         recognizer.domain_learning_phase()
-        return observation_path, observations_paths, recognizer
+        recognizer.goals_adaptation_phase(['(1,6)', '(6,1)', '(6,6)'])
+        
+        agent = TabularQLearner(env_name=env_name, problem_name="MiniGrid-DynamicGoalEmpty-8x8-1x6-v0")
+        agent.learn()
+        sequence = agent.generate_observation(greedy_selection)
+        closest_goal = recognizer.inference_phase(sequence)
+        print(f'closest goal is: {closest_goal}')
 
     else:
         print("I currently only support minigrid. I promise it will change in the future!")
         exit(1)
 
-def interactive_recognition(observation_path, observations_paths, recognizer):
-    initial_goal_set = input("Please specify an initial set of goals for me. I will perform goals adaptation time now.")
-    pass
+# def interactive_recognition(observation_path, observations_paths, recognizer):
+#     initial_goal_set = input("Please specify an initial set of goals for me. I will perform goals adaptation time now.")
+#     pass
 
 def main():
-    observation_path, observations_paths, recognizer = init()
-    interactive_recognition(observation_path, observations_paths, recognizer)
+    init()
     
 
 if __name__ == "__main__":

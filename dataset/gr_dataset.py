@@ -6,6 +6,7 @@ from typing import List
 from ml.utils import get_siamese_dataset_path
 import os
 import dill
+import torch
 
 class GRDataset(Dataset):
     def __init__(self, num_samples, samples):
@@ -32,7 +33,7 @@ def generate_datasets(num_samples, agents, observation_creation_method : MethodT
         if not os.path.exists(dataset_directory):
             os.makedirs(dataset_directory)
         all_samples = []
-        for i in range(10000):
+        for i in range(num_samples):
             is_same_goal = random.choice([1, 0]) # decide whether this sample constitutes 2 sequences to the same goal or to different goals
             first_agent = np.random.choice(agents) # pick a random agent to generate the sample
             first_observation = first_agent.generate_observation(observation_creation_method)
@@ -42,7 +43,9 @@ def generate_datasets(num_samples, agents, observation_creation_method : MethodT
                 second_agent = np.random.choice([agent for agent in agents if agent != first_agent]) # pick another random agent to generate the sample
             second_observation = second_agent.generate_observation(observation_creation_method)
             second_observation = [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in second_observation]
-            all_samples.append((first_observation, second_observation, is_same_goal)) # observations to the same goal have label 1, and to different have label 0
+            all_samples.append(([torch.tensor(observation, dtype=torch.float32) for observation in first_observation],
+                                [torch.tensor(observation, dtype=torch.float32) for observation in second_observation],
+                                torch.tensor(is_same_goal, dtype=torch.float32))) # observations to the same goal have label 1, and to different have label 0
             if i % 1000 == 0: print(f'generated {i} samples')
         # Split samples into train and dev sets
         total_samples = len(all_samples)

@@ -1,4 +1,5 @@
 from abc import ABC
+import math
 from dataset.gr_dataset import GRDataset, generate_datasets
 from ml.base import RLAgent
 from metrics import metrics
@@ -12,14 +13,18 @@ import torch
 from ml.sequential.lstm_model import LstmObservations, train_metric_model
 
 ### IMPLEMENT MORE SELECTION METHODS, MAKE SURE action_probs IS AS IT SEEMS: list of action-probability 'es ###
-    
+
 def collate_fn(batch):
     first_traces, second_traces, is_same_goals = zip(*batch)
-    first_traces_padded = pad_sequence(torch.tensor(first_traces), batch_first=True)
-    second_traces_padded = pad_sequence(torch.tensor(second_traces), batch_first=True)
-    first_traces_padded_lengths = [len(trace) for trace in first_traces]
-    second_traces_padded_lengths = [len(trace) for trace in second_traces]
-    return first_traces_padded, second_traces_padded, is_same_goals, first_traces_padded_lengths, second_traces_padded_lengths
+    # torch.stack takes tensor tuples (fixed size) and stacks them up in a matrix
+    first_traces_padded = pad_sequence([torch.stack(sequence) for sequence in first_traces], batch_first=True)
+    second_traces_padded = pad_sequence([torch.stack(sequence) for sequence in second_traces], batch_first=True)
+    first_traces_lengths = [len(trace) for trace in first_traces]
+    second_traces_lengths = [len(trace) for trace in second_traces]
+    return first_traces_padded, second_traces_padded, torch.stack(is_same_goals), first_traces_lengths, second_traces_lengths
+
+def goal_to_minigrid_str(tuple):
+    return f'MiniGrid-DynamicGoalEmpty-8x8-{tuple[1]}x{tuple[3]}-v0'
 
 class GramlRecognizer(ABC):
     def __init__(self, method: Type[RLAgent], env_name: str, problems: List[str], grid_size):
@@ -40,14 +45,30 @@ class GramlRecognizer(ABC):
         train_samples, dev_samples = generate_datasets(10000, self.agents, metrics.stochastic_amplified_selection, self.problems, self.env_name)
         train_dataset = GRDataset(len(train_samples), train_samples)
         dev_dataset = GRDataset(len(dev_samples), dev_samples)
-        model = LstmObservations()
-        model = train_metric_model(model,
-                                    train_loader=DataLoader(train_dataset, batch_size=32, shuffle=False, collate_fn=collate_fn),
-                                    dev_loader=DataLoader(dev_dataset, batch_size=32, shuffle=False, collate_fn=collate_fn))
+        self.model = LstmObservations()
+        train_metric_model(self.model,
+                            train_loader=DataLoader(train_dataset, batch_size=64, shuffle=False, collate_fn=collate_fn),
+                            dev_loader=DataLoader(dev_dataset, batch_size=64, shuffle=False, collate_fn=collate_fn))
 
     def goals_adaptation_phase(self, new_goals):
+        self.current_goals = new_goals
         # start by training each rl agent on the base goal set
-        for problem_name in self.problems:
+        problems_goals = [(goal_to_minigrid_str(tuple),tuple) for tuple in new_goals]
+        self.embeddings_dict = {}
+        # will change, for now let an optimal agent give us the trace
+        for (problem_name, goal) in problems_goals:
             agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name)
             agent.learn()
-            self.agents.append(agent)
+            obs = agent.generate_observation(metrics.greedy_selection)
+            embedding = self.model.embed_sequence(obs)
+            self.embeddings_dict[goal] = embedding
+            
+    def inference_phase(self, sequence):
+        new_embedding = self.model.embed_sequence(sequence)
+        closest_goal, shortest_dist = None, math.inf
+        for (goal, embedding) in self.embeddings_dict.items():
+           curr_dist = torch.sum(torch.abs(embedding - new_embedding))
+           if curr_dist < shortest_dist:
+               closest_goal = goal
+               shortest_dist = curr_dist
+        return closest_goal

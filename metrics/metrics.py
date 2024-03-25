@@ -61,7 +61,7 @@ def amplify(values, alpha=1.0):
     Returns:
         np.array: amplified softmax probabilities
     """
-    values = np.concatenate((values[:3], values[-1:]))**alpha # currently only choose to turn, move forward or finish
+    values = values[:3]**alpha # currently only choose to turn or move forward
     return values / np.sum(values)
 
 def stochastic_amplified_selection(actions_probs, alpha=15.0):
