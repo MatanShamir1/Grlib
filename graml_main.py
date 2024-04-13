@@ -34,7 +34,7 @@ def init():
         file_system.create_partial_observabilities_files(env_name=env_name, observabilities=[0.1, 0.3, 0.5, 0.7])
         file_system.print_md5(file_path_list=observations_paths)
         
-        recognizer = GramlRecognizer(TabularQLearner, env_name, problem_list, grid_size)
+        recognizer = GramlRecognizer(TabularQLearner, env_name, problem_list, grid_size, is_continuous=True)
         print("### STARTING DOMAIN LEARNING PHASE ###")
         recognizer.domain_learning_phase()
         recognizer.goals_adaptation_phase(['(1,6)', '(6,1)', '(6,6)'])
@@ -55,7 +55,7 @@ def init():
 
 def main():
     init()
-    
+
 
 if __name__ == "__main__":
     main()

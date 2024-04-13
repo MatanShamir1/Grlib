@@ -1,6 +1,7 @@
 from abc import ABC
 import math
 from dataset.gr_dataset import GRDataset, generate_datasets
+from ml import utils
 from ml.base import RLAgent
 from metrics import metrics
 from typing import List, Tuple, Type
@@ -10,7 +11,7 @@ from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_sequence
 import torch
 
-from ml.sequential.lstm_model import LstmObservations, train_metric_model
+from ml.sequential.lstm_model import LstmObservations, train_metric_model, train_metric_model_cont
 
 ### IMPLEMENT MORE SELECTION METHODS, MAKE SURE action_probs IS AS IT SEEMS: list of action-probability 'es ###
 
@@ -23,17 +24,31 @@ def collate_fn(batch):
     second_traces_lengths = [len(trace) for trace in second_traces]
     return first_traces_padded, second_traces_padded, torch.stack(is_same_goals), first_traces_lengths, second_traces_lengths
 
+def collate_fn_cont(batch):
+    first_traces, second_traces, is_same_goals = zip(*batch)
+    first_traces_images_padded = pad_sequence([torch.stack([step.image for step in sequence]) for sequence in first_traces], batch_first=True)
+    first_traces_texts_padded = pad_sequence([torch.stack([step.text for step in sequence]) for sequence in first_traces], batch_first=True)
+    second_traces_images_padded = pad_sequence([torch.stack([step.image for step in sequence]) for sequence in second_traces], batch_first=True)
+    second_traces_texts_padded = pad_sequence([torch.stack([step.text for step in sequence]) for sequence in second_traces], batch_first=True)
+    first_traces_lengths = [len(trace) for trace in first_traces]
+    second_traces_lengths = [len(trace) for trace in second_traces]
+    return first_traces_images_padded, first_traces_texts_padded, second_traces_images_padded, second_traces_texts_padded, \
+            torch.stack(is_same_goals), first_traces_lengths, second_traces_lengths
+
 def goal_to_minigrid_str(tuple):
     return f'MiniGrid-DynamicGoalEmpty-8x8-{tuple[1]}x{tuple[3]}-v0'
 
 class GramlRecognizer(ABC):
-    def __init__(self, method: Type[RLAgent], env_name: str, problems: List[str], grid_size):
+    def __init__(self, method: Type[RLAgent], env_name: str, problems: List[str], grid_size, is_continuous = False):
         self.problems = problems
         self.env_name = env_name
         self._observability_percentages = [0.1, 0.3, 0.5, 0.7, 1.0]
         self.rl_agents_method = method
         self.agents: List[RLAgent] = []
-        
+        self.is_continuous = is_continuous
+        if is_continuous: self.train_func = train_metric_model_cont; self.collate_func = collate_fn_cont
+        else: self.train_func = train_metric_model; self.collate_func = collate_fn
+
     def domain_learning_phase(self):
         # start by training each rl agent on the base goal set
         for problem_name in self.problems:
@@ -42,13 +57,14 @@ class GramlRecognizer(ABC):
             self.agents.append(agent)
 
         # train the network so it will find a metric for the observations of the base agents such that traces of agents to different goals are far from one another
-        train_samples, dev_samples = generate_datasets(10000, self.agents, metrics.stochastic_amplified_selection, self.problems, self.env_name)
+        self.obs_space, self.preprocess_obss = utils.get_obss_preprocessor(self.agents[0].env.observation_space)
+        train_samples, dev_samples = generate_datasets(10000, self.agents, metrics.stochastic_amplified_selection, self.problems, self.env_name, self.preprocess_obss, self.is_continuous)
         train_dataset = GRDataset(len(train_samples), train_samples)
         dev_dataset = GRDataset(len(dev_samples), dev_samples)
-        self.model = LstmObservations()
-        train_metric_model(self.model,
-                            train_loader=DataLoader(train_dataset, batch_size=64, shuffle=False, collate_fn=collate_fn),
-                            dev_loader=DataLoader(dev_dataset, batch_size=64, shuffle=False, collate_fn=collate_fn))
+        self.model = LstmObservations(obs_space=self.obs_space, action_space=self.agents[0].env.action_space, is_continuous=self.is_continuous)
+        self.train_func(self.model,
+                            train_loader=DataLoader(train_dataset, batch_size=64, shuffle=False, collate_fn=self.collate_func),
+                            dev_loader=DataLoader(dev_dataset, batch_size=64, shuffle=False, collate_fn=self.collate_func))
 
     def goals_adaptation_phase(self, new_goals):
         self.current_goals = new_goals
