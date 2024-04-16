@@ -1,3 +1,4 @@
+import random
 from consts import MINIGRID_PROBLEMS
 import scripts.file_system as file_system
 from recognizer import GramlRecognizer
@@ -41,7 +42,7 @@ def init():
         
         agent = TabularQLearner(env_name=env_name, problem_name="MiniGrid-DynamicGoalEmpty-8x8-1x6-v0")
         agent.learn()
-        sequence = agent.generate_observation(greedy_selection)
+        sequence = agent.generate_partial_observation(action_selection_method=greedy_selection, percentage=random.choice([0.5, 0.7, 1]))
         closest_goal = recognizer.inference_phase(sequence)
         print(f'closest goal is: {closest_goal}')
 

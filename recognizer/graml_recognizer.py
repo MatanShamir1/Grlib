@@ -1,5 +1,6 @@
 from abc import ABC
 import math
+import random
 from dataset.gr_dataset import GRDataset, generate_datasets
 from ml import utils
 from ml.base import RLAgent
@@ -26,6 +27,8 @@ def collate_fn(batch):
 
 def collate_fn_cont(batch):
     first_traces, second_traces, is_same_goals = zip(*batch)
+    # pad sequence takes a batch of sequences and pads all of them to be as long as the longest sequence. with zeros.
+    # a pile of torches of different sizes, each one a 'list' of images\texts is padded, which means there are "0" images in the padded traces.
     first_traces_images_padded = pad_sequence([torch.stack([step.image for step in sequence]) for sequence in first_traces], batch_first=True)
     first_traces_texts_padded = pad_sequence([torch.stack([step.text for step in sequence]) for sequence in first_traces], batch_first=True)
     second_traces_images_padded = pad_sequence([torch.stack([step.image for step in sequence]) for sequence in second_traces], batch_first=True)
@@ -49,6 +52,7 @@ class GramlRecognizer(ABC):
         if is_continuous: self.train_func = train_metric_model_cont; self.collate_func = collate_fn_cont
         else: self.train_func = train_metric_model; self.collate_func = collate_fn
 
+    # TODO create a cache for the learning phase and load the weights if the problem was alread learnt.
     def domain_learning_phase(self):
         # start by training each rl agent on the base goal set
         for problem_name in self.problems:
@@ -58,7 +62,7 @@ class GramlRecognizer(ABC):
 
         # train the network so it will find a metric for the observations of the base agents such that traces of agents to different goals are far from one another
         self.obs_space, self.preprocess_obss = utils.get_obss_preprocessor(self.agents[0].env.observation_space)
-        train_samples, dev_samples = generate_datasets(10000, self.agents, metrics.stochastic_amplified_selection, self.problems, self.env_name, self.preprocess_obss, self.is_continuous)
+        train_samples, dev_samples = generate_datasets(100000, self.agents, metrics.stochastic_amplified_selection, self.problems, self.env_name, self.preprocess_obss, self.is_continuous)
         train_dataset = GRDataset(len(train_samples), train_samples)
         dev_dataset = GRDataset(len(dev_samples), dev_samples)
         self.model = LstmObservations(obs_space=self.obs_space, action_space=self.agents[0].env.action_space, is_continuous=self.is_continuous)
@@ -75,7 +79,7 @@ class GramlRecognizer(ABC):
         for (problem_name, goal) in problems_goals:
             agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name)
             agent.learn()
-            obs = agent.generate_observation(metrics.greedy_selection)
+            obs = agent.generate_partial_observation(action_selection_method=metrics.greedy_selection, percentage=random.choice([0.5, 0.7, 1]))
             embedding = self.model.embed_sequence(obs)
             self.embeddings_dict[goal] = embedding
             
@@ -83,7 +87,7 @@ class GramlRecognizer(ABC):
         new_embedding = self.model.embed_sequence(sequence)
         closest_goal, shortest_dist = None, math.inf
         for (goal, embedding) in self.embeddings_dict.items():
-           curr_dist = torch.sum(torch.abs(embedding - new_embedding))
+           curr_dist = torch.exp(-torch.sum(torch.abs(embedding-new_embedding)))
            if curr_dist < shortest_dist:
                closest_goal = goal
                shortest_dist = curr_dist

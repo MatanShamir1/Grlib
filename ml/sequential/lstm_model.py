@@ -81,13 +81,13 @@ class CNNImageEmbeddor(nn.Module):
 		return hidden[-1]
 
 class LstmObservations(nn.Module):
-	def __init__(self, obs_space, action_space, hidden_dim=5, is_continuous = False):
+	def __init__(self, obs_space, action_space, is_continuous = False):
 		super(LstmObservations,self).__init__()
 		self.embeddor = CNNImageEmbeddor(obs_space, action_space)
 		self.is_continuous = is_continuous
 		# check if the traces are a bunch of images	
-		if is_continuous: input_size = 64
-		else: input_size = 4
+		if is_continuous: input_size = 64; hidden_dim = 64
+		else: input_size = 4; hidden_dim = 5
 		self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_dim, batch_first=True)
 
 	# tabular
@@ -101,12 +101,11 @@ class LstmObservations(nn.Module):
 
 	# continuous
 	def forward_cont(self, traces1_images, traces1_texts, traces2_images, traces2_texts, lengths1, lengths2):
+     	# we also embed '0' images, but we take them out of the equation in the lstm (it knows to not treat them when batching)
 		traces1 = self.embeddor(traces1_images, traces1_texts)
-		traces2 = self.embeddor(traces2_images, traces2_texts) # traces1 & traces 2 shapes: batch_size X sequence_length X embedding_size
+		traces2 = self.embeddor(traces2_images, traces2_texts) # traces1 & traces 2 shapes: batch_size X max_sequence_length X embedding_size
 		out1, (ht1, ct1) = self.lstm(pack_padded_sequence(traces1, lengths1, batch_first=True, enforce_sorted=False), None)
 		out2, (ht2, ct2) = self.lstm(pack_padded_sequence(traces2, lengths2, batch_first=True, enforce_sorted=False), None)
-		# out1, _ = pad_packed_sequence(out1, batch_first=True, total_length=max(lengths1))
-		# out2, _ = pad_packed_sequence(out2, batch_first=True, total_length=max(lengths2))
 		manhattan_dis = torch.exp(-torch.sum(torch.abs(ht1[-1]-ht2[-1]),dim=1,keepdim=True))
 		return manhattan_dis.squeeze()
 

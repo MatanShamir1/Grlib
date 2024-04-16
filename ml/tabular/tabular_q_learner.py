@@ -1,5 +1,6 @@
 import os.path
 import pickle
+import random
 from types import MethodType
 
 import dill
@@ -377,3 +378,27 @@ class TabularQLearner(TabularRLAgent):
             if done:
                 break
         return steps
+    
+    def generate_partial_observation(self, action_selection_method: MethodType, percentage: float):
+        """
+        Generate a single observation given a list of agents
+
+        Args:
+            agents (list): A list of agents from which to select one randomly.
+            action_selection_method : a MethodType, to generate the observation stochastically, greedily, or softmax.
+
+        Returns:
+            list: A list of state-action pairs representing the generated observation.
+
+        Notes:
+            The function randomly selects an agent from the given list and generates a sequence of state-action pairs 
+            based on the Q-table of the selected agent. The action selection is stochastic, where each action is 
+            selected based on the probability distribution defined by the Q-values in the Q-table.
+
+            The generated sequence terminates when a maximum number of steps is reached or when the environment 
+            episode terminates.
+        """
+
+        steps = self.generate_observation(action_selection_method) # steps are a full observation
+        return random.sample(steps, int(percentage * len(steps)))
+        

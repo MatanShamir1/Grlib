@@ -20,6 +20,7 @@ class GRDataset(Dataset):
     def __getitem__(self, idx):
         return self.samples[idx] # returns a tuple - as appended in 'generate_dataset' last line
 
+# need to put 0.5 partial traces and 1.0 full traces close together with is_same_goal=1
 # this method fits both tabular and sequential according to generate_observation
 def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_method : MethodType, problems: List[str], env_name, preprocess_obss, is_continuous=False):
     dataset_directory = get_siamese_dataset_path(env_name=env_name, problem_names_list=problems)
@@ -39,7 +40,7 @@ def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_m
             for i in range(num_samples):
                 is_same_goal = random.choice([1, 0])
                 first_agent = np.random.choice(agents)
-                first_observation = first_agent.generate_observation(observation_creation_method)
+                first_observation = first_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=random.choice([0.5, 0.7, 1]))
                 if is_continuous:
                     first_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in first_observation] # list of dicts, each dict a sample comprised of image and text
                 else:
