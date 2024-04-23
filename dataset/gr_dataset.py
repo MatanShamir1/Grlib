@@ -22,8 +22,8 @@ class GRDataset(Dataset):
 
 # need to put 0.5 partial traces and 1.0 full traces close together with is_same_goal=1
 # this method fits both tabular and sequential according to generate_observation
-def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_method : MethodType, problems: List[str], env_name, preprocess_obss, is_continuous=False):
-    dataset_directory = get_siamese_dataset_path(env_name=env_name, problem_names_list=problems)
+def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_method : MethodType, problems: str, env_name, preprocess_obss, is_continuous=False):
+    dataset_directory = get_siamese_dataset_path(env_name=env_name, problem_names=problems)
     if is_continuous: dataset_directory = os.path.join(dataset_directory, 'cont')
     dataset_train_path, dataset_dev_path = os.path.join(dataset_directory, 'train.pkl'), os.path.join(dataset_directory, 'dev.pkl')
     try:

@@ -1,9 +1,11 @@
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from types import MethodType
 import numpy as np
+from ml.utils import get_model_dir
 from torch.nn.utils.rnn import pack_padded_sequence
 
 
@@ -13,7 +15,7 @@ def accuracy_per_epoch(model, data_loader):
 	sum_loss = 0.0
 	with torch.no_grad():
 		for (first_traces, second_traces, is_same_goals, first_traces_lengths, second_traces_lengths) in data_loader:
-			y_pred = model(first_traces, second_traces, first_traces_lengths, second_traces_lengths)
+			y_pred = model.forward_tab(first_traces, second_traces, first_traces_lengths, second_traces_lengths)
 			loss = F.binary_cross_entropy(y_pred, is_same_goals)
 			sum_loss += loss.item()
 			y_pred = (y_pred >= 0.5)
@@ -40,17 +42,17 @@ class CNNImageEmbeddor(nn.Module):
 		super().__init__()
 		self.use_text = use_text
 		self.image_conv = nn.Sequential( # need to provide: batch_size X in_channels X height X width
-			nn.Conv2d(3, 16, kernel_size=(2, 2)),
+			nn.Conv2d(3, 4, kernel_size=(2, 2)),
 			nn.ReLU(),
 			nn.MaxPool2d((2, 2)),
-			nn.Conv2d(16, 32, (2, 2)),
+			nn.Conv2d(4, 8, (2, 2)),
 			nn.ReLU(),
-			nn.Conv2d(32, 64, (2, 2)),
-			nn.ReLU()
+			nn.Conv2d(8, 8, (2, 2)),
+			nn.ReLU(),
 		)
 		n = obs_space["image"][0]
 		m = obs_space["image"][1]
-		self.image_embedding_size = ((n - 1) // 2 - 2) * ((m - 1) // 2 - 2) * 64
+		self.image_embedding_size = ((n - 1) // 2 - 2) * ((m - 1) // 2 - 2) * 16
 		if self.use_text:
 			self.word_embedding_size = 32
 			self.word_embedding = nn.Embedding(obs_space["text"], self.word_embedding_size)
@@ -81,14 +83,16 @@ class CNNImageEmbeddor(nn.Module):
 		return hidden[-1]
 
 class LstmObservations(nn.Module):
+    
 	def __init__(self, obs_space, action_space, is_continuous = False):
 		super(LstmObservations,self).__init__()
 		self.embeddor = CNNImageEmbeddor(obs_space, action_space)
 		self.is_continuous = is_continuous
 		# check if the traces are a bunch of images	
-		if is_continuous: input_size = 64; hidden_dim = 64
+		if is_continuous: input_size = 8; hidden_dim = 6
 		else: input_size = 4; hidden_dim = 5
 		self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_dim, batch_first=True)
+		
 
 	# tabular
 	def forward_tab(self, traces1, traces2, lengths1, lengths2):
@@ -115,9 +119,12 @@ class LstmObservations(nn.Module):
 		out, (ht, ct) = self.lstm(trace, None)
 		return ht[-1]
 
-def train_metric_model(model, train_loader, dev_loader, nepochs=5):
+def train_metric_model(model, train_loader, dev_loader, nepochs=5, patience = 2):
 	devAccuracy = []
-	optimizer = torch.optim.Adadelta(model.parameters(),weight_decay=1.25)
+	best_dev_accuracy = 0.0
+	no_improvement_count = 0
+	optimizer = torch.optim.Adadelta(model.parameters(), weight_decay=0.1)
+	scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=2, factor=0.5)
 	for epoch in range(nepochs):
 		sum_loss, denominator = 0.0, 0.0
 		model.train()
@@ -132,11 +139,20 @@ def train_metric_model(model, train_loader, dev_loader, nepochs=5):
    
 		dev_accuracy, dev_loss = accuracy_per_epoch(model, dev_loader)
 		devAccuracy.append(dev_accuracy)
+		if dev_accuracy > best_dev_accuracy:
+			best_dev_accuracy = dev_accuracy
+			no_improvement_count = 0
+		else:
+			no_improvement_count = 1
 
 		print("epoch - {}/{}...".format(epoch + 1, nepochs),
 				"train loss - {:.6f}...".format(sum_loss / denominator),
 				"dev loss - {:.6f}...".format(dev_loss),
 				"dev accuracy - {:.6f}".format(dev_accuracy))
+
+		if no_improvement_count >= patience:
+			print(f"Early stopping after {epoch + 1} epochs with no improvement.")
+			break
   
 def train_metric_model_cont(model, train_loader, dev_loader, nepochs=5):
 	devAccuracy = []

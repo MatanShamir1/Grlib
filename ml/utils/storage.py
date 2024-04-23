@@ -1,5 +1,6 @@
 import csv
 import os
+from typing import List
 import torch
 import logging
 import sys
@@ -43,8 +44,8 @@ def get_observations_dir(env_name):
 def get_model_dir(env_name, model_name, class_name):
     return os.path.join(get_env_dir(env_name=env_name), _get_models_directory_name(), model_name, class_name)
 
-def get_siamese_dataset_path(env_name, problem_names_list):
-    return os.path.join(get_env_dir(env_name=env_name), _get_datasets_directory_name(), ''.join(problem_names_list))
+def get_siamese_dataset_path(env_name, problem_names):
+    return os.path.join(get_env_dir(env_name=env_name), _get_datasets_directory_name(), problem_names)
 
 def get_status_path(model_dir):
     return os.path.join(model_dir, "status.pt")
@@ -90,3 +91,6 @@ def get_csv_logger(model_dir):
     utils.create_folders_if_necessary(csv_path)
     csv_file = open(csv_path, "a")
     return csv_file, csv.writer(csv_file)
+
+def problem_list_to_str_tuple(problems : List[str]):
+    return '_'.join([f"[{s.split('-')[-2]}]" for s in problems])
