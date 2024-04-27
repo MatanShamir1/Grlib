@@ -1,5 +1,11 @@
+import os
 import random
 from math import sqrt, log
+
+from tqdm import tqdm
+import pickle
+
+from ml.utils.storage import get_model_dir
 from .utils import Node
 from .utils import Tree
 from gym.envs.registration import register
@@ -24,7 +30,7 @@ class MonteCarloTreeSearch():
 		self.tree.add_node(new_node, node)
 		return new_node
 
-	def random_policy(self, node):
+	def simulation(self, node):
 		if node.terminal:
 			return node.reward
 
@@ -57,18 +63,21 @@ class MonteCarloTreeSearch():
 	# finds the ultimate path from the root node to a terminal state (the one that maximized rewards)
 	def tree_policy(self):
 		node = self.tree.root
+		depth = 0
 		while not node.terminal:
 			if self.tree.is_expandable(node):
-				return self.expand(node)
+				# expansion
+				return self.expand(node), depth
 			else:
+				# selection
 				node = self.best_child(node, exploration_constant=1.0/sqrt(2.0))
 				state, reward, terminated, truncated, _ = self.env.step(node.action)
-				done = terminated | truncated
+				depth += 1
 				# assert np.all(node.state == state)
-		return node
+		return node, depth
 
 	# receives a final state node and updates the rewards of all the nodes on the path to the root
-	def backward(self, node, value):
+	def backpropagation(self, node, value):
 		while node:
 			node.num_visits += 1
 			node.total_simulation_reward += value
@@ -98,20 +107,30 @@ class MonteCarloTreeSearch():
 			node = next
 		return trace
 
-def plan(problem_name):
+def plan(env_name, problem_name):
+	model_dir = get_model_dir(env_name=env_name, model_name=problem_name, class_name="MCTS")
+	model_file_path = os.path.join(model_dir, "mcts_model.pth")
+	if os.path.exists(model_file_path):
+		print(f"Loading pre-existing mcts planner in {model_file_path}")
+		with open(model_file_path, 'rb') as file:  # Load the pre-existing model
+			monteCarloTreeSearch = pickle.load(file)
+			return monteCarloTreeSearch.generate_policy_sequence()
 	random.seed(2)
 	env = gym.make(id=problem_name)
 	tree = Tree()
 	monteCarloTreeSearch = MonteCarloTreeSearch(env=env, tree=tree)
 	steps = 8000
-
-	
-	for _ in range(0, steps):
+	max_reward = 0
+	tq = tqdm(range(steps), postfix=f"Selection Depth depth: {depth}. Episode: {n} \ {steps}. Maximum reward: {max_reward}")
+	for n in tq:
 		env.reset()
-		node = monteCarloTreeSearch.tree_policy() # find a path to a new unvisited node state by utilizing explorative policy or choosing unvisited children recursively
-		reward = monteCarloTreeSearch.random_policy(node) # proceed from that node randomly and collect the final reward expected from it (heuristic)
-		monteCarloTreeSearch.backward(node, reward)  # update the performances of nodes along the way
-
+		node, depth = monteCarloTreeSearch.tree_policy() # find a path to a new unvisited node state by utilizing explorative policy or choosing unvisited children recursively
+		reward = monteCarloTreeSearch.simulation(node) # proceed from that node randomly and collect the final reward expected from it (heuristic)
+		if reward > max_reward: max_reward = reward
+		monteCarloTreeSearch.backpropagation(node, reward)  # update the performances of nodes along the way
+  
+	with open(model_file_path, 'wb') as file:  # Serialize the model
+		pickle.dump(monteCarloTreeSearch, file)
 	return monteCarloTreeSearch.generate_policy_sequence()
 	
 if __name__ == "__main__":

@@ -108,7 +108,7 @@ class GramlRecognizer(ABC):
 			# agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name)
 			# agent.learn()
 			# obs = agent.generate_partial_observation(action_selection_method=metrics.greedy_selection, percentage=random.choice([0.5, 0.7, 1]))
-			obs = mcts_model.plan(problem_name)
+			obs = mcts_model.plan(self.env_name, problem_name)
 			if self.is_continuous: embedding = self.model.embed_sequence_cont(obs, self.preprocess_obss)
 			else: embedding = self.model.embed_sequence(obs)
 			embedding = self.model.embed_sequence(obs)
