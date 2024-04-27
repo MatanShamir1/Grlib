@@ -15,7 +15,7 @@ from gymnasium.error import InvalidAction
 from metrics.metrics import softmax
 from ml.tabular import TabularState
 from ml.tabular.tabular_rl_agent import TabularRLAgent
-from ml.utils import get_model_dir
+from ml.utils import get_model_dir, random_subset_with_order
 
 
 class TabularQLearner(TabularRLAgent):
@@ -400,5 +400,5 @@ class TabularQLearner(TabularRLAgent):
         """
 
         steps = self.generate_observation(action_selection_method) # steps are a full observation
-        return random.sample(steps, int(percentage * len(steps)))
+        return random_subset_with_order(steps, percentage * len(steps))
         

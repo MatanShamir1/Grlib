@@ -3,6 +3,7 @@ import re
 import torch
 import ml
 import gymnasium as gym
+import random
 
 
 def get_obss_preprocessor(obs_space):
@@ -39,6 +40,15 @@ def preprocess_images(images, device=None):
     # Bug of Pytorch: very slow if not first converted to numpy array
     images = numpy.array(images)
     return torch.tensor(images, device=device, dtype=torch.float)
+
+
+def random_subset_with_order(sequence, subset_size):
+    if subset_size >= len(sequence):
+        return sequence
+    else:
+        indices_to_select = sorted(random.sample(range(len(sequence)), subset_size))  # Randomly select indices to keep
+        return [sequence[i] for i in indices_to_select]  # Return the elements corresponding to the selected indices
+
 
 
 def preprocess_texts(texts, vocab, device=None):
