@@ -26,7 +26,7 @@ def collate_fn(batch):
 	second_traces_padded = pad_sequence([torch.stack(sequence) for sequence in second_traces], batch_first=True)
 	first_traces_lengths = [len(trace) for trace in first_traces]
 	second_traces_lengths = [len(trace) for trace in second_traces]
-	return first_traces_padded, second_traces_padded, torch.stack(is_same_goals), first_traces_lengths, second_traces_lengths
+	return first_traces_padded.to(utils.device), second_traces_padded.to(utils.device), torch.stack(is_same_goals).to(utils.device), first_traces_lengths, second_traces_lengths
 
 def collate_fn_cont(batch):
 	first_traces, second_traces, is_same_goals = zip(*batch)
@@ -38,8 +38,8 @@ def collate_fn_cont(batch):
 	second_traces_texts_padded = pad_sequence([torch.stack([step.text for step in sequence]) for sequence in second_traces], batch_first=True)
 	first_traces_lengths = [len(trace) for trace in first_traces]
 	second_traces_lengths = [len(trace) for trace in second_traces]
-	return first_traces_images_padded, first_traces_texts_padded, second_traces_images_padded, second_traces_texts_padded, \
-			torch.stack(is_same_goals), first_traces_lengths, second_traces_lengths
+	return first_traces_images_padded.to(utils.device), first_traces_texts_padded.to(utils.device), second_traces_images_padded.to(utils.device), second_traces_texts_padded.to(utils.device), \
+			torch.stack(is_same_goals).to(utils.device), first_traces_lengths, second_traces_lengths
 
 def goal_to_minigrid_str(tuply):
 	tuply = tuply[1:-1] # remove the braces

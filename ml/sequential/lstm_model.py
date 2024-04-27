@@ -42,17 +42,17 @@ class CNNImageEmbeddor(nn.Module):
 		super().__init__()
 		self.use_text = use_text
 		self.image_conv = nn.Sequential( # need to provide: batch_size X in_channels X height X width
-			nn.Conv2d(3, 4, kernel_size=(2, 2)),
+			nn.Conv2d(3, 16, kernel_size=(2, 2)),
 			nn.ReLU(),
 			nn.MaxPool2d((2, 2)),
-			nn.Conv2d(4, 8, (2, 2)),
+			nn.Conv2d(16, 32, (2, 2)),
 			nn.ReLU(),
-			nn.Conv2d(8, 8, (2, 2)),
+			nn.Conv2d(32, 64, (2, 2)),
 			nn.ReLU(),
 		)
 		n = obs_space["image"][0]
 		m = obs_space["image"][1]
-		self.image_embedding_size = ((n - 1) // 2 - 2) * ((m - 1) // 2 - 2) * 16
+		self.image_embedding_size = ((n - 1) // 2 - 2) * ((m - 1) // 2 - 2) * 64
 		if self.use_text:
 			self.word_embedding_size = 32
 			self.word_embedding = nn.Embedding(obs_space["text"], self.word_embedding_size)
@@ -89,7 +89,7 @@ class LstmObservations(nn.Module):
 		self.embeddor = CNNImageEmbeddor(obs_space, action_space)
 		self.is_continuous = is_continuous
 		# check if the traces are a bunch of images	
-		if is_continuous: input_size = 8; hidden_dim = 6
+		if is_continuous: input_size = 64; hidden_dim = 32
 		else: input_size = 4; hidden_dim = 5
 		self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_dim, batch_first=True)
 		
@@ -119,10 +119,10 @@ class LstmObservations(nn.Module):
 		out, (ht, ct) = self.lstm(trace, None)
 		return ht[-1]
 
-	def embed_sequence_cont(self, trace, preprocess_obss):
-		trace = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in first_observation]
-		trace_images = [torch.stack([step.image for step in sequence]) for sequence in first_traces]
-		trace_texts = [torch.stack([step.text for step in sequence]) for sequence in first_traces]
+	def embed_sequence_cont(self, sequence, preprocess_obss):
+		sequence = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in sequence]
+		trace_images = [torch.stack([step.image for step in sequence])]
+		trace_texts = [torch.stack([step.text for step in sequence])]
 		embedded_trace = self.embeddor(trace_images, trace_texts)
 		out, (ht, ct) = self.lstm(embedded_trace, None)
 		return ht[-1]

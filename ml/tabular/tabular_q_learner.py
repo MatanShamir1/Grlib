@@ -400,5 +400,5 @@ class TabularQLearner(TabularRLAgent):
         """
 
         steps = self.generate_observation(action_selection_method) # steps are a full observation
-        return random_subset_with_order(steps, percentage * len(steps))
+        return random_subset_with_order(steps, (int)(percentage * len(steps)))
         
