@@ -60,7 +60,7 @@ class CNNImageEmbeddor(nn.Module):
 			self.text_rnn = nn.GRU(self.word_embedding_size, self.text_embedding_size, batch_first=True)
 
 	def forward(self, images, texts):
-     	# images shape: batch_size X max_sequence_len X sample_size. same for text.
+	 	# images shape: batch_size X max_sequence_len X sample_size. same for text.
 		# need to reshape image to num_channels X height X width, like nn.Conv expects it to be.
 		x = images.transpose(2, 4).transpose(3, 4)
 		orig_shape = x.shape
@@ -83,8 +83,8 @@ class CNNImageEmbeddor(nn.Module):
 		return hidden[-1]
 
 class LstmObservations(nn.Module):
-    
-	def __init__(self, obs_space, action_space, is_continuous = False):
+	
+	def __init__(self, obs_space, action_space, is_continuous = False): # TODO make sure the right cuda is used!
 		super(LstmObservations,self).__init__()
 		self.embeddor = CNNImageEmbeddor(obs_space, action_space)
 		self.is_continuous = is_continuous
@@ -105,7 +105,7 @@ class LstmObservations(nn.Module):
 
 	# continuous
 	def forward_cont(self, traces1_images, traces1_texts, traces2_images, traces2_texts, lengths1, lengths2):
-     	# we also embed '0' images, but we take them out of the equation in the lstm (it knows to not treat them when batching)
+	 	# we also embed '0' images, but we take them out of the equation in the lstm (it knows to not treat them when batching)
 		traces1 = self.embeddor(traces1_images, traces1_texts)
 		traces2 = self.embeddor(traces2_images, traces2_texts) # traces1 & traces 2 shapes: batch_size X max_sequence_length X embedding_size
 		out1, (ht1, ct1) = self.lstm(pack_padded_sequence(traces1, lengths1, batch_first=True, enforce_sorted=False), None)
@@ -117,6 +117,14 @@ class LstmObservations(nn.Module):
 		trace = [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in trace]
 		trace = torch.stack([torch.tensor(observation, dtype=torch.float32) for observation in trace])
 		out, (ht, ct) = self.lstm(trace, None)
+		return ht[-1]
+
+	def embed_sequence_cont(self, trace, preprocess_obss):
+		trace = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in first_observation]
+		trace_images = [torch.stack([step.image for step in sequence]) for sequence in first_traces]
+		trace_texts = [torch.stack([step.text for step in sequence]) for sequence in first_traces]
+		embedded_trace = self.embeddor(trace_images, trace_texts)
+		out, (ht, ct) = self.lstm(embedded_trace, None)
 		return ht[-1]
 
 def train_metric_model(model, train_loader, dev_loader, nepochs=5, patience = 2):

@@ -12,6 +12,7 @@ import numpy as np
 from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_sequence
 import torch
+from ml.planner.mcts import mcts_model
 
 from ml.sequential.lstm_model import LstmObservations, train_metric_model, train_metric_model_cont
 from ml.utils.storage import get_model_dir, problem_list_to_str_tuple
@@ -40,13 +41,17 @@ def collate_fn_cont(batch):
 	return first_traces_images_padded, first_traces_texts_padded, second_traces_images_padded, second_traces_texts_padded, \
 			torch.stack(is_same_goals), first_traces_lengths, second_traces_lengths
 
-def goal_to_minigrid_str(tuple):
-	return f'MiniGrid-DynamicGoalEmpty-8x8-{tuple[1]}x{tuple[3]}-v0'
+def goal_to_minigrid_str(tuply):
+	tuply = tuply[1:-1] # remove the braces
+	#print(tuply)
+	nums = tuply.split(',')
+	#print(nums)
+	return f'MiniGrid-SimpleCrossingS13N4-DynamicGoal-{nums[0]}x{nums[1]}-v0'
 
 def load_weights(loaded_model : LstmObservations, path):
-	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-	loaded_model.load_state_dict(torch.load(path, map_location=device))
-	loaded_model.to(device)  # Ensure model is on the right device
+	# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+	loaded_model.load_state_dict(torch.load(path, map_location=utils.device))
+	loaded_model.to(utils.device)  # Ensure model is on the right device
 	return loaded_model
 
 def save_weights(model : LstmObservations, path):
@@ -80,12 +85,13 @@ class GramlRecognizer(ABC):
 		else: last_path = r"lstm_cnn_model.pth"
 		self.model_file_path = os.path.join(self.model_directory, last_path)
 		self.model = LstmObservations(obs_space=self.obs_space, action_space=self.agents[0].env.action_space, is_continuous=self.is_continuous)
-		
+		self.model.to(utils.device)
+
 		if os.path.exists(self.model_file_path):
 			print(f"Loading pre-existing lstm model in {self.model_file_path}")
 			load_weights(loaded_model=self.model, path=self.model_file_path)
 		else:
-			train_samples, dev_samples = generate_datasets(400000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_continuous)
+			train_samples, dev_samples = generate_datasets(10000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_continuous)
 			train_dataset = GRDataset(len(train_samples), train_samples)
 			dev_dataset = GRDataset(len(dev_samples), dev_samples)
 			self.train_func(self.model,	train_loader=DataLoader(train_dataset, batch_size=64, shuffle=False, collate_fn=self.collate_func),
@@ -95,13 +101,16 @@ class GramlRecognizer(ABC):
 	def goals_adaptation_phase(self, new_goals):
 		self.current_goals = new_goals
 		# start by training each rl agent on the base goal set
-		problems_goals = [(goal_to_minigrid_str(tuple),tuple) for tuple in new_goals]
+		problems_goals = [(goal_to_minigrid_str(tuply),tuply) for tuply in new_goals]
 		self.embeddings_dict = {}
 		# will change, for now let an optimal agent give us the trace
 		for (problem_name, goal) in problems_goals:
-			agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name)
-			agent.learn()
-			obs = agent.generate_partial_observation(action_selection_method=metrics.greedy_selection, percentage=random.choice([0.5, 0.7, 1]))
+			# agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name)
+			# agent.learn()
+			# obs = agent.generate_partial_observation(action_selection_method=metrics.greedy_selection, percentage=random.choice([0.5, 0.7, 1]))
+			obs = mcts_model.plan(problem_name)
+			if self.is_continuous: embedding = self.model.embed_sequence_cont(obs, self.preprocess_obss)
+			else: embedding = self.model.embed_sequence(obs)
 			embedding = self.model.embed_sequence(obs)
 			self.embeddings_dict[goal] = embedding
 			
