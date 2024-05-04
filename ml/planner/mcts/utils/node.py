@@ -3,13 +3,11 @@ import random
 
 class Node:
 
-    def __init__(self, state, action, action_space, reward, terminal, pos):
+    def __init__(self, action, action_space, reward, terminal):
         self.identifier = str(uuid.uuid1())
         self.parent_identifier = None
         self.children_identifiers = []
         self.untried_actions = list(range(action_space))
-        self.state = state
-        self.pos = tuple(pos)
         self.total_simulation_reward = 0
         self.num_visits = 0
         self.performance = 0
@@ -18,8 +16,7 @@ class Node:
         self.terminal = terminal
 
     def __str__(self):
-        return "{}: (action={}, visits={}, reward={:d}, ratio={:0.4f})".format(
-                                                  self.state,
+        return "(action={}, visits={}, reward={:d}, ratio={:0.4f})".format(
                                                   self.action,
                                                   self.num_visits,
                                                   int(self.total_simulation_reward),
