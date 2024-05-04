@@ -91,7 +91,7 @@ class GramlRecognizer(ABC):
 			print(f"Loading pre-existing lstm model in {self.model_file_path}")
 			load_weights(loaded_model=self.model, path=self.model_file_path)
 		else:
-			train_samples, dev_samples = generate_datasets(10000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_continuous)
+			train_samples, dev_samples = generate_datasets(100000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_continuous)
 			train_dataset = GRDataset(len(train_samples), train_samples)
 			dev_dataset = GRDataset(len(dev_samples), dev_samples)
 			self.train_func(self.model,	train_loader=DataLoader(train_dataset, batch_size=64, shuffle=False, collate_fn=self.collate_func),
@@ -111,15 +111,16 @@ class GramlRecognizer(ABC):
 			obs = mcts_model.plan(self.env_name, problem_name)
 			if self.is_continuous: embedding = self.model.embed_sequence_cont(obs, self.preprocess_obss)
 			else: embedding = self.model.embed_sequence(obs)
-			embedding = self.model.embed_sequence(obs)
 			self.embeddings_dict[goal] = embedding
-			
+
 	def inference_phase(self, sequence):
-		new_embedding = self.model.embed_sequence(sequence)
+		if self.is_continuous: new_embedding = self.model.embed_sequence_cont(sequence, self.preprocess_obss)
+		else: new_embedding = self.model.embed_sequence(sequence)
 		closest_goal, greatest_similarity = None, 0
 		for (goal, embedding) in self.embeddings_dict.items():
 			curr_similarity = torch.exp(-torch.sum(torch.abs(embedding-new_embedding)))
 			if curr_similarity > greatest_similarity:
+				print(f'new closest goal is: {goal}')
 				closest_goal = goal
 				greatest_similarity = curr_similarity
 		return closest_goal

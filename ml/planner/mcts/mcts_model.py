@@ -20,7 +20,7 @@ class MonteCarloTreeSearch():
 		self.action_space = self.env.action_space.n
 		self.action_space = 3 # currently
 		state = self.env.reset()
-		self.tree.add_node(Node(state=state, action=None, action_space=self.action_space, reward=0, terminal=False, pos=self.env.unwrapped.agent_pos))
+		self.tree.add_node(Node(state=state[0], action=None, action_space=self.action_space, reward=0, terminal=False, pos=self.env.unwrapped.agent_pos))
 
 	def expand(self, node):
 		action = node.untried_action()
@@ -115,21 +115,36 @@ def plan(env_name, problem_name):
 		with open(model_file_path, 'rb') as file:  # Load the pre-existing model
 			monteCarloTreeSearch = pickle.load(file)
 			return monteCarloTreeSearch.generate_policy_sequence()
+	if not os.path.exists(model_dir): # if we reached here, the model doesn't exist. we need to make sure its folder exists.
+		os.makedirs(model_dir)
+	print(f"No tree found. Executing MCTS, 200 rollouts for each action.")
 	random.seed(2)
 	env = gym.make(id=problem_name)
 	tree = Tree()
 	monteCarloTreeSearch = MonteCarloTreeSearch(env=env, tree=tree)
-	steps = 8000
-	max_reward = 0
-	tq = tqdm(range(steps), postfix=f"Selection Depth depth: {depth}. Episode: {n} \ {steps}. Maximum reward: {max_reward}")
-	for n in tq:
-		env.reset()
-		node, depth = monteCarloTreeSearch.tree_policy() # find a path to a new unvisited node state by utilizing explorative policy or choosing unvisited children recursively
-		reward = monteCarloTreeSearch.simulation(node) # proceed from that node randomly and collect the final reward expected from it (heuristic)
-		if reward > max_reward: max_reward = reward
-		monteCarloTreeSearch.backpropagation(node, reward)  # update the performances of nodes along the way
-  
+	num_of_steps = 0
+	while not tree.root.terminal: # we iterate until the root is a terminal state, meaning the game is over.
+		steps = 200
+		max_reward = 0
+		depth = 0
+		iteration = 0
+		tq = tqdm(range(steps), postfix=f"Number of steps: {num_of_steps}. Selection depth: {depth}. Maximum reward: {max_reward}")
+		for n in tq:
+			iteration = n
+			env.reset()
+			node, depth = monteCarloTreeSearch.tree_policy() # find a path to a new unvisited node state by utilizing explorative policy or choosing unvisited children recursively
+			reward = monteCarloTreeSearch.simulation(node) # proceed from that node randomly and collect the final reward expected from it (heuristic)
+			if reward > max_reward:
+				max_reward = reward
+			monteCarloTreeSearch.backpropagation(node, reward)  # update the performances of nodes along the way
+			tq.set_postfix_str(f"Number of steps: {num_of_steps}. Selection depth: {depth}. Maximum reward: {max_reward}")
+		# update the root and start from it next time.
+		num_of_steps += 1
+		tree.root = monteCarloTreeSearch.best_child(node=tree.root, exploration_constant=0)
+		print(f"Executed action {tree.root.action} to reach to state {tree.root.pos}")
+
 	with open(model_file_path, 'wb') as file:  # Serialize the model
+		monteCarloTreeSearch.env = None # pickle cannot serialize lambdas which exist in the env
 		pickle.dump(monteCarloTreeSearch, file)
 	return monteCarloTreeSearch.generate_policy_sequence()
 	

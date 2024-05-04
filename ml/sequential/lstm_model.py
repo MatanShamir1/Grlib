@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from types import MethodType
 import numpy as np
-from ml.utils import get_model_dir
+from ml.utils import get_model_dir, device
 from torch.nn.utils.rnn import pack_padded_sequence
 
 
@@ -69,9 +69,8 @@ class CNNImageEmbeddor(nn.Module):
 		x = self.image_conv(x) # x shape:  batch_size * max_sequence_len X last_conv_size X 1 X 1
 		# reshape x back to divide batches from sequences
 		x = x.view(orig_shape[0], orig_shape[1], x.shape[1]) # x shape: batch_size X max_sequence_len X last_conv_size. last 2 dimensions (1,1) are collapsed to last conv.
-
 		embedding = x
-
+  
 		if self.use_text:
 			embed_text = self._get_embed_text(texts)
 			embedding = torch.cat((embedding, embed_text), dim=1)
@@ -121,10 +120,10 @@ class LstmObservations(nn.Module):
 
 	def embed_sequence_cont(self, sequence, preprocess_obss):
 		sequence = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in sequence]
-		trace_images = [torch.stack([step.image for step in sequence])]
-		trace_texts = [torch.stack([step.text for step in sequence])]
+		trace_images = torch.tensor(np.expand_dims(torch.stack([step.image for step in sequence]), axis=0)).to(device)
+		trace_texts = torch.tensor(np.expand_dims(torch.stack([step.text for step in sequence]), axis=0)).to(device)
 		embedded_trace = self.embeddor(trace_images, trace_texts)
-		out, (ht, ct) = self.lstm(embedded_trace, None)
+		out, (ht, ct) = self.lstm(embedded_trace)
 		return ht[-1]
 
 def train_metric_model(model, train_loader, dev_loader, nepochs=5, patience = 2):

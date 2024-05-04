@@ -9,7 +9,7 @@ class Node:
         self.children_identifiers = []
         self.untried_actions = list(range(action_space))
         self.state = state
-        self.pos = pos
+        self.pos = tuple(pos)
         self.total_simulation_reward = 0
         self.num_visits = 0
         self.performance = 0

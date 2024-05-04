@@ -38,7 +38,7 @@ def init():
 		recognizer = GramlRecognizer(TabularQLearner, env_name, problem_list, grid_size, is_continuous=True)
 		print("### STARTING DOMAIN LEARNING PHASE ###")
 		recognizer.domain_learning_phase()
-		recognizer.goals_adaptation_phase(['(11,3)', '(11,5)', '(11,8)', '(8,1)', '(8,1)', '(6,1)', '(1,7)', '(5,9)'])
+		recognizer.goals_adaptation_phase(['(11,3)', '(11,5)', '(11,8)', '(8,1)', '(6,1)', '(1,7)', '(5,9)'])
 
 		agent = TabularQLearner(env_name=env_name, problem_name="MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0")
 		agent.learn()
