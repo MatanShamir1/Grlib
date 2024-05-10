@@ -41,7 +41,7 @@ class MonteCarloTreeSearch():
 				return reward
 
 	def compute_value(self, parent, child, exploration_constant):
-		exploration_term = exploration_constant * sqrt(2 * log(parent.num_visits) / child.num_visits)
+		exploration_term = exploration_constant * sqrt(2 * log(parent.num_visits) / child.num_visits) # consider not multiplying by 2
 		return child.performance + exploration_term
 
 	def best_child(self, node, exploration_constant):
