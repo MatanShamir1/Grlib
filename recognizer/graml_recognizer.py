@@ -48,6 +48,24 @@ def goal_to_minigrid_str(tuply):
 	#print(nums)
 	return f'MiniGrid-SimpleCrossingS13N4-DynamicGoal-{nums[0]}x{nums[1]}-v0'
 
+def minigrid_str_to_goal(str):
+	"""
+	This function extracts the goal size (width and height) from a MiniGrid environment name.
+
+	Args:
+		env_name: The name of the MiniGrid environment (string).
+
+	Returns:
+		A tuple of integers representing the goal size (width, height).
+	"""
+	# Split the environment name by separators
+	parts = str.split("-")
+	# Find the part containing the goal size (usually after "DynamicGoal")
+	goal_part = [part for part in parts if "x" in part]
+	# Extract width and height from the goal part
+	width, height = goal_part[0].split("x")
+	return (int(width), int(height))
+
 def load_weights(loaded_model : LstmObservations, path):
 	# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 	loaded_model.load_state_dict(torch.load(path, map_location=utils.device))
@@ -108,7 +126,7 @@ class GramlRecognizer(ABC):
 			# agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name)
 			# agent.learn()
 			# obs = agent.generate_partial_observation(action_selection_method=metrics.greedy_selection, percentage=random.choice([0.5, 0.7, 1]))
-			obs = mcts_model.plan(self.env_name, problem_name)
+			obs = mcts_model.plan(self.env_name, problem_name, minigrid_str_to_goal(problem_name))
 			if self.is_continuous: embedding = self.model.embed_sequence_cont(obs, self.preprocess_obss)
 			else: embedding = self.model.embed_sequence(obs)
 			self.embeddings_dict[goal] = embedding

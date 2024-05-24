@@ -2,7 +2,7 @@ import random
 
 class Node:
 
-    def __init__(self, identifier, state, action, action_space, reward, terminal, pos):
+    def __init__(self, identifier, state, action, action_space, reward, terminal, pos, depth):
         self.identifier = identifier
         self.parent_identifier = None
         self.children_identifiers = []
@@ -15,6 +15,8 @@ class Node:
         self.action = action
         self.reward = reward
         self.terminal = terminal
+        self.invalid = False
+        self.depth = depth
 
     def __str__(self):
         return "{}: (action={}, visits={}, reward={:d}, ratio={:0.4f})".format(

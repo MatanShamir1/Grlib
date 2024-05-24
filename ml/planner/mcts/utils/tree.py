@@ -24,7 +24,7 @@ class Tree:
         self.root = None
 
     def is_expandable(self, node):
-        if node.terminal:
+        if node.terminal or node.invalid:
             return False
         if len(node.untried_actions) > 0:
             return True
