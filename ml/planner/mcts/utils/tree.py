@@ -52,6 +52,7 @@ class Tree:
             last_node_flags.pop()
 
     def add_node(self, node, parent=None):
+        assert node.identifier not in self.nodes.keys()
         self.nodes.update({node.identifier: node})
 
         if parent is None:
@@ -60,6 +61,25 @@ class Tree:
         else:
             self.nodes[parent.identifier].children_identifiers.append(node.identifier)
             self.nodes[node.identifier].parent_identifier=parent.identifier
+
+    def update_id(self, old_id, new_id):
+        # prepare needed objects
+        node = self.nodes[old_id]
+        parent = self.parent(node)
+
+        # update the node's parent
+        self.nodes[parent.identifier].children_identifiers.remove(old_id)
+        self.nodes[parent.identifier].children_identifiers.append(new_id)
+
+        # update the node itself
+        node.identifier = new_id
+
+        # update the node's children (if there are any?...)
+        for child_id in node.children_identifiers:
+            self.nodes[child_id].parent_identifier = new_id
+        
+        self.nodes.pop(old_id)
+        self.nodes.update({node.identifier: node})
 
     def children(self, node):
         children = []

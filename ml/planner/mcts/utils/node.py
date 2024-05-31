@@ -16,6 +16,7 @@ class Node:
         self.reward = reward
         self.terminal = terminal
         self.invalid = False
+        self.got_invalid = False
         self.depth = depth
 
     def __str__(self):
