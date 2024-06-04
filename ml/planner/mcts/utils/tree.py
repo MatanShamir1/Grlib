@@ -63,6 +63,7 @@ class Tree:
             self.nodes[node.identifier].parent_identifier=parent.identifier
 
     def update_id(self, old_id, new_id):
+        assert new_id not in self.nodes.keys()
         # prepare needed objects
         node = self.nodes[old_id]
         parent = self.parent(node)
