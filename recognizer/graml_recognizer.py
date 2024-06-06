@@ -13,6 +13,7 @@ from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_sequence
 import torch
 from ml.planner.mcts import mcts_model
+import dill
 
 from ml.sequential.lstm_model import LstmObservations, train_metric_model, train_metric_model_cont
 from ml.utils.storage import get_model_dir, problem_list_to_str_tuple
@@ -141,4 +142,7 @@ class GramlRecognizer(ABC):
 				print(f'new closest goal is: {goal}')
 				closest_goal = goal
 				greatest_similarity = curr_similarity
+		self.embeddings_dict['actual_goal'] = new_embedding
+		with open("embeddings_dict.pkl", 'wb') as embeddings_file:
+			dill.dump(self.embeddings_dict, embeddings_file)
 		return closest_goal
