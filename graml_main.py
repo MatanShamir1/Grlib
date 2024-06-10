@@ -1,7 +1,7 @@
 import random
 from consts import MINIGRID_PROBLEMS
 import scripts.file_system as file_system
-from recognizer import GramlRecognizer
+from recognizer import GramlRecognizer, goal_to_minigrid_str
 from ml import TabularQLearner
 from metrics.metrics import greedy_selection
 import os
@@ -35,16 +35,25 @@ def init():
 		file_system.create_partial_observabilities_files(env_name=env_name, observabilities=[0.1, 0.3, 0.5, 0.7])
 		file_system.print_md5(file_path_list=observations_paths)
 		
-		recognizer = GramlRecognizer(TabularQLearner, env_name, problem_list, grid_size, is_continuous=True)
+		recognizer = GramlRecognizer(TabularQLearner, env_name, problem_list, grid_size, is_continuous=False)
 		print("### STARTING DOMAIN LEARNING PHASE ###")
 		recognizer.domain_learning_phase()
-		recognizer.goals_adaptation_phase(['(11,3)', '(11,5)', '(11,8)', '(8,1)', '(6,1)', '(1,7)', '(5,9)'])
+		recognizer.goals_adaptation_phase(['(6,1)', '(11,3)', '(11,5)', '(11,8)', '(1,7)', '(5,9)'])
+		task_num, correct = 0, 0
+		for goal in ['(6,1)', '(11,3)', '(11,5)', '(11,8)', '(1,7)', '(5,9)']:
+			for percentage in [0.3, 0.5, 0.7, 0.9, 1]:
+				agent = TabularQLearner(env_name=env_name, problem_name=goal_to_minigrid_str(goal))
+				agent.learn()
+				sequence = agent.generate_partial_observation(action_selection_method=greedy_selection, percentage=percentage)
+				closest_goal = recognizer.inference_phase(sequence, task_num)
+				print(f'real goal {goal}, closest goal is: {closest_goal}')
+				if all(a == b for a, b in zip(goal, closest_goal)):
+					correct += 1
+				task_num += 1
 
-		agent = TabularQLearner(env_name=env_name, problem_name="MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0")
-		agent.learn()
-		sequence = agent.generate_partial_observation(action_selection_method=greedy_selection, percentage=random.choice([0.6, 0.7, 0.8, 0.9, 1]))
-		closest_goal = recognizer.inference_phase(sequence)
-		print(f'closest goal is: {closest_goal}')
+		print(f'correct: {correct}\n total tasks: {task_num}\n accuracy: {correct/task_num}')
+    
+		
 
 	else:
 		print("I currently only support minigrid. I promise it will change in the future!")

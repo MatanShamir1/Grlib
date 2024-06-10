@@ -110,7 +110,7 @@ class GramlRecognizer(ABC):
 			print(f"Loading pre-existing lstm model in {self.model_file_path}")
 			load_weights(loaded_model=self.model, path=self.model_file_path)
 		else:
-			train_samples, dev_samples = generate_datasets(10000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_continuous)
+			train_samples, dev_samples = generate_datasets(30000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_continuous)
 			train_dataset = GRDataset(len(train_samples), train_samples)
 			dev_dataset = GRDataset(len(dev_samples), dev_samples)
 			self.train_func(self.model,	train_loader=DataLoader(train_dataset, batch_size=64, shuffle=False, collate_fn=self.collate_func),
@@ -132,7 +132,7 @@ class GramlRecognizer(ABC):
 			else: embedding = self.model.embed_sequence(obs)
 			self.embeddings_dict[goal] = embedding
 
-	def inference_phase(self, sequence):
+	def inference_phase(self, sequence, task_num):
 		if self.is_continuous: new_embedding = self.model.embed_sequence_cont(sequence, self.preprocess_obss)
 		else: new_embedding = self.model.embed_sequence(sequence)
 		closest_goal, greatest_similarity = None, 0
@@ -143,6 +143,6 @@ class GramlRecognizer(ABC):
 				closest_goal = goal
 				greatest_similarity = curr_similarity
 		self.embeddings_dict['actual_goal'] = new_embedding
-		with open("embeddings_dict.pkl", 'wb') as embeddings_file:
+		with open(f'embeddings_dict{task_num}.pkl', 'wb') as embeddings_file:
 			dill.dump(self.embeddings_dict, embeddings_file)
 		return closest_goal

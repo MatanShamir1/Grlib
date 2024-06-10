@@ -37,9 +37,9 @@ def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_m
             os.makedirs(dataset_directory)
         all_samples = []
         for i in range(num_samples):
-            is_same_goal = (np.random.choice([1, 0], 1, p=[1/3, 2/3]))[0]
+            is_same_goal = (np.random.choice([1, 0], 1, p=[1/len(agents), 1 - 1/len(agents)]))[0]
             first_agent = np.random.choice(agents)
-            first_observation = first_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=random.choice([0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]))
+            first_observation = first_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]))
             if is_continuous:
                 first_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in first_observation] # list of dicts, each dict a sample comprised of image and text
             else:

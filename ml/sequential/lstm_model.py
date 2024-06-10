@@ -41,18 +41,20 @@ class CNNImageEmbeddor(nn.Module):
 	def __init__(self, obs_space, action_space, use_text=False):
 		super().__init__()
 		self.use_text = use_text
-		self.image_conv = nn.Sequential( # need to provide: batch_size X in_channels X height X width
-			nn.Conv2d(3, 8, kernel_size=(2, 2)),
-			nn.ReLU(),
-			nn.MaxPool2d((2, 2)),
-			nn.Conv2d(8, 16, (2, 2)),
-			nn.ReLU(),
-			nn.Conv2d(16, 32, (2, 2)),
-			nn.ReLU(),
+		self.image_conv = nn.Sequential(
+			nn.Conv2d(3, 4, kernel_size=(3, 3), padding=1),  # Reduced filters, added padding
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2)),
+            nn.Conv2d(4, 4, (3, 3), padding=1),  # Reduced filters, added padding
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2)),  # Added additional pooling to reduce size
+            nn.Conv2d(4, 8, (3, 3), padding=1),  # Reduced filters, added padding
+            nn.ReLU(),
+            nn.BatchNorm2d(8)
 		)
 		n = obs_space["image"][0]
 		m = obs_space["image"][1]
-		self.image_embedding_size = ((n - 1) // 2 - 2) * ((m - 1) // 2 - 2) * 32
+		self.image_embedding_size = ((n - 4) // 4 - 3) * ((m - 4) // 4 - 3) * 8
 		if self.use_text:
 			self.word_embedding_size = 32
 			self.word_embedding = nn.Embedding(obs_space["text"], self.word_embedding_size)
@@ -88,9 +90,16 @@ class LstmObservations(nn.Module):
 		self.embeddor = CNNImageEmbeddor(obs_space, action_space)
 		self.is_continuous = is_continuous
 		# check if the traces are a bunch of images	
-		if is_continuous: input_size = 32; hidden_dim = 16
-		else: input_size = 4; hidden_dim = 5
+		if is_continuous: input_size = 8; hidden_dim = 8
+		else: input_size = 4; hidden_dim = 8
 		self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_dim, batch_first=True)
+		self.dropout = nn.Dropout(0.5)  # Added dropout layer
+		# Initialize weights
+		for name, param in self.lstm.named_parameters():
+			if 'weight' in name:
+				nn.init.xavier_uniform_(param)
+			elif 'bias' in name:
+				nn.init.zeros_(param)
 		
 
 	# tabular
@@ -114,7 +123,7 @@ class LstmObservations(nn.Module):
 
 	def embed_sequence(self, trace):
 		trace = [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in trace]
-		trace = torch.stack([torch.tensor(observation, dtype=torch.float32) for observation in trace])
+		trace = torch.stack([torch.tensor(observation, dtype=torch.float32) for observation in trace]).to(device)
 		out, (ht, ct) = self.lstm(trace, None)
 		return ht[-1]
 
