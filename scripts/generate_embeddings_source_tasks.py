@@ -1,9 +1,20 @@
+import dill
+import torch
+import os
+import sys
+import inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+GRAML_itself = os.path.dirname(currentdir)
+GRAML_includer = os.path.dirname(os.path.dirname(currentdir))
+sys.path.insert(0, GRAML_includer)
+sys.path.insert(0, GRAML_itself)
+from GRAML.ml.utils import get_embeddings_result_path
 import random
-from ml.sequential.lstm_model import LstmObservations
-from ml import utils
+from GRAML.ml.sequential.lstm_model import LstmObservations
+from GRAML.ml import utils
 import torch
 import gym
-from metrics.metrics import stochastic_amplified_selection
+from GRAML.metrics.metrics import stochastic_amplified_selection
 
 from ml.tabular.tabular_q_learner import TabularQLearner
 

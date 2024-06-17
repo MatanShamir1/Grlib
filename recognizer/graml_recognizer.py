@@ -16,7 +16,7 @@ from ml.planner.mcts import mcts_model
 import dill
 
 from ml.sequential.lstm_model import LstmObservations, train_metric_model, train_metric_model_cont
-from ml.utils.storage import get_model_dir, problem_list_to_str_tuple
+from ml.utils.storage import get_model_dir, problem_list_to_str_tuple, get_embeddings_result_path
 
 ### IMPLEMENT MORE SELECTION METHODS, MAKE SURE action_probs IS AS IT SEEMS: list of action-probability 'es ###
 
@@ -133,6 +133,9 @@ class GramlRecognizer(ABC):
 			self.embeddings_dict[goal] = embedding
 
 	def inference_phase(self, sequence, task_num):
+		embeddings_path = get_embeddings_result_path(self.env_name)
+		if not os.path.exists(embeddings_path):
+			os.makedirs(embeddings_path)
 		if self.is_continuous: new_embedding = self.model.embed_sequence_cont(sequence, self.preprocess_obss)
 		else: new_embedding = self.model.embed_sequence(sequence)
 		closest_goal, greatest_similarity = None, 0
@@ -142,7 +145,10 @@ class GramlRecognizer(ABC):
 				print(f'new closest goal is: {goal}')
 				closest_goal = goal
 				greatest_similarity = curr_similarity
+
 		self.embeddings_dict['actual_goal'] = new_embedding
-		with open(f'embeddings_dict{task_num}.pkl', 'wb') as embeddings_file:
+		with open(embeddings_path + f'/embeddings_dict{task_num}.pkl', 'wb') as embeddings_file:
 			dill.dump(self.embeddings_dict, embeddings_file)
+		self.embeddings_dict.pop('actual_goal')
+
 		return closest_goal
