@@ -4,7 +4,7 @@ from stable_baselines3.common.env_util import make_vec_env
 import os
 import panda_gym
 import sys
-
+import traceback
 
 class PPOAgent():
     def __init__(self, env_name: str, problem_name: str):
@@ -26,18 +26,27 @@ class PPOAgent():
             print(f"Loading pre-existing ppo model in {self._model_file_path}")
             self.load_model()
         else:
-            self._model.learn(total_timesteps=2000000)
+            self._model.learn(total_timesteps=100000)
             self.save_model()
 
     def generate_full_observation(self):
         obs = self._env.reset()
         observations = [obs]
-        done = False
-        while not done:
-            action, _ = self._model.predict(obs, deterministic=True)
-            obs, reward, done, info = self._env.step(action)
-            observations.append(obs)
-            self._env.render()
+        is_done = False
+        try:
+            while not is_done:
+                action, _ = self._model.predict(obs, deterministic=True)
+                # obs, reward, done, info = self._env.step(action)
+                obs, reward, done, info = self._env.step(action)
+                is_done = info[0]["is_success"]
+                assert done[0] == is_done
+                observations.append(obs)
+                self._env.render()
+        except BaseException as e:
+            print("An exception occurred: fucking shait")
+            traceback.print_exc()
+        print(observations)
+        print(f'len of observations: {len(observations)}')
     
     def generate_partial_observation(self):
         pass
@@ -47,7 +56,7 @@ if __name__ == "__main__":
     if package_root not in sys.path:
         sys.path.insert(0, package_root)
     from ml.utils.storage import get_model_dir, problem_list_to_str_tuple
-    agent = PPOAgent("PandaPushSimple-g-m01xm01-o-01x01-v3", "PandaPushSimple-g-m01xm01-o-01x01-v3")
+    agent = PPOAgent("PandaReachSimple-g-m01xm01-v3", "PandaReachSimple-g-m01xm01-v3")
     agent.learn()
     agent.generate_full_observation()
     
