@@ -5,6 +5,7 @@ from math import sqrt, log
 from tqdm import tqdm
 import pickle
 
+from ml.utils.format import random_subset_with_order
 from ml.utils.storage import get_model_dir
 from .utils import Node
 from .utils import Tree
@@ -226,7 +227,7 @@ class MonteCarloTreeSearch():
 			assert len(candidate_children) > 0
 			node = max(candidate_children, key=lambda node: node.num_visits) # pick the child that was visited most, meaning it represents the desired action and not the undesired outcomes.
 			trace.append(((node.state, node.pos), node.action))
-		return trace
+		return random_subset_with_order(trace, (int)(random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]) * len(trace)))
     
 
 def save_model_and_generate_policy(tree, original_root, model_file_path, monteCarloTreeSearch):

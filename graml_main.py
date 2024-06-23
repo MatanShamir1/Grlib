@@ -45,7 +45,7 @@ def init():
 				agent = TabularQLearner(env_name=env_name, problem_name=goal_to_minigrid_str(goal))
 				agent.learn()
 				sequence = agent.generate_partial_observation(action_selection_method=greedy_selection, percentage=percentage)
-				closest_goal = recognizer.inference_phase(sequence, task_num)
+				closest_goal = recognizer.inference_phase(sequence, goal, percentage)
 				print(f'real goal {goal}, closest goal is: {closest_goal}')
 				if all(a == b for a, b in zip(goal, closest_goal)):
 					correct += 1

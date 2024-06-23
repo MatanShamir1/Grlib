@@ -44,8 +44,7 @@ def offline_trained_agents_embeddings(env_name, problem_names, model_file_path):
 	return embeddings
 
 if __name__ == "__main__":
-	assert len(sys.argv) == 3, f"Assertion failed: len(sys.argv) is {len(sys.argv)} while it needs to be 3.\n Example: \n\t /usr/bin/python scripts/generate_embeddings_source_tasks.py MiniGrid-Walls-13x13-v0 dataset/MiniGrid-Walls-13x13-v0/models/[11x1]_[11x11]_[1x11]_[8x1]/GramlRecognizer/problems_config.txt"
-
+	assert len(sys.argv) == 3, f"Assertion failed: len(sys.argv) is {len(sys.argv)} while it needs to be 3.\n Example: \n\t /usr/bin/python scripts/generate_embeddings_source_tasks.py MiniGrid-Walls-13x13-v0 dataset/MiniGrid-Walls-13x13-v0/models/[11x1]_[11x11]_[1x11]_[8x1]/GramlRecognizer/base_problems.conf"
 	problems_path = sys.argv[2]
 	env_name = sys.argv[1]
 	with open(problems_path, 'r') as file:

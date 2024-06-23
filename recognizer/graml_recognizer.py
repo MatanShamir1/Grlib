@@ -127,12 +127,12 @@ class GramlRecognizer(ABC):
 			# agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name)
 			# agent.learn()
 			# obs = agent.generate_partial_observation(action_selection_method=metrics.greedy_selection, percentage=random.choice([0.5, 0.7, 1]))
-			obs = mcts_model.plan(self.env_name, problem_name, minigrid_str_to_goal(problem_name))
-			if self.is_continuous: embedding = self.model.embed_sequence_cont(obs, self.preprocess_obss)
-			else: embedding = self.model.embed_sequence(obs)
+			partial_obs = mcts_model.plan(self.env_name, problem_name, minigrid_str_to_goal(problem_name))
+			if self.is_continuous: embedding = self.model.embed_sequence_cont(partial_obs, self.preprocess_obss)
+			else: embedding = self.model.embed_sequence(partial_obs)
 			self.embeddings_dict[goal] = embedding
 
-	def inference_phase(self, sequence, task_num):
+	def inference_phase(self, sequence, true_goal, percentage):
 		embeddings_path = get_embeddings_result_path(self.env_name)
 		if not os.path.exists(embeddings_path):
 			os.makedirs(embeddings_path)
@@ -146,9 +146,9 @@ class GramlRecognizer(ABC):
 				closest_goal = goal
 				greatest_similarity = curr_similarity
 
-		self.embeddings_dict['actual_goal'] = new_embedding
-		with open(embeddings_path + f'/embeddings_dict{task_num}.pkl', 'wb') as embeddings_file:
+		self.embeddings_dict[f"{true_goal}_true"] = new_embedding
+		with open(embeddings_path + f'/{true_goal}_{percentage}_embeddings_dict.pkl', 'wb') as embeddings_file:
 			dill.dump(self.embeddings_dict, embeddings_file)
-		self.embeddings_dict.pop('actual_goal')
+		self.embeddings_dict.pop(f"{true_goal}_true")
 
 		return closest_goal
