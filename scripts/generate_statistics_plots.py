@@ -7,22 +7,23 @@ import inspect
 import torch
 import dill
 
-from generate_embeddings_dynamic_goals import offline_dynamic_tasks_embeddings
-from generate_embeddings_source_tasks import offline_trained_agents_embeddings
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 GRAML_itself = os.path.dirname(currentdir)
 GRAML_includer = os.path.dirname(os.path.dirname(currentdir))
 sys.path.insert(0, GRAML_includer)
 sys.path.insert(0, GRAML_itself)
 
-from GRAML.ml.utils import get_embeddings_result_path
 from GRAML.ml.utils import get_embeddings_result_path, get_model_dir, problem_list_to_str_tuple
-from GRAML.recognizer.graml_recognizer import GramlRecognizer, minigrid_str_to_goal
+from GRAML.recognizer.graml_recognizer import GramlRecognizer
+from GRAML.ml.utils.storage import set_global_storage_configs
 
 def get_tasks_embeddings_dir_path(env_name):
 	return GRAML_itself + '/' + get_embeddings_result_path(env_name)
 
-def analyze_and_produce_plots(env_name):
+def analyze_and_produce_plots(confs:list[str]):
+	env_name, fragmened_status, same_length_status = confs[0], confs[1], confs[2]
+	set_global_storage_configs(fragmened_status, same_length_status)
+	assert os.path.exists(get_embeddings_result_path(confs[0])), "Embeddings weren't made for this environment, run graml_main.py with this environment first."
 	# DS declaration
 	source_tasks_embedding_dicts = {}
 	tasks_confidences = {}
@@ -81,7 +82,7 @@ def analyze_and_produce_plots(env_name):
 		ax.legend()
 
 	# Save the figure
-	fig.savefig(f"{env_name}_goal_similarities_combined.png")
+	fig.savefig(f"{env_name}_{fragmened_status}_{same_length_status}_goal_similarities_combined.png")
 
 	# Show plot
 	plt.tight_layout()
@@ -89,6 +90,6 @@ def analyze_and_produce_plots(env_name):
 	
 if __name__ == "__main__":
 	# checks:
-	assert len(sys.argv) == 2, f"Assertion failed: len(sys.argv) is {len(sys.argv)} while it needs to be 3.\n Example: \n\t /usr/bin/python scripts/generate_statistics_plots.py MiniGrid-Walls-13x13-v0"
-	assert os.path.exists(get_embeddings_result_path(sys.argv[1])), "embeddings weren't made for this environment, run graml_main.py with this environment first."
-	analyze_and_produce_plots(sys.argv[1])
+	assert len(sys.argv) == 2, f"Assertion failed: len(sys.argv) is {len(sys.argv)} while it needs to be 2.\n Example: \n\t /usr/bin/python scripts/generate_statistics_plots.py \"MiniGrid-Walls-13x13-v0/fragmented_partial_obs/inference_same_length\""
+	confs = sys.argv[1].split("/")
+	analyze_and_produce_plots(confs)

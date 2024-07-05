@@ -4,6 +4,7 @@ import random
 from types import MethodType
 
 import dill
+from gymnasium import register
 import numpy as np
 
 from tqdm import tqdm
@@ -16,6 +17,8 @@ from metrics.metrics import softmax
 from ml.tabular import TabularState
 from ml.tabular.tabular_rl_agent import TabularRLAgent
 from ml.utils import get_model_dir, random_subset_with_order
+from ml.utils.storage import get_policy_sequences_result_path
+from scripts.get_plans_images import create_sequence_image
 
 
 class TabularQLearner(TabularRLAgent):
@@ -343,7 +346,7 @@ class TabularQLearner(TabularRLAgent):
         self.save_q_table(path=self.model_file_path)
         self._save_conf_file()
         
-    def generate_observation(self, action_selection_method: MethodType):
+    def generate_observation(self, action_selection_method: MethodType, save_fig = False):
         """
         Generate a single observation given a list of agents
 
@@ -377,9 +380,16 @@ class TabularQLearner(TabularRLAgent):
             done = terminated | truncated
             if done:
                 break
+
+        if save_fig:
+            img_path = os.path.join(get_policy_sequences_result_path(self.env_name), self.problem_name)
+            sequence = [pos for ((state, pos), action) in steps]
+            print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
+            create_sequence_image(sequence, img_path, self.problem_name)
+
         return steps
     
-    def generate_partial_observation(self, action_selection_method: MethodType, percentage: float):
+    def generate_partial_observation(self, action_selection_method: MethodType, percentage: float, save_fig = False, is_fragmented = True):
         """
         Generate a single observation given a list of agents
 
@@ -399,6 +409,6 @@ class TabularQLearner(TabularRLAgent):
             episode terminates.
         """
 
-        steps = self.generate_observation(action_selection_method) # steps are a full observation
-        return random_subset_with_order(steps, (int)(percentage * len(steps)))
+        steps = self.generate_observation(action_selection_method, save_fig) # steps are a full observation
+        return random_subset_with_order(steps, (int)(percentage * len(steps)), is_fragmented)
         

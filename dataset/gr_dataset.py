@@ -22,10 +22,12 @@ class GRDataset(Dataset):
 
 # need to put 0.5 partial traces and 1.0 full traces close together with is_same_goal=1
 # this method fits both tabular and sequential according to generate_observation
-def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_method : MethodType, problems: str, env_name, preprocess_obss, is_continuous=False):
+def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_method : MethodType, problems: str, env_name, preprocess_obss, is_continuous=False, is_fragmented=True):
     dataset_directory = get_siamese_dataset_path(env_name=env_name, problem_names=problems)
     if is_continuous: dataset_directory = os.path.join(dataset_directory, 'cont')
-    dataset_train_path, dataset_dev_path = os.path.join(dataset_directory, 'train.pkl'), os.path.join(dataset_directory, 'dev.pkl')
+    if is_fragmented: addition = 'fragmented'
+    else: addition = ''
+    dataset_train_path, dataset_dev_path = os.path.join(dataset_directory, addition + 'train.pkl'), os.path.join(dataset_directory, addition + 'dev.pkl')
     if os.path.exists(dataset_train_path) and os.path.exists(dataset_dev_path):
         print(f"Loading pre-existing datasets in {dataset_directory}")
         with open(dataset_train_path, 'rb') as train_file:
@@ -39,7 +41,7 @@ def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_m
         for i in range(num_samples):
             is_same_goal = (np.random.choice([1, 0], 1, p=[1/len(agents), 1 - 1/len(agents)]))[0]
             first_agent = np.random.choice(agents)
-            first_observation = first_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]))
+            first_observation = first_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]), is_fragmented=is_fragmented)
             if is_continuous:
                 first_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in first_observation] # list of dicts, each dict a sample comprised of image and text
             else:
@@ -47,7 +49,7 @@ def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_m
             second_agent = first_agent
             if not is_same_goal:
                 second_agent = np.random.choice([agent for agent in agents if agent != first_agent])
-            second_observation = second_agent.generate_observation(observation_creation_method)
+            second_observation = second_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]), is_fragmented=is_fragmented)
             if is_continuous:
                 second_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in second_observation]
             else:

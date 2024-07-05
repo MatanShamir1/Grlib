@@ -1,1 +1,1 @@
-from recognizer.graml_recognizer import GramlRecognizer, goal_to_minigrid_str
+from recognizer.graml_recognizer import GramlRecognizer

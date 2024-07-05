@@ -35,6 +35,31 @@ def get_obss_preprocessor(obs_space):
 
     return obs_space, preprocess_obss
 
+def goal_to_minigrid_str(tuply):
+	tuply = tuply[1:-1] # remove the braces
+	#print(tuply)
+	nums = tuply.split(',')
+	#print(nums)
+	return f'MiniGrid-SimpleCrossingS13N4-DynamicGoal-{nums[0]}x{nums[1]}-v0'
+
+def minigrid_str_to_goal(str):
+	"""
+	This function extracts the goal size (width and height) from a MiniGrid environment name.
+
+	Args:
+		env_name: The name of the MiniGrid environment (string).
+
+	Returns:
+		A tuple of integers representing the goal size (width, height).
+	"""
+	# Split the environment name by separators
+	parts = str.split("-")
+	# Find the part containing the goal size (usually after "DynamicGoal")
+	goal_part = [part for part in parts if "x" in part]
+	# Extract width and height from the goal part
+	width, height = goal_part[0].split("x")
+	return (int(width), int(height))
+
 
 def preprocess_images(images, device=None):
     # Bug of Pytorch: very slow if not first converted to numpy array
@@ -42,11 +67,14 @@ def preprocess_images(images, device=None):
     return torch.tensor(images, device=device, dtype=torch.float)
 
 
-def random_subset_with_order(sequence, subset_size):
+def random_subset_with_order(sequence, subset_size, is_fragmented = True):
     if subset_size >= len(sequence):
         return sequence
     else:
-        indices_to_select = sorted(random.sample(range(len(sequence)), subset_size))  # Randomly select indices to keep
+        if is_fragmented:
+            indices_to_select = sorted(random.sample(range(len(sequence)), subset_size))  # Randomly select indices to keep
+        else:
+            indices_to_select = [i for i in range(subset_size)]
         return [sequence[i] for i in indices_to_select]  # Return the elements corresponding to the selected indices
 
 

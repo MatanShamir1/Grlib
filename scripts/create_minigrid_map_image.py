@@ -1,9 +1,16 @@
+import sys
+import os
+import inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+GRAML_itself = os.path.dirname(currentdir)
+GRAML_includer = os.path.dirname(os.path.dirname(currentdir))
+sys.path.insert(0, GRAML_includer)
+sys.path.insert(0, GRAML_itself)
 import gymnasium as gym
 from minigrid.wrappers import RGBImgPartialObsWrapper, ImgObsWrapper
 import numpy as np
-import ml.utils as utils
-import ml
-import os
+import GRAML.ml.utils as utils
+import GRAML.ml as ml
 import pickle
 import gym
 import minigrid
@@ -11,9 +18,9 @@ from minigrid.core.world_object import Wall
 #from q_table_plot import save_q_table_plot_image
 from gymnasium.envs.registration import register
 
-env_name = "MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0"
+env_name = "MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0"
 # create an agent and train it (if it is already trained, it will get q-table from cache)
-agent = ml.TabularQLearner(env_name='MiniGrid-Walls-13x13-v0',problem_name = "MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0")
+agent = ml.TabularQLearner(env_name='MiniGrid-Walls-13x13-v0',problem_name = "MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0")
 # agent.learn()
 
 # save_q_table_plot_image(agent.q_table, 15, 15, (10,7))

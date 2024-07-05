@@ -216,8 +216,9 @@ class MonteCarloTreeSearch():
 			node.total_simulation_reward += value
 			node.performance = node.total_simulation_reward/node.num_visits
 			node = self.tree.parent(node)
-	
-	def generate_policy_sequence(self):
+
+
+	def generate_full_policy_sequence(self):
 		trace = []
 		node = self.tree.root
 		print("generating policy sequence.")
@@ -227,15 +228,14 @@ class MonteCarloTreeSearch():
 			assert len(candidate_children) > 0
 			node = max(candidate_children, key=lambda node: node.num_visits) # pick the child that was visited most, meaning it represents the desired action and not the undesired outcomes.
 			trace.append(((node.state, node.pos), node.action))
-		return random_subset_with_order(trace, (int)(random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]) * len(trace)))
-    
+		return trace
+
 
 def save_model_and_generate_policy(tree, original_root, model_file_path, monteCarloTreeSearch):
 	tree.root = original_root
 	with open(model_file_path, 'wb') as file:  # Serialize the model
 		monteCarloTreeSearch.env = None # pickle cannot serialize lambdas which exist in the env
 		pickle.dump(monteCarloTreeSearch, file)
-	return monteCarloTreeSearch.generate_policy_sequence()
 
 def plan(env_name, problem_name, goal):
 	global newely_expanded
@@ -245,7 +245,7 @@ def plan(env_name, problem_name, goal):
 		print(f"Loading pre-existing mcts planner in {model_file_path}")
 		with open(model_file_path, 'rb') as file:  # Load the pre-existing model
 			monteCarloTreeSearch = pickle.load(file)
-			return monteCarloTreeSearch.generate_policy_sequence()
+			return monteCarloTreeSearch.generate_full_policy_sequence()
 	if not os.path.exists(model_dir): # if we reached here, the model doesn't exist. make sure its folder exists.
 		os.makedirs(model_dir)
 	steps = 10000
@@ -272,7 +272,8 @@ def plan(env_name, problem_name, goal):
 			if not result:
 				# false return value from partial plan execution means the plan is finished. we can mark our root as terminal and exit, happy with our plan.
 				tree.root.terminal = True
-				return save_model_and_generate_policy(tree=tree, original_root=original_root, model_file_path=model_file_path, monteCarloTreeSearch=mcts)
+				save_model_and_generate_policy(tree=tree, original_root=original_root, model_file_path=model_file_path, monteCarloTreeSearch=mcts)
+				return mcts.generate_full_policy_sequence()
 			plan_pos, plan_dir = node.pos, dict_dir_id_to_str[node.state['direction']]
 			tree.root = node # determine the root to be the node executed after the plan for this iteration.
 			node, depth = mcts.tree_policy(root_depth=depth) # find a path to a new unvisited node (unique sequence of actions) by utilizing explorative policy or choosing unvisited children recursively
@@ -289,7 +290,8 @@ def plan(env_name, problem_name, goal):
 			pass
 		mcts.plan.append(action)
 		print(f"Executed action {action}")
-	return save_model_and_generate_policy(tree=tree, original_root=original_root, model_file_path=model_file_path, monteCarloTreeSearch=monteCarloTreeSearch)	
+	save_model_and_generate_policy(tree=tree, original_root=original_root, model_file_path=model_file_path, monteCarloTreeSearch=monteCarloTreeSearch)	
+	return mcts.generate_full_policy_sequence()
 	
 if __name__ == "__main__":
 	# register(
