@@ -60,6 +60,12 @@ def minigrid_str_to_goal(str):
 	width, height = goal_part[0].split("x")
 	return (int(width), int(height))
 
+def goal_str_to_tuple(str):
+    assert str[0] == "(" and str[-1] == ")"
+    str = str[1:-1]
+    width, height = str.split(',')
+    return (int(width), int(height))
+
 
 def preprocess_images(images, device=None):
     # Bug of Pytorch: very slow if not first converted to numpy array

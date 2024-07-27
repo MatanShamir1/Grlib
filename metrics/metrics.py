@@ -27,19 +27,19 @@ def kl_divergence(p1: List[float], p2: List[float]) -> float:
     return sum(p1[i] * log2(p1[i] / p2[i]) for i in range(len(p1)))
 
 
-# def kl_divergence_norm_softmax(observations: List[Tuple[State, Any]], agent: BaseAlgo, actions: Discrete):
-#     distances = []
-#     p_traj = traj_to_policy(observations=observations, actions=actions)
+def kl_divergence_norm_softmax(observations: List[Tuple[State, Any]], agent, actions: Discrete):
+    distances = []
+    p_traj = traj_to_policy(observations=observations, actions=actions)
 
-#     for (observation, agent_pos), action in observations:
-#         state = observation['image']
-#         state_pickled = dill.dumps(state)
+    for (observation, agent_pos), action in observations:
+        state = observation['image']
+        state_pickled = dill.dumps(state)
 
-#         qp1 = p_traj[state_pickled]
-#         qp2_flatten_distribution_list: List[float] = agent.get_actions_probabilities(
-#             observation=(observation, agent_pos))
-#         distances.append(kl_divergence(qp1, qp2_flatten_distribution_list))
-#     return mean(distances)
+        qp1 = p_traj[state_pickled]
+        qp2_flatten_distribution_list: List[float] = agent.get_actions_probabilities(
+            observation=(observation, agent_pos))
+        distances.append(kl_divergence(qp1, qp2_flatten_distribution_list))
+    return mean(distances)
 
 
 def softmax(values: List[float]) -> List[float]:

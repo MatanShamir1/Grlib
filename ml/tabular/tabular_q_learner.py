@@ -384,7 +384,8 @@ class TabularQLearner(TabularRLAgent):
         if save_fig:
             img_path = os.path.join(get_policy_sequences_result_path(self.env_name), self.problem_name)
             sequence = [pos for ((state, pos), action) in steps]
-            print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
+            #print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
+            print(f"generating sequence image at {img_path}.")
             create_sequence_image(sequence, img_path, self.problem_name)
 
         return steps

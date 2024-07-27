@@ -2,7 +2,7 @@ from abc import ABC
 import math
 import os
 import random
-from dataset.gr_dataset import GRDataset, generate_datasets
+from dataset.graml.gr_dataset import GRDataset, generate_datasets
 from ml import utils
 from ml.base import RLAgent
 from metrics import metrics
@@ -56,17 +56,18 @@ def save_weights(model : LstmObservations, path):
 	torch.save(model.state_dict(), path)
 
 class GramlRecognizer(ABC):
-	def __init__(self, method: Type[RLAgent], env_name: str, problems: List[str], grid_size, is_continuous = False, is_fragmented=True, is_inference_same_length_sequences=False):
+	def __init__(self, method: Type[RLAgent], env_name: str, problems: List[str], grid_size, is_continuous = False, is_fragmented=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False, collect_statistics=True):
 		self.problems = problems
 		self.env_name = env_name
-		self._observability_percentages = [0.1, 0.3, 0.5, 0.7, 1.0]
 		self.rl_agents_method = method
 		self.agents: List[RLAgent] = []
 		self.is_continuous = is_continuous
 		self.is_fragmented = is_fragmented
 		self.is_inference_same_length_sequences = is_inference_same_length_sequences
+		self.is_learn_same_length_sequences = is_learn_same_length_sequences
 		if is_continuous: self.train_func = train_metric_model_cont; self.collate_func = collate_fn_cont
 		else: self.train_func = train_metric_model; self.collate_func = collate_fn
+		self.collect_statistics = collect_statistics
 
 	def domain_learning_phase(self):
 		# start by training each rl agent on the base goal set
@@ -89,7 +90,7 @@ class GramlRecognizer(ABC):
 			print(f"Loading pre-existing lstm model in {self.model_file_path}")
 			load_weights(loaded_model=self.model, path=self.model_file_path)
 		else:
-			train_samples, dev_samples = generate_datasets(30000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_continuous, self.is_fragmented)
+			train_samples, dev_samples = generate_datasets(100000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_continuous, self.is_fragmented, self.is_learn_same_length_sequences)
 			train_dataset = GRDataset(len(train_samples), train_samples)
 			dev_dataset = GRDataset(len(dev_samples), dev_samples)
 			self.train_func(self.model,	train_loader=DataLoader(train_dataset, batch_size=64, shuffle=False, collate_fn=self.collate_func),
@@ -125,25 +126,28 @@ class GramlRecognizer(ABC):
 
 		# In case of adjusting plans length before embedding them, we embed them only now in the inference phase.
 		if self.is_inference_same_length_sequences:
+			assert self.plans_dict, "plans_dict wasn't created during goals_adaptation_phase and now inference phase can't embed the plans. when inference_same_length, keep the plans and not their embeddings during goals_adaptation_phase."
 			for goal, seq in self.plans_dict.items():
 				partial_obs = random_subset_with_order(seq, len(inf_sequence), self.is_fragmented)
 				if self.is_continuous: embedding = self.model.embed_sequence_cont(partial_obs, self.preprocess_obss)
 				else: embedding = self.model.embed_sequence(partial_obs)
 				self.embeddings_dict[goal] = embedding
-
+		else:
+			assert self.embeddings_dict, "embeddings_dict wasn't created during goals_adaptation_phase and now inference phase can't use the embeddings. when inference_diff_length, keep the embeddings and not their plans during goals_adaptation_phase."
 		if self.is_continuous: new_embedding = self.model.embed_sequence_cont(inf_sequence, self.preprocess_obss)
 		else: new_embedding = self.model.embed_sequence(inf_sequence)
 		closest_goal, greatest_similarity = None, 0
 		for (goal, embedding) in self.embeddings_dict.items():
 			curr_similarity = torch.exp(-torch.sum(torch.abs(embedding-new_embedding)))
 			if curr_similarity > greatest_similarity:
-				print(f'new closest goal is: {goal}')
+				# print(f'new closest goal is: {goal}')
 				closest_goal = goal
 				greatest_similarity = curr_similarity
 
 		self.embeddings_dict[f"{true_goal}_true"] = new_embedding
-		with open(embeddings_path + f'/{true_goal}_{percentage}_embeddings_dict.pkl', 'wb') as embeddings_file:
-			dill.dump(self.embeddings_dict, embeddings_file)
+		if self.collect_statistics:
+			with open(embeddings_path + f'/{true_goal}_{percentage}_embeddings_dict.pkl', 'wb') as embeddings_file:
+				dill.dump(self.embeddings_dict, embeddings_file)
 		self.embeddings_dict.pop(f"{true_goal}_true")
 
 		return closest_goal

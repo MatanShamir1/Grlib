@@ -10,11 +10,17 @@ from .other import device
 
 IS_FRAGMENTED = None
 IS_INFERENCE_SAME_LEN_SEQUENCES = None
+IS_LEARN_SAME_LEN_SEQUENCES = None
+RECOGNIZER_STR = None
+GRAQL = "graql"
+GRAML = "graml"
 
-def set_global_storage_configs(is_fragmented, is_inference_same_length_sequences):
-    global IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES
+def set_global_storage_configs(recognizer_str, is_fragmented, is_inference_same_length_sequences=None, is_learn_same_length_sequences=None):
+    global IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES, RECOGNIZER_STR
+    RECOGNIZER_STR = recognizer_str
     IS_FRAGMENTED = is_fragmented
     IS_INFERENCE_SAME_LEN_SEQUENCES = is_inference_same_length_sequences
+    IS_LEARN_SAME_LEN_SEQUENCES = is_learn_same_length_sequences
 
 def create_folders_if_necessary(path):
     dirname = os.path.dirname(path)
@@ -23,8 +29,8 @@ def create_folders_if_necessary(path):
 
 
 def get_storage_dir():
-    assert IS_FRAGMENTED!=None and IS_INFERENCE_SAME_LEN_SEQUENCES!=None, "You must call 'set_global_storage_configs' before using API from 'storage' module."
-    return "dataset"
+    assert RECOGNIZER_STR == "graql" and IS_FRAGMENTED!=None or (RECOGNIZER_STR == "graml" and IS_FRAGMENTED!=None and IS_INFERENCE_SAME_LEN_SEQUENCES!=None and IS_LEARN_SAME_LEN_SEQUENCES!=None), "You must call 'set_global_storage_configs' before using API from 'storage' module."
+    return f"dataset/{RECOGNIZER_STR}"
 
 
 def _get_models_directory_name():
@@ -41,7 +47,8 @@ def get_observation_file_name(observability_percentage: float):
 
 
 def get_env_dir(env_name):
-    return os.path.join(get_storage_dir(), env_name, IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES)
+    if RECOGNIZER_STR == GRAML: return os.path.join(get_storage_dir(), env_name, IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES)
+    else: return os.path.join(get_storage_dir(), env_name)
 
 def get_observations_dir(env_name):
     return os.path.join(get_env_dir(env_name=env_name), _get_observations_directory_name())
@@ -52,6 +59,8 @@ def get_model_dir(env_name, model_name, class_name):
 
 def get_models_dir(env_name):
     return os.path.join(get_env_dir(env_name=env_name), _get_models_directory_name())
+
+### GRAML PATHS ###
 
 def get_siamese_dataset_path(env_name, problem_names):
     return os.path.join(get_env_dir(env_name=env_name), _get_datasets_directory_name(), problem_names)
@@ -64,6 +73,15 @@ def get_plans_result_path(env_name):
 
 def get_policy_sequences_result_path(env_name):
     return os.path.join(get_env_dir(env_name), "policy_sequences")
+
+### END GRAML PATHS ###
+
+### GRAQL PATHS ###
+
+def get_graql_experiment_confidence_path(env_name):
+    return os.path.join(get_env_dir(env_name), "experiments")
+
+### GRAQL PATHS ###
 
 def get_status_path(model_dir):
     return os.path.join(model_dir, "status.pt")
