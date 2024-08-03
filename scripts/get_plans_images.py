@@ -29,7 +29,7 @@ def create_sequence_image(sequence, img_path, problem_name):
 	env_id = "MiniGrid-CustomColorS13N4-DynamicGoal-" + problem_name.split("-DynamicGoal-")[1]
 	result = register(
 		id=env_id,
-		entry_point="minigrid.envs:CustomColorEnv",
+		entry_point="gr_libs.minigrid_scripts.envs:CustomColorEnv",
 		kwargs={"size": 13, "num_crossings": 4, "goal_pos": minigrid_str_to_goal(problem_name), "obstacle_type": Wall, "start_pos": (1, 1), "plan": sequence},
 	)
 	print(result)

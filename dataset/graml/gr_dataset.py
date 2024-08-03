@@ -16,12 +16,10 @@ class GRDataset(Dataset):
 
     def __len__(self):
         return self.num_samples
-    
+
     def __getitem__(self, idx):
         return self.samples[idx] # returns a tuple - as appended in 'generate_dataset' last line
 
-# need to put 0.5 partial traces and 1.0 full traces close together with is_same_goal=1
-# this method fits both tabular and sequential according to generate_observation
 def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_method : MethodType, problems: str, env_name, preprocess_obss, is_continuous=False, is_fragmented=True, is_learn_same_length_sequences=False):
     dataset_directory = get_siamese_dataset_path(env_name=env_name, problem_names=problems)
     if is_continuous: dataset_directory = os.path.join(dataset_directory, 'cont')

@@ -90,7 +90,7 @@ class GramlRecognizer(ABC):
 			print(f"Loading pre-existing lstm model in {self.model_file_path}")
 			load_weights(loaded_model=self.model, path=self.model_file_path)
 		else:
-			train_samples, dev_samples = generate_datasets(100000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_continuous, self.is_fragmented, self.is_learn_same_length_sequences)
+			train_samples, dev_samples = generate_datasets(10000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_continuous, self.is_fragmented, self.is_learn_same_length_sequences)
 			train_dataset = GRDataset(len(train_samples), train_samples)
 			dev_dataset = GRDataset(len(dev_samples), dev_samples)
 			self.train_func(self.model,	train_loader=DataLoader(train_dataset, batch_size=64, shuffle=False, collate_fn=self.collate_func),

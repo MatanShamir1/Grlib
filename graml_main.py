@@ -34,7 +34,7 @@ def init(recognizer_str:str, is_fragmented:bool, collect_statistics:bool, is_inf
 			for percentage in [0.3, 0.5, 0.7, 0.9, 1]:
 				agent = TabularQLearner(env_name=env_name, problem_name=goal_to_minigrid_str(goal))
 				agent.learn()
-				sequence = agent.generate_partial_observation(action_selection_method=greedy_selection, percentage=percentage, is_fragmented=is_fragmented, save_fig=True)
+				sequence = agent.generate_partial_observation(action_selection_method=greedy_selection, percentage=percentage, is_fragmented=is_fragmented, save_fig=True, random_optimalism=True)
 				closest_goal = recognizer.inference_phase(sequence, goal, percentage)
 				# print(f'real goal {goal}, closest goal is: {closest_goal}')
 				if all(a == b for a, b in zip(goal, closest_goal)):

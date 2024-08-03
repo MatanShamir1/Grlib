@@ -139,8 +139,9 @@ class MonteCarloTreeSearch():
 			# need to handle the case of walking into a wall here: the resulting node will be considered invalid and it's reward and performance needs to be 0, but must handle stochasticity
 			# suggestion to handle stochasticity - consider *all* the children associated with taking action 2 towards a wall as performance 0, even if they accidently led in walking to another direction.
 			# which suggests the invalidity needs to be checked not according to the resulting state, rather according to the intended action itself and the environment! remember, you cannot access the "stochastic_action", it is meant to be hidden from you.
-			if node.invalid: return 0
-			else: return 1 / (abs(node.pos[0] - self.goal[0]) + abs(node.pos[1] - self.goal[1])) # large depth = less probability of obstacles -> larger nominator higher performance. further from goal -> larger denominator, lower performance.
+			if node.pos[0] == self.goal[0] and node.pos[1] == self.goal[1] : return 2
+			if node.invalid: return -0.5
+			else: return 0.8*(1 / (abs(node.pos[0] - self.goal[0]) + abs(node.pos[1] - self.goal[1]))) + 0.2*(1/node.depth) # large depth = less probability of obstacles -> larger nominator higher performance. further from goal -> larger denominator, lower performance.
 		while True:
 			action = random.randint(0, self.action_space-1)
 			state, reward, terminated, truncated, _ = self.env.step(self.stochastic_action(action))
@@ -259,7 +260,7 @@ def plan(env_name, problem_name, goal):
 	while not tree.root.terminal: # we iterate until the root is a terminal state, meaning the game is over.
 		max_reward = 0
 		iteration = 0
-		steps = max(1000,int(steps*0.9))
+		steps = max(2000,int(steps*0.9))
 		print(f"Executing {steps} rollouts for each action now.")
 		tq = tqdm(range(steps), postfix=f"Iteration: {iteration}, Num of steps: {len(mcts.plan)}. depth: {depth}. Max reward: {max_reward}. plan to {tuple(env.unwrapped.agent_pos)}, newely expanded: {0}")		
 		for n in tq:

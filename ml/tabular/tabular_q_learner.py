@@ -346,7 +346,7 @@ class TabularQLearner(TabularRLAgent):
         self.save_q_table(path=self.model_file_path)
         self._save_conf_file()
         
-    def generate_observation(self, action_selection_method: MethodType, save_fig = False):
+    def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig = False):
         """
         Generate a single observation given a list of agents
 
@@ -374,7 +374,17 @@ class TabularQLearner(TabularRLAgent):
             x, y = self.env.unwrapped.agent_pos
             str_state = "({},{}):{}".format(x, y, obs['direction'])
             action_probs = self.q_table[str_state] / np.sum(self.q_table[str_state])  # Normalize probabilities
-            action = action_selection_method(action_probs)
+            if step_index == 0 and random_optimalism:
+                print("in 1st step in generating plan and got random optimalism.")
+                std_dev = np.std(action_probs)
+                uniques_sorted = np.unique(action_probs)
+                num_of_stds = (uniques_sorted[-1] - uniques_sorted[-2]) / std_dev
+                if num_of_stds < 0.75:
+                    sorted_indices = np.argsort(action_probs)
+                    action = np.random.choice([sorted_indices[-1], sorted_indices[-2]])
+                else: action = action_selection_method(action_probs)
+            else:
+                action = action_selection_method(action_probs)
             steps.append(((obs, self.env.unwrapped.agent_pos), action))
             obs, reward, terminated, truncated, _ = self.env.step(action)
             done = terminated | truncated
@@ -390,7 +400,7 @@ class TabularQLearner(TabularRLAgent):
 
         return steps
     
-    def generate_partial_observation(self, action_selection_method: MethodType, percentage: float, save_fig = False, is_fragmented = True):
+    def generate_partial_observation(self, action_selection_method: MethodType, percentage: float, save_fig = False, is_fragmented = True, random_optimalism=False):
         """
         Generate a single observation given a list of agents
 
@@ -410,6 +420,6 @@ class TabularQLearner(TabularRLAgent):
             episode terminates.
         """
 
-        steps = self.generate_observation(action_selection_method, save_fig) # steps are a full observation
+        steps = self.generate_observation(action_selection_method, save_fig, random_optimalism) # steps are a full observation
         return random_subset_with_order(steps, (int)(percentage * len(steps)), is_fragmented)
         
