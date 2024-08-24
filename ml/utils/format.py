@@ -35,13 +35,6 @@ def get_obss_preprocessor(obs_space):
 
     return obs_space, preprocess_obss
 
-def goal_to_minigrid_str(tuply):
-	tuply = tuply[1:-1] # remove the braces
-	#print(tuply)
-	nums = tuply.split(',')
-	#print(nums)
-	return f'MiniGrid-SimpleCrossingS13N4-DynamicGoal-{nums[0]}x{nums[1]}-v0'
-
 def minigrid_str_to_goal(str):
 	"""
 	This function extracts the goal size (width and height) from a MiniGrid environment name.

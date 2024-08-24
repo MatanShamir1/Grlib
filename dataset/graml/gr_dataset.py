@@ -20,9 +20,9 @@ class GRDataset(Dataset):
     def __getitem__(self, idx):
         return self.samples[idx] # returns a tuple - as appended in 'generate_dataset' last line
 
-def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_method : MethodType, problems: str, env_name, preprocess_obss, is_continuous=False, is_fragmented=True, is_learn_same_length_sequences=False):
+def generate_datasets(num_samples, agents: List, observation_creation_method : MethodType, problems: str, env_name, preprocess_obss, is_fragmented=True, is_learn_same_length_sequences=False):
     dataset_directory = get_siamese_dataset_path(env_name=env_name, problem_names=problems)
-    if is_continuous: dataset_directory = os.path.join(dataset_directory, 'cont')
+    # if is_continuous: dataset_directory = os.path.join(dataset_directory, 'cont')
     if is_fragmented: addition = 'fragmented_'
     else: addition = ''
     dataset_train_path, dataset_dev_path = os.path.join(dataset_directory, addition + 'train.pkl'), os.path.join(dataset_directory, addition + 'dev.pkl')
@@ -41,24 +41,20 @@ def generate_datasets(num_samples, agents: List[RLAgent], observation_creation_m
             first_agent = np.random.choice(agents)
             first_trace_percentage = random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
             first_observation = first_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=first_trace_percentage, is_fragmented=is_fragmented)
-            if is_continuous:
-                first_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in first_observation] # list of dicts, each dict a sample comprised of image and text
-            else:
-                first_observation = [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in first_observation] # list of tuples, each tuple the sample
+                # first_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in first_observation] # list of dicts, each dict a sample comprised of image and text
+            first_observation = first_agent.simplify_observation(first_observation)
             second_agent = first_agent
             if not is_same_goal:
                 second_agent = np.random.choice([agent for agent in agents if agent != first_agent])
             second_trace_percentage = first_trace_percentage if is_learn_same_length_sequences else random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
             second_observation = second_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=second_trace_percentage, is_fragmented=is_fragmented)
-            if is_continuous:
-                second_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in second_observation]
-            else:
-                second_observation = [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in second_observation]
-            if not is_continuous: all_samples.append((
-                [torch.tensor(observation, dtype=torch.float32) for observation in first_observation],
-                [torch.tensor(observation, dtype=torch.float32) for observation in second_observation],
-                torch.tensor(is_same_goal, dtype=torch.float32)))
-            else: all_samples.append((first_observation, second_observation, torch.tensor(is_same_goal, dtype=torch.float32)))
+                # second_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in second_observation]
+            second_observation = second_agent.simplify_observation(second_observation)
+            # if not is_continuous: all_samples.append((
+            #     [torch.tensor(observation, dtype=torch.float32) for observation in first_observation],
+            #     [torch.tensor(observation, dtype=torch.float32) for observation in second_observation],
+            #     torch.tensor(is_same_goal, dtype=torch.float32)))
+            all_samples.append((first_observation, second_observation, torch.tensor(is_same_goal, dtype=torch.float32)))
             if i % 1000 == 0:
                 print(f'generated {i} samples')
         

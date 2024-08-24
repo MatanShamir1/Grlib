@@ -75,3 +75,16 @@ MINIGRID_PROBLEMS = {
         )
     ,
 }
+
+MAZE_PROBLEMS = {
+    'PointMaze-FourRoomsEnv-11x11-3-PROBLEMS':
+        (
+            'PointMaze-FourRoomsEnvDense-11x11',
+            [
+                "PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",
+                "PointMaze-FourRoomsEnvDense-11x11-Goal-9x9",
+                "PointMaze-FourRoomsEnvDense-11x11-Goal-1x9"
+            ]
+        )
+    ,
+}

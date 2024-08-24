@@ -85,13 +85,11 @@ class CNNImageEmbeddor(nn.Module):
 
 class LstmObservations(nn.Module):
 	
-	def __init__(self, obs_space, action_space, is_continuous = False): # TODO make sure the right cuda is used!
+	def __init__(self, obs_space, action_space): # TODO make sure the right cuda is used!
 		super(LstmObservations,self).__init__()
 		self.embeddor = CNNImageEmbeddor(obs_space, action_space)
-		self.is_continuous = is_continuous
 		# check if the traces are a bunch of images	
-		if is_continuous: input_size = 8; hidden_dim = 8
-		else: input_size = 4; hidden_dim = 8
+		input_size = 4; hidden_dim = 8
 		self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_dim, batch_first=True)
 		self.dropout = nn.Dropout(0.5)  # Added dropout layer
 		# Initialize weights
@@ -127,13 +125,13 @@ class LstmObservations(nn.Module):
 		out, (ht, ct) = self.lstm(trace, None)
 		return ht[-1]
 
-	def embed_sequence_cont(self, sequence, preprocess_obss):
-		sequence = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in sequence]
-		trace_images = torch.tensor(np.expand_dims(torch.stack([step.image for step in sequence]), axis=0)).to(device)
-		trace_texts = torch.tensor(np.expand_dims(torch.stack([step.text for step in sequence]), axis=0)).to(device)
-		embedded_trace = self.embeddor(trace_images, trace_texts)
-		out, (ht, ct) = self.lstm(embedded_trace)
-		return ht[-1]
+	# def embed_sequence_cont(self, sequence, preprocess_obss):
+	# 	sequence = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in sequence]
+	# 	trace_images = torch.tensor(np.expand_dims(torch.stack([step.image for step in sequence]), axis=0)).to(device)
+	# 	trace_texts = torch.tensor(np.expand_dims(torch.stack([step.text for step in sequence]), axis=0)).to(device)
+	# 	embedded_trace = self.embeddor(trace_images, trace_texts)
+	# 	out, (ht, ct) = self.lstm(embedded_trace)
+	# 	return ht[-1]
 
 def train_metric_model(model, train_loader, dev_loader, nepochs=5, patience = 2):
 	devAccuracy = []

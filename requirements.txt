@@ -9,7 +9,6 @@ chardet==5.2.0
 charset-normalizer==3.3.2
 cloudpickle==3.0.0
 ClusterShell==1.9.2
-cockpit @ file:///builddir/build/BUILD/cockpit-311.2/tmp/wheel/cockpit-311.2-py3-none-any.whl
 colorlog==6.7.0
 conda==4.14.0
 conda-package-handling==1.7.3
@@ -34,7 +33,6 @@ fonttools==4.44.3
 frozendict==1.2
 fsspec==2023.10.0
 gpg==1.15.1
--e git+ssh://git@github.com/BenNageris/GoalRecognitionLibs.git@759d5d42013fba548e21c528f80417164840f921#egg=gr_libs
 greenlet==3.0.1
 gssapi==1.6.9
 gym==0.26.2
@@ -89,7 +87,6 @@ nvidia-nvjitlink-cu12==12.4.127
 nvidia-nvtx-cu12==12.1.105
 optuna==3.4.0
 packaging==23.2
--e git+https://github.com/MatanShamir1/panda-gym.git@457785d1a4e589f1ba2a9494f0d095f8e9ff3a49#egg=panda_gym
 pandas==2.0.3
 parso==0.8.4
 pathvalidate==2.5.2
@@ -149,7 +146,6 @@ scipy==1.10.1
 selinux==3.6
 sepolicy==3.6
 setools==4.4.4
-setroubleshoot @ file:///builddir/build/BUILD/setroubleshoot-3.3.32/src
 simpleline==1.8.3
 six==1.16.0
 sklearn==0.0

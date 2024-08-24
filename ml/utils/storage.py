@@ -29,6 +29,7 @@ def create_folders_if_necessary(path):
 
 
 def get_storage_dir():
+    global IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES, RECOGNIZER_STR
     assert RECOGNIZER_STR == "graql" and IS_FRAGMENTED!=None or (RECOGNIZER_STR == "graml" and IS_FRAGMENTED!=None and IS_INFERENCE_SAME_LEN_SEQUENCES!=None and IS_LEARN_SAME_LEN_SEQUENCES!=None), "You must call 'set_global_storage_configs' before using API from 'storage' module."
     return f"dataset/{RECOGNIZER_STR}"
 
@@ -47,6 +48,7 @@ def get_observation_file_name(observability_percentage: float):
 
 
 def get_env_dir(env_name):
+    global IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES, RECOGNIZER_STR
     if RECOGNIZER_STR == GRAML: return os.path.join(get_storage_dir(), env_name, IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES)
     else: return os.path.join(get_storage_dir(), env_name)
 
