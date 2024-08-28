@@ -58,9 +58,9 @@ def save_weights(model : LstmObservations, path):
 	torch.save(model.state_dict(), path)
 
 class GramlRecognizer(ABC):
-	def __init__(self, method: Type[ABC], env_name: str, problems: List[str],  exploration_rates: List[float], goal_to_task_str:MethodType, is_fragmented=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False, collect_statistics=True):
-		assert len(exploration_rates) == len(problems), "There should be exploration rate for every problem."
-		self.exploration_rates = exploration_rates
+	def __init__(self, method: Type[ABC], env_name: str, problems: List[str],  train_configs: List, goal_to_task_str:MethodType, is_fragmented=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False, collect_statistics=True):
+		assert len(train_configs) == len(problems), "There should be exploration rate for every problem."
+		self.train_configs = train_configs
 		self.problems = problems
 		self.env_name = env_name
 		self.rl_agents_method = method
@@ -75,8 +75,8 @@ class GramlRecognizer(ABC):
 
 	def domain_learning_phase(self, problem_list_to_str_tuple:MethodType):
 		# start by training each rl agent on the base goal set
-		for problem_name, exploration_rate in zip(self.problems, self.exploration_rates):
-			agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name, algorithm=SAC, exploration_rate=exploration_rate)
+		for problem_name, (exploration_rate, num_timesteps) in zip(self.problems, self.train_configs):
+			agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name, algorithm=SAC, exploration_rate=exploration_rate, num_timesteps=num_timesteps)
 			agent.learn()
 			self.agents.append(agent)
 		self.obs_space, self.preprocess_obss = utils.get_obss_preprocessor(self.agents[0].env.observation_space)

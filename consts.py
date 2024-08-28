@@ -82,7 +82,7 @@ MAZE_PROBLEMS = {
             'PointMaze-FourRoomsEnvDense-11x11',
             [
                 "PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",
-                #"PointMaze-FourRoomsEnvDense-11x11-Goal-9x9",
+                "PointMaze-FourRoomsEnv-11x11-Goal-9x9", # this one doesn't work with dense rewards because of encountering local minima
                 "PointMaze-FourRoomsEnvDense-11x11-Goal-1x9"
             ]
         )

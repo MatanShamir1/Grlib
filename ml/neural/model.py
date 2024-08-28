@@ -18,11 +18,11 @@ if __name__ != "__main__":
     from ml.utils.format import random_subset_with_order
 
 class NeuralAgent():
-    def __init__(self, env_name: str, problem_name: str, algorithm, reward_threshold: float=450, exploration_rate=None):
+    def __init__(self, env_name: str, problem_name: str, algorithm, num_timesteps:float, reward_threshold: float=450, exploration_rate=None):
         # Need to change reward threshold to change according to which task the agent is training on, becuase it changes from task to task.
         env = gym.make(problem_name, render_mode="rgb_array")
-        env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
-        env = Monitor(env, "logs/", allow_early_resets=True)
+        # env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
+        # env = Monitor(env, "logs/", allow_early_resets=True)
         self.env_name = env_name
         self.env = DummyVecEnv([lambda: env])
         self._actions_space = self.env.action_space
@@ -32,6 +32,7 @@ class NeuralAgent():
         self._model_file_path = os.path.join(self._model_directory, "saved_model.pth")
         self.algorithm = algorithm
         self.reward_threshold = reward_threshold
+        self.num_timesteps = num_timesteps
         
     def save_model(self):
         self._model.save(self._model_file_path)
@@ -65,7 +66,7 @@ class NeuralAgent():
             callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=self.reward_threshold, verbose=1)
             eval_callback = EvalCallback(self.env, best_model_save_path="./logs/",
                              log_path="./logs/", eval_freq=500, callback_on_new_best=callback_on_best, verbose=1, render=True)
-            self._model.learn(total_timesteps=200000, progress_bar=True, callback=eval_callback)
+            self._model.learn(total_timesteps=self.num_timesteps, progress_bar=True, callback=eval_callback)
             self.save_model()
 
     def simplify_observation(self, observation):
