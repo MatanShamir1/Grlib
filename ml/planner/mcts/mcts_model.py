@@ -9,7 +9,7 @@ from ml.utils.format import random_subset_with_order
 from ml.utils.storage import get_model_dir
 from .utils import Node
 from .utils import Tree
-from gym.envs.registration import register
+from gymnasium.envs.registration import register
 import gymnasium as gym
 import numpy as np
 import copy

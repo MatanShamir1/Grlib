@@ -1,8 +1,8 @@
 import random
 import sys
+from typing import List
 from consts import MAZE_PROBLEMS, MINIGRID_PROBLEMS
 from ml.neural.model import NeuralAgent
-from ml.utils.format import goal_to_minigrid_str
 from ml.utils.storage import set_global_storage_configs
 from recognizer.graql_recognizer import GraqlRecognizer
 import scripts.file_system as file_system
@@ -36,12 +36,16 @@ def init(recognizer_str:str, is_fragmented:bool, collect_statistics:bool, is_inf
 			nums = tuply.split(',')
 			#print(nums)
 			return f'MiniGrid-SimpleCrossingS13N4-DynamicGoal-{nums[0]}x{nums[1]}-v0'
-		
+
+		def problem_list_to_str_tuple(problems : List[str]):
+			return '_'.join([f"[{s.split('-')[-2]}]" for s in problems])
+
 	
 	elif task == "MAZE":
 		problem_name = "PointMaze-FourRoomsEnv-11x11-3-PROBLEMS"
 		env_name, problem_list = MAZE_PROBLEMS[problem_name]
 		learner_type = NeuralAgent
+		dynamic_goals = ['(7,3)', '(3,7)', '(6,4)', '(4,6)', '(3,3)', '(6,6)']
 		if recognizer_str == "graql":
 			print("Can't support GR as RL recognition yet. ask ben to give his framework here to evaluate next to his.")
 			exit(1)
@@ -54,13 +58,16 @@ def init(recognizer_str:str, is_fragmented:bool, collect_statistics:bool, is_inf
 			#print(nums)
 			return f'PointMaze-FourRoomsEnvDense-11x11-Goal-{nums[0]}x{nums[1]}'
 
+		def problem_list_to_str_tuple(problems : List[str]):
+			return '_'.join([f"[{s.split('-')[-1]}]" for s in problems])
+
 	else:
 		print("I currently only support minigrid and maze. I promise it will change in the future!")
 		exit(1)
   
-	recognizer = recognizer_type(learner_type, env_name, problem_list, is_continuous=False, is_fragmented=is_fragmented, is_inference_same_length_sequences=is_inference_same_length_sequences, is_learn_same_length_sequences=is_learn_same_length_sequences, collect_statistics=collect_statistics)
+	recognizer = recognizer_type(learner_type, env_name, problem_list, exploration_rates=[None, None], is_fragmented=is_fragmented, is_inference_same_length_sequences=is_inference_same_length_sequences, is_learn_same_length_sequences=is_learn_same_length_sequences, collect_statistics=collect_statistics, goal_to_task_str=goal_to_task_str)
 	# print("### STARTING DOMAIN LEARNING PHASE ###")
-	recognizer.domain_learning_phase()
+	recognizer.domain_learning_phase(problem_list_to_str_tuple=problem_list_to_str_tuple)
 	recognizer.goals_adaptation_phase(dynamic_goals)
  
 	# experiments - feel free to change according to task...
@@ -86,7 +93,7 @@ if __name__ == "__main__":
 	assert len(sys.argv) == 7
 	assert sys.argv[1] in ["graml"] and sys.argv[2] in ["continuing_partial_obs", "fragmented_partial_obs"] and sys.argv[3] in ["inference_same_length", "inference_diff_length"] and sys.argv[4] in ["learn_same_length", "learn_diff_length"] and sys.argv[5] in ['no_collect_statistics', 'collect_statistics'] \
 			or len(sys.argv) == 4 and sys.argv[1] in ["graql"] and sys.argv[2] in ["continuing_partial_obs", "fragmented_partial_obs"] and sys.argv[3] in ['no_collect_statistics', 'collect_statistics'] \
-	   ,f"Assertion failed: incorrect arguments.\nExample 1: \n\t /usr/bin/python graml_main.py graml [continuing_partial_obs/fragmented_partial_obs] [inference_same_length/inference_diff_length] [learn_same_length/learn_diff_length] [collect_statistics/no_collect_statistics]\nExample 2: \n\t /usr/bin/python graml_main.py graql [continuing_partial_obs/fragmented_partial_obs] [collect_statistics/no_collect_statistics]"
+	   ,f"Assertion failed: incorrect arguments.\nExample 1: \n\t python graml_main.py graml [continuing_partial_obs/fragmented_partial_obs] [inference_same_length/inference_diff_length] [learn_same_length/learn_diff_length] [collect_statistics/no_collect_statistics]\nExample 2: \n\t python graml_main.py graql [continuing_partial_obs/fragmented_partial_obs] [collect_statistics/no_collect_statistics]"
 	assert sys.argv[6] in ["MAZE", "MINIGRID"]
 	if sys.argv[1] == "graml":
 		set_global_storage_configs(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

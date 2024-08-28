@@ -9,12 +9,12 @@ from metrics import metrics
 import ml
 from ml import utils
 from ml.base import RLAgent
-from ml.utils.format import goal_str_to_tuple, goal_to_minigrid_str, minigrid_str_to_goal
+from ml.utils.format import goal_str_to_tuple, minigrid_str_to_goal
 from ml.utils.storage import get_graql_experiment_confidence_path
 
 
 class GraqlRecognizer(ABC):
-    def __init__(self, method: Type[RLAgent], env_name: str, base_problems: List[str], grid_size,
+    def __init__(self, method: Type[RLAgent], env_name: str, base_problems: List[str], goal_to_task_str:MethodType,
                  is_continuous = False, is_fragmented=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False, collect_statistics=True):
         self.base_problems = base_problems
         self.env_name = env_name
@@ -22,6 +22,7 @@ class GraqlRecognizer(ABC):
         self.active_goals = [minigrid_str_to_goal(problem_name) for problem_name in base_problems]
         self.agents = {}
         self.collect_statistics = collect_statistics
+        self.goal_to_task_str = goal_to_task_str
 
     def domain_learning_phase(self):
         for problem_name in self.base_problems:
@@ -32,7 +33,7 @@ class GraqlRecognizer(ABC):
 
     def goals_adaptation_phase(self, new_goals):
         self.active_goals = new_goals
-        problems_goals = [(goal_to_minigrid_str(tuply),tuply) for tuply in new_goals]
+        problems_goals = [(self.goal_to_task_str(tuply),tuply) for tuply in new_goals]
         for problem_name, goal_str in problems_goals:
             goal = goal_str_to_tuple(goal_str)
             agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name)

@@ -129,6 +129,3 @@ def get_csv_logger(model_dir):
     utils.create_folders_if_necessary(csv_path)
     csv_file = open(csv_path, "a")
     return csv_file, csv.writer(csv_file)
-
-def problem_list_to_str_tuple(problems : List[str]):
-    return '_'.join([f"[{s.split('-')[-2]}]" for s in problems])

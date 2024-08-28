@@ -2,6 +2,8 @@ from abc import ABC
 import math
 import os
 import random
+
+from stable_baselines3 import SAC
 from dataset.graml.gr_dataset import GRDataset, generate_datasets
 from ml import utils
 from ml.base import RLAgent
@@ -16,8 +18,8 @@ from ml.planner.mcts import mcts_model
 import dill
 
 from ml.sequential.lstm_model import LstmObservations, train_metric_model, train_metric_model_cont
-from ml.utils.format import goal_to_minigrid_str, minigrid_str_to_goal, random_subset_with_order
-from ml.utils.storage import get_model_dir, problem_list_to_str_tuple, get_embeddings_result_path
+from ml.utils.format import minigrid_str_to_goal, random_subset_with_order
+from ml.utils.storage import get_model_dir, get_embeddings_result_path
 
 ### IMPLEMENT MORE SELECTION METHODS, MAKE SURE action_probs IS AS IT SEEMS: list of action-probability 'es ###
 
@@ -56,7 +58,9 @@ def save_weights(model : LstmObservations, path):
 	torch.save(model.state_dict(), path)
 
 class GramlRecognizer(ABC):
-	def __init__(self, method: Type[ABC], env_name: str, problems: List[str], is_fragmented=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False, collect_statistics=True):
+	def __init__(self, method: Type[ABC], env_name: str, problems: List[str],  exploration_rates: List[float], goal_to_task_str:MethodType, is_fragmented=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False, collect_statistics=True):
+		assert len(exploration_rates) == len(problems), "There should be exploration rate for every problem."
+		self.exploration_rates = exploration_rates
 		self.problems = problems
 		self.env_name = env_name
 		self.rl_agents_method = method
@@ -67,22 +71,23 @@ class GramlRecognizer(ABC):
 		# if is_continuous: self.train_func = train_metric_model_cont; self.collate_func = collate_fn_cont
 		self.train_func = train_metric_model; self.collate_func = collate_fn
 		self.collect_statistics = collect_statistics
+		self.goal_to_task_str = goal_to_task_str
 
-	def domain_learning_phase(self):
+	def domain_learning_phase(self, problem_list_to_str_tuple:MethodType):
 		# start by training each rl agent on the base goal set
-		for problem_name in self.problems:
-			agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name)
+		for problem_name, exploration_rate in zip(self.problems, self.exploration_rates):
+			agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name, algorithm=SAC, exploration_rate=exploration_rate)
 			agent.learn()
 			self.agents.append(agent)
 		self.obs_space, self.preprocess_obss = utils.get_obss_preprocessor(self.agents[0].env.observation_space)
 		# train the network so it will find a metric for the observations of the base agents such that traces of agents to different goals are far from one another		
 		self.model_directory = get_model_dir(env_name=self.env_name, model_name=problem_list_to_str_tuple(self.problems), class_name=self.__class__.__name__)
-		last_path = r"lstm_cnn_model"
+		last_path = r"lstm_model"
 		# if self.is_continuous : last_path += r"_cont"
 		if self.is_fragmented : last_path += r"_fragmented"
 		last_path += r".pth"
 		self.model_file_path = os.path.join(self.model_directory, last_path)
-		self.model = LstmObservations(obs_space=self.obs_space, action_space=self.agents[0].env.action_space)
+		self.model = LstmObservations()
 		self.model.to(utils.device)
 
 		if os.path.exists(self.model_file_path):
@@ -99,7 +104,7 @@ class GramlRecognizer(ABC):
 	def goals_adaptation_phase(self, new_goals):
 		self.current_goals = new_goals
 		# start by training each rl agent on the base goal set
-		problems_goals = [(goal_to_minigrid_str(tuply),tuply) for tuply in new_goals]
+		problems_goals = [(self.goal_to_task_str(tuply),tuply) for tuply in new_goals]
 		self.embeddings_dict = {} # relevant if the embedding of the plan occurs during the goals adaptation phase
 		self.plans_dict = {} # relevant if the embedding of the plan occurs during the inference phase
 		# will change, for now let an optimal agent give us the trace

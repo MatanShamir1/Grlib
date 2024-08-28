@@ -37,29 +37,29 @@ def accuracy_per_epoch_cont(model, data_loader):
 			total += len(is_same_goals)
 	return correct / total, sum_loss / 32
 
-class CNNImageEmbeddor(nn.Module):
-	def __init__(self, obs_space, action_space, use_text=False):
-		super().__init__()
-		self.use_text = use_text
-		self.image_conv = nn.Sequential(
-			nn.Conv2d(3, 4, kernel_size=(3, 3), padding=1),  # Reduced filters, added padding
-            nn.ReLU(),
-            nn.MaxPool2d((2, 2)),
-            nn.Conv2d(4, 4, (3, 3), padding=1),  # Reduced filters, added padding
-            nn.ReLU(),
-            nn.MaxPool2d((2, 2)),  # Added additional pooling to reduce size
-            nn.Conv2d(4, 8, (3, 3), padding=1),  # Reduced filters, added padding
-            nn.ReLU(),
-            nn.BatchNorm2d(8)
-		)
-		n = obs_space["image"][0]
-		m = obs_space["image"][1]
-		self.image_embedding_size = ((n - 4) // 4 - 3) * ((m - 4) // 4 - 3) * 8
-		if self.use_text:
-			self.word_embedding_size = 32
-			self.word_embedding = nn.Embedding(obs_space["text"], self.word_embedding_size)
-			self.text_embedding_size = 128
-			self.text_rnn = nn.GRU(self.word_embedding_size, self.text_embedding_size, batch_first=True)
+# class CNNImageEmbeddor(nn.Module):
+# 	def __init__(self, obs_space, action_space, use_text=False):
+# 		super().__init__()
+# 		self.use_text = use_text
+# 		self.image_conv = nn.Sequential(
+# 			nn.Conv2d(3, 4, kernel_size=(3, 3), padding=1),  # Reduced filters, added padding
+#             nn.ReLU(),
+#             nn.MaxPool2d((2, 2)),
+#             nn.Conv2d(4, 4, (3, 3), padding=1),  # Reduced filters, added padding
+#             nn.ReLU(),
+#             nn.MaxPool2d((2, 2)),  # Added additional pooling to reduce size
+#             nn.Conv2d(4, 8, (3, 3), padding=1),  # Reduced filters, added padding
+#             nn.ReLU(),
+#             nn.BatchNorm2d(8)
+# 		)
+# 		n = obs_space["image"][0]
+# 		m = obs_space["image"][1]
+# 		self.image_embedding_size = ((n - 4) // 4 - 3) * ((m - 4) // 4 - 3) * 8
+# 		if self.use_text:
+# 			self.word_embedding_size = 32
+# 			self.word_embedding = nn.Embedding(obs_space["text"], self.word_embedding_size)
+# 			self.text_embedding_size = 128
+# 			self.text_rnn = nn.GRU(self.word_embedding_size, self.text_embedding_size, batch_first=True)
 
 	def forward(self, images, texts):
 	 	# images shape: batch_size X max_sequence_len X sample_size. same for text.
@@ -85,9 +85,9 @@ class CNNImageEmbeddor(nn.Module):
 
 class LstmObservations(nn.Module):
 	
-	def __init__(self, obs_space, action_space): # TODO make sure the right cuda is used!
+	def __init__(self): # TODO make sure the right cuda is used!
 		super(LstmObservations,self).__init__()
-		self.embeddor = CNNImageEmbeddor(obs_space, action_space)
+		#self.embeddor = CNNImageEmbeddor(obs_space, action_space)
 		# check if the traces are a bunch of images	
 		input_size = 4; hidden_dim = 8
 		self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_dim, batch_first=True)
@@ -110,14 +110,14 @@ class LstmObservations(nn.Module):
 		return manhattan_dis.squeeze()
 
 	# continuous
-	def forward_cont(self, traces1_images, traces1_texts, traces2_images, traces2_texts, lengths1, lengths2):
-	 	# we also embed '0' images, but we take them out of the equation in the lstm (it knows to not treat them when batching)
-		traces1 = self.embeddor(traces1_images, traces1_texts)
-		traces2 = self.embeddor(traces2_images, traces2_texts) # traces1 & traces 2 shapes: batch_size X max_sequence_length X embedding_size
-		out1, (ht1, ct1) = self.lstm(pack_padded_sequence(traces1, lengths1, batch_first=True, enforce_sorted=False), None)
-		out2, (ht2, ct2) = self.lstm(pack_padded_sequence(traces2, lengths2, batch_first=True, enforce_sorted=False), None)
-		manhattan_dis = torch.exp(-torch.sum(torch.abs(ht1[-1]-ht2[-1]),dim=1,keepdim=True))
-		return manhattan_dis.squeeze()
+	# def forward_cont(self, traces1_images, traces1_texts, traces2_images, traces2_texts, lengths1, lengths2):
+	#  	# we also embed '0' images, but we take them out of the equation in the lstm (it knows to not treat them when batching)
+	# 	traces1 = self.embeddor(traces1_images, traces1_texts)
+	# 	traces2 = self.embeddor(traces2_images, traces2_texts) # traces1 & traces 2 shapes: batch_size X max_sequence_length X embedding_size
+	# 	out1, (ht1, ct1) = self.lstm(pack_padded_sequence(traces1, lengths1, batch_first=True, enforce_sorted=False), None)
+	# 	out2, (ht2, ct2) = self.lstm(pack_padded_sequence(traces2, lengths2, batch_first=True, enforce_sorted=False), None)
+	# 	manhattan_dis = torch.exp(-torch.sum(torch.abs(ht1[-1]-ht2[-1]),dim=1,keepdim=True))
+	# 	return manhattan_dis.squeeze()
 
 	def embed_sequence(self, trace):
 		trace = [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in trace]

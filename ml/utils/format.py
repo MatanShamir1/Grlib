@@ -30,6 +30,16 @@ def get_obss_preprocessor(obs_space):
 
         preprocess_obss.vocab = vocab
 
+    # Check if it is a MiniGrid observation space
+    elif isinstance(obs_space, gym.spaces.Dict) and "observation" in obs_space.spaces.keys():
+        obs_space = {"observation": obs_space.spaces["observation"].shape}
+
+        def preprocess_obss(obss, device=None):
+            return ml.DictList({
+                "observation": preprocess_images(obss, device=device)
+        })
+
+
     else:
         raise ValueError("Unknown observation space: " + str(obs_space))
 
