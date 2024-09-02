@@ -65,7 +65,7 @@ def init(recognizer_str:str, is_fragmented:bool, collect_statistics:bool, is_inf
 		print("I currently only support minigrid and maze. I promise it will change in the future!")
 		exit(1)
   
-	recognizer = recognizer_type(learner_type, env_name, problem_list, train_configs=[(None, 200000), (None, 1000000), (None, 200000)], is_fragmented=is_fragmented, is_inference_same_length_sequences=is_inference_same_length_sequences, is_learn_same_length_sequences=is_learn_same_length_sequences, collect_statistics=collect_statistics, goal_to_task_str=goal_to_task_str)
+	recognizer = recognizer_type(learner_type, env_name, problem_list, train_configs=[(None, 200000), (None, 500000), (None, 200000)], is_fragmented=is_fragmented, is_inference_same_length_sequences=is_inference_same_length_sequences, is_learn_same_length_sequences=is_learn_same_length_sequences, collect_statistics=collect_statistics, goal_to_task_str=goal_to_task_str)
 	# print("### STARTING DOMAIN LEARNING PHASE ###")
 	recognizer.domain_learning_phase(problem_list_to_str_tuple=problem_list_to_str_tuple)
 	recognizer.goals_adaptation_phase(dynamic_goals)

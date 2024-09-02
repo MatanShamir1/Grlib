@@ -1,4 +1,39 @@
 ### GRAML ###
+## Setup:
+1. Ensure you have python 3.11 installed.
+If you have root permissions, simply use:
+```
+mkdir -p ~/.local/python3.11
+dnf install python3.11 --prefix ~/.local/python3.11
+echo 'export PATH=$HOME/.local/python3.11/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+```
+Else, use pyenv:
+```
+pyenv install 3.11.0
+```
+2. Create a new venv or use an existing 3.11 venv, and activate it. To create a new venv:
+```
+~/.pyenv/versions/3.11.0/bin/python -m venv graml_env
+./Python-3.11.0/graml_env/bin/activate
+```
+If you're not a sudo, and you have problems with building python getting such warnings:
+```
+WARNING: The Python ctypes extension was not compiled. Missing the libffi lib?
+```
+That means you don't have the necesarry libraries for building python, and you probably can't change that since you're not a sudoer.
+An alternative solution can be using a conda env:
+```
+conda create -n graml_env python=3.11
+conda activate graml_env
+```
+3. Install GoalRecognitionLibs to get all needed dependencies:
+```
+git clone [GoalRecognitionLibs address]
+cd GoalRecognitionLibs
+pip install -e . # using the conda's pip of course
+```
+
 ## Execution:
 # First, generate the results by running the framework with the experiments:
 1. GRAML - python graml_main.py graml continuing_partial_obs inference_same_length learn_same_length collect_statistics

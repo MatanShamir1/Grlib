@@ -5,6 +5,7 @@ from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewar
 from stable_baselines3 import SAC, PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.callbacks import BaseCallback, CallbackList
 import gr_libs.maze_scripts.envs.maze
 import os
 import sys
@@ -24,6 +25,7 @@ class NeuralAgent():
         # env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
         # env = Monitor(env, "logs/", allow_early_resets=True)
         self.env_name = env_name
+        env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
         self.env = DummyVecEnv([lambda: env])
         self._actions_space = self.env.action_space
         if exploration_rate != None: self._model = algorithm("MultiInputPolicy", self.env, ent_coef=exploration_rate, verbose=1)
@@ -42,7 +44,7 @@ class NeuralAgent():
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
         fps = 30.0
         self.env.reset()
-        frame_size = (self.env.render().shape[1], self.env.render().shape[0])
+        frame_size = (self.env.render(mode='rgb_array').shape[1], self.env.render(mode='rgb_array').shape[0])
         video_writer = cv2.VideoWriter(video_path, fourcc, fps, frame_size)
         done = False
         obs = self.env.reset()
@@ -63,10 +65,11 @@ class NeuralAgent():
             self.load_model()
         else:
             # Stop training when the model reaches the reward threshold
-            callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=self.reward_threshold, verbose=1)
-            eval_callback = EvalCallback(self.env, best_model_save_path="./logs/",
-                             log_path="./logs/", eval_freq=500, callback_on_new_best=callback_on_best, verbose=1, render=True)
-            self._model.learn(total_timesteps=self.num_timesteps, progress_bar=True, callback=eval_callback)
+            # callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=self.reward_threshold, verbose=1)
+            # eval_callback = EvalCallback(self.env, best_model_save_path="./logs/",
+            #                  log_path="./logs/", eval_freq=500, callback_on_new_best=callback_on_best, verbose=1, render=True)
+            # self._model.learn(total_timesteps=self.num_timesteps, progress_bar=True, callback=eval_callback)
+            self._model.learn(total_timesteps=self.num_timesteps, progress_bar=True) # comment this in a normal env
             self.save_model()
 
     def simplify_observation(self, observation):
