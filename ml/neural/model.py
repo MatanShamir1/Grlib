@@ -1,5 +1,6 @@
 from types import MethodType
 import gymnasium as gym
+import numpy as np
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3 import SAC, PPO
@@ -25,6 +26,7 @@ class NeuralAgent():
         # env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
         # env = Monitor(env, "logs/", allow_early_resets=True)
         self.env_name = env_name
+        self.problem_name = problem_name
         env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
         self.env = DummyVecEnv([lambda: env])
         self._actions_space = self.env.action_space
@@ -51,7 +53,7 @@ class NeuralAgent():
         while not done:
             action, _states = self._model.predict(obs, deterministic=True)
             obs, rewards, done, info = self.env.step(action)
-            assert done == info[0]["success"]
+            assert done == info[0]["success"] # make sure the agent actually reached the goal within the max time
             frame = self.env.render()
             video_writer.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
         video_writer.release()
@@ -73,7 +75,7 @@ class NeuralAgent():
             self.save_model()
 
     def simplify_observation(self, observation):
-        return observation
+        return [np.concatenate((np.array(obs).reshape(obs.shape[-1]),np.array(action).reshape(action.shape[-1]))) for (obs,action) in observation]
 
     def generate_partial_observation(self, action_selection_method, percentage, is_fragmented, save_fig=False, random_optimalism=True):
         steps = self.generate_observation(action_selection_method, save_fig=save_fig, random_optimalism=random_optimalism) # steps are a full observation
@@ -85,18 +87,19 @@ class NeuralAgent():
         is_done = False
         while not is_done:
             deterministic = action_selection_method != stochastic_amplified_selection and not random_optimalism
-            action, _states = self._model.predict(obs, deterministic=True)
+            action, _states = self._model.predict(obs, deterministic=deterministic)
             # obs, reward, done, info = self.env.step(action)
             observations.append((obs['observation'], action))
             obs, reward, done, info = self.env.step(action)
             is_done = info[0]["success"]
             assert done[0] == is_done # we want to make sure the episode is done only when the agent has actually succeeded with the task.
-        print(f'len of observations: {len(observations)}')
+        #print(f'len of observations: {len(observations)}')
         if save_fig:
             vid_path = os.path.join(get_policy_sequences_result_path(self.env_name), self.problem_name)
             self.record_video(vid_path)
             #print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
             print(f"generated sequence video at {vid_path}.")
+        return observations
         
 
 if __name__ == "__main__":
@@ -114,7 +117,20 @@ if __name__ == "__main__":
     from ml.utils.storage import get_model_dir, set_global_storage_configs
 
     set_global_storage_configs("graml", "fragmented_partial_obs", "inference_same_length", "learn_diff_length")
-    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-1x9", algorithm=SAC, reward_threshold=450)
+    dynamic_goals = ['(7,3)', '(3,7)', '(6,4)', '(4,6)', '(4,4)', '(3,4)', '(7,7)']
+    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-7x3", algorithm=SAC, num_timesteps=200000)
+    agent.learn()
+    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-3x7", algorithm=SAC, num_timesteps=200000)
+    agent.learn()
+    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-6x4", algorithm=SAC, num_timesteps=200000)
+    agent.learn()
+    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnv-11x11", problem_name="PointMaze-FourRoomsEnv-11x11-Goal-4x6", algorithm=SAC, num_timesteps=500000)
+    agent.learn()
+    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-4x4", algorithm=SAC, num_timesteps=200000)
+    agent.learn()
+    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-3x4", algorithm=SAC, num_timesteps=200000)
+    agent.learn()
+    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnv-11x11", problem_name="PointMaze-FourRoomsEnv-11x11-Goal-7x7", algorithm=SAC, num_timesteps=1000000)
     agent.learn()
     print(os.path.join(GRAML_itself, "dataset/Videos/maze_video.mp4"))
     # agent.generate_full_observation()

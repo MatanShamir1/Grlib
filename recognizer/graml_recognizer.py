@@ -21,6 +21,8 @@ from ml.sequential.lstm_model import LstmObservations, train_metric_model, train
 from ml.utils.format import minigrid_str_to_goal, random_subset_with_order
 from ml.utils.storage import get_model_dir, get_embeddings_result_path
 
+MCTS_BASED, AGENT_BASED = 0, 1
+
 ### IMPLEMENT MORE SELECTION METHODS, MAKE SURE action_probs IS AS IT SEEMS: list of action-probability 'es ###
 
 def collate_fn(batch):
@@ -58,7 +60,7 @@ def save_weights(model : LstmObservations, path):
 	torch.save(model.state_dict(), path)
 
 class GramlRecognizer(ABC):
-	def __init__(self, method: Type[ABC], env_name: str, problems: List[str],  train_configs: List, goal_to_task_str:MethodType, is_fragmented=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False, collect_statistics=True):
+	def __init__(self, method: Type[ABC], env_name: str, problems: List[str],  train_configs: List, goal_to_task_str:MethodType, task_str_to_goal:MethodType, goals_adaptation_sequence_generation_method, is_fragmented=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False, collect_statistics=True, specified_rl_algorithm = None):
 		assert len(train_configs) == len(problems), "There should be exploration rate for every problem."
 		self.train_configs = train_configs
 		self.problems = problems
@@ -72,11 +74,18 @@ class GramlRecognizer(ABC):
 		self.train_func = train_metric_model; self.collate_func = collate_fn
 		self.collect_statistics = collect_statistics
 		self.goal_to_task_str = goal_to_task_str
+		self.task_str_to_goal = task_str_to_goal
+		self.specified_rl_algorithm = specified_rl_algorithm
+		self.goals_adaptation_sequence_generation_method = goals_adaptation_sequence_generation_method
 
-	def domain_learning_phase(self, problem_list_to_str_tuple:MethodType):
+	def domain_learning_phase(self, problem_list_to_str_tuple:MethodType, input_size, hidden_size, batch_size):
 		# start by training each rl agent on the base goal set
 		for problem_name, (exploration_rate, num_timesteps) in zip(self.problems, self.train_configs):
-			agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name, algorithm=SAC, exploration_rate=exploration_rate, num_timesteps=num_timesteps)
+			kwargs = {"env_name":self.env_name, "problem_name":problem_name}
+			if self.specified_rl_algorithm: kwargs["algorithm"] = self.specified_rl_algorithm
+			if exploration_rate: kwargs["exploration_rate"] = exploration_rate
+			if num_timesteps: kwargs["num_timesteps"] = num_timesteps
+			agent = self.rl_agents_method(**kwargs)
 			agent.learn()
 			self.agents.append(agent)
 		self.obs_space, self.preprocess_obss = utils.get_obss_preprocessor(self.agents[0].env.observation_space)
@@ -87,7 +96,7 @@ class GramlRecognizer(ABC):
 		if self.is_fragmented : last_path += r"_fragmented"
 		last_path += r".pth"
 		self.model_file_path = os.path.join(self.model_directory, last_path)
-		self.model = LstmObservations()
+		self.model = LstmObservations(input_size=input_size, hidden_size=hidden_size)
 		self.model.to(utils.device)
 
 		if os.path.exists(self.model_file_path):
@@ -97,8 +106,8 @@ class GramlRecognizer(ABC):
 			train_samples, dev_samples = generate_datasets(10000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_fragmented, self.is_learn_same_length_sequences)
 			train_dataset = GRDataset(len(train_samples), train_samples)
 			dev_dataset = GRDataset(len(dev_samples), dev_samples)
-			self.train_func(self.model,	train_loader=DataLoader(train_dataset, batch_size=64, shuffle=False, collate_fn=self.collate_func),
-							dev_loader=DataLoader(dev_dataset, batch_size=64, shuffle=False, collate_fn=self.collate_func))
+			self.train_func(self.model,	train_loader=DataLoader(train_dataset, batch_size=batch_size, shuffle=False, collate_fn=self.collate_func),
+							dev_loader=DataLoader(dev_dataset, batch_size=batch_size, shuffle=False, collate_fn=self.collate_func))
 			save_weights(model=self.model, path=self.model_file_path)
 
 	def goals_adaptation_phase(self, new_goals):
@@ -108,11 +117,20 @@ class GramlRecognizer(ABC):
 		self.embeddings_dict = {} # relevant if the embedding of the plan occurs during the goals adaptation phase
 		self.plans_dict = {} # relevant if the embedding of the plan occurs during the inference phase
 		# will change, for now let an optimal agent give us the trace
-		for (problem_name, goal) in problems_goals:
-			# agent = self.rl_agents_method(env_name=self.env_name, problem_name=problem_name)
-			# agent.learn()
-			# obs = agent.generate_partial_observation(action_selection_method=metrics.greedy_selection, percentage=random.choice([0.5, 0.7, 1]))
-			obs = mcts_model.plan(self.env_name, problem_name, minigrid_str_to_goal(problem_name))
+		for problem_name, goal in problems_goals:
+			if self.goals_adaptation_sequence_generation_method == MCTS_BASED:
+				obs = mcts_model.plan(self.env_name, problem_name, self.task_str_to_goal(problem_name))
+			elif self.goals_adaptation_sequence_generation_method == AGENT_BASED:
+				kwargs = {"env_name":self.env_name, "problem_name":problem_name}
+				if self.specified_rl_algorithm: kwargs["algorithm"] = self.specified_rl_algorithm
+				if self.train_configs[0][0]: kwargs["exploration_rate"] = self.train_configs[0][0]
+				if self.train_configs[0][1]: kwargs["num_timesteps"] = self.train_configs[0][1]
+				agent = self.rl_agents_method(**kwargs)
+				agent.learn()
+				obs = agent.generate_observation(action_selection_method=metrics.greedy_selection, random_optimalism=False, save_fig=False)
+			else:
+				raise TypeError("goals_adaptation_sequence_generation_method must be either AGENT_BASED or MCTS_BASED")
+
 			if self.is_inference_same_length_sequences:
 				self.plans_dict[goal] = obs
 				continue
@@ -134,12 +152,14 @@ class GramlRecognizer(ABC):
 			for goal, seq in self.plans_dict.items():
 				partial_obs = random_subset_with_order(seq, len(inf_sequence), self.is_fragmented)
 				# if self.is_continuous: embedding = self.model.embed_sequence_cont(partial_obs, self.preprocess_obss)
-				embedding = self.model.embed_sequence(partial_obs)
+				simplified_partial_obs = self.agents[0].simplify_observation(partial_obs)
+				embedding = self.model.embed_sequence(simplified_partial_obs)
 				self.embeddings_dict[goal] = embedding
 		else:
 			assert self.embeddings_dict, "embeddings_dict wasn't created during goals_adaptation_phase and now inference phase can't use the embeddings. when inference_diff_length, keep the embeddings and not their plans during goals_adaptation_phase."
 		# if self.is_continuous: new_embedding = self.model.embed_sequence_cont(inf_sequence, self.preprocess_obss)
-		new_embedding = self.model.embed_sequence(inf_sequence)
+		simplified_inf_sequence = self.agents[0].simplify_observation(inf_sequence)
+		new_embedding = self.model.embed_sequence(simplified_inf_sequence)
 		closest_goal, greatest_similarity = None, 0
 		for (goal, embedding) in self.embeddings_dict.items():
 			curr_similarity = torch.exp(-torch.sum(torch.abs(embedding-new_embedding)))

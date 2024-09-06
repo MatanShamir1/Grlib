@@ -346,7 +346,7 @@ class TabularQLearner(TabularRLAgent):
         self.save_q_table(path=self.model_file_path)
         self._save_conf_file()
         
-    def simplify_observation(observation):
+    def simplify_observation(self, observation):
         return [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in observation] # list of tuples, each tuple the sample
         
     def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig = False):

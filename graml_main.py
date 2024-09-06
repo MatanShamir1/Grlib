@@ -1,16 +1,17 @@
 import random
 import sys
 from typing import List
+
+from stable_baselines3 import SAC
 from consts import MAZE_PROBLEMS, MINIGRID_PROBLEMS
 from ml.neural.model import NeuralAgent
+from ml.utils.format import minigrid_str_to_goal, maze_str_to_goal
 from ml.utils.storage import set_global_storage_configs
+from recognizer.graml_recognizer import MCTS_BASED, AGENT_BASED
 from recognizer.graql_recognizer import GraqlRecognizer
-import scripts.file_system as file_system
 from recognizer import GramlRecognizer
 from ml import TabularQLearner
 from metrics.metrics import greedy_selection
-import os
-import pickle
 
 def init(recognizer_str:str, is_fragmented:bool, collect_statistics:bool, is_inference_same_length_sequences:bool=None, is_learn_same_length_sequences:bool=None, task:str=None):
 #     world = input("Welcome to GRAML!\n \
@@ -30,6 +31,11 @@ def init(recognizer_str:str, is_fragmented:bool, collect_statistics:bool, is_inf
 			recognizer_type = GramlRecognizer
    
 		dynamic_goals = ['(6,1)', '(11,3)', '(11,5)', '(11,8)', '(1,7)', '(5,9)']
+		train_configs = [(None, None), (None, None), (None, None), (None, None), (None, None)] # irrelevant for now, check how to get rid of
+		specified_rl_algorithm = None
+		goals_adaptation_sequence_generation_method = MCTS_BASED
+		task_str_to_goal = minigrid_str_to_goal
+		input_size = 4; hidden_size = 8; batch_size = 16
 		def goal_to_task_str(tuply):
 			tuply = tuply[1:-1] # remove the braces
 			#print(tuply)
@@ -45,7 +51,12 @@ def init(recognizer_str:str, is_fragmented:bool, collect_statistics:bool, is_inf
 		problem_name = "PointMaze-FourRoomsEnv-11x11-3-PROBLEMS"
 		env_name, problem_list = MAZE_PROBLEMS[problem_name]
 		learner_type = NeuralAgent
-		dynamic_goals = ['(7,3)', '(3,7)', '(6,4)', '(4,6)', '(3,3)', '(6,6)']
+		dynamic_goals = ['(7,3)', '(3,7)', '(6,4)', '(4,4)', '(3,4)']
+		train_configs = [(None, 200000), (None, 500000), (None, 200000)]
+		specified_rl_algorithm = SAC
+		goals_adaptation_sequence_generation_method = AGENT_BASED
+		task_str_to_goal = maze_str_to_goal
+		input_size = 6; hidden_size = 8; batch_size = 32
 		if recognizer_str == "graql":
 			print("Can't support GR as RL recognition yet. ask ben to give his framework here to evaluate next to his.")
 			exit(1)
@@ -65,16 +76,20 @@ def init(recognizer_str:str, is_fragmented:bool, collect_statistics:bool, is_inf
 		print("I currently only support minigrid and maze. I promise it will change in the future!")
 		exit(1)
   
-	recognizer = recognizer_type(learner_type, env_name, problem_list, train_configs=[(None, 200000), (None, 500000), (None, 200000)], is_fragmented=is_fragmented, is_inference_same_length_sequences=is_inference_same_length_sequences, is_learn_same_length_sequences=is_learn_same_length_sequences, collect_statistics=collect_statistics, goal_to_task_str=goal_to_task_str)
+	recognizer = recognizer_type(learner_type, env_name, problem_list, train_configs=train_configs, task_str_to_goal=task_str_to_goal, is_fragmented=is_fragmented, is_inference_same_length_sequences=is_inference_same_length_sequences, is_learn_same_length_sequences=is_learn_same_length_sequences, collect_statistics=collect_statistics, goal_to_task_str=goal_to_task_str, specified_rl_algorithm=specified_rl_algorithm, goals_adaptation_sequence_generation_method=goals_adaptation_sequence_generation_method)
 	# print("### STARTING DOMAIN LEARNING PHASE ###")
-	recognizer.domain_learning_phase(problem_list_to_str_tuple=problem_list_to_str_tuple)
+	recognizer.domain_learning_phase(problem_list_to_str_tuple=problem_list_to_str_tuple, input_size=input_size, hidden_size=hidden_size, batch_size=batch_size)
 	recognizer.goals_adaptation_phase(dynamic_goals)
  
 	# experiments - feel free to change according to task...
 	task_num, correct = 0, 0
 	for goal in dynamic_goals:
 		for percentage in [0.3, 0.5, 0.7, 0.9, 1]:
-			agent = learner_type(env_name=env_name, problem_name=goal_to_task_str(goal))
+			kwargs = {"env_name":env_name, "problem_name":goal_to_task_str(goal)}
+			if specified_rl_algorithm: kwargs["algorithm"] = specified_rl_algorithm
+			if train_configs[0][0]: kwargs["exploration_rate"] = train_configs[0][0]
+			if train_configs[0][1]: kwargs["num_timesteps"] = train_configs[0][1]
+			agent = learner_type(**kwargs)
 			agent.learn()
 			sequence = agent.generate_partial_observation(action_selection_method=greedy_selection, percentage=percentage, is_fragmented=is_fragmented, save_fig=True, random_optimalism=True)
 			closest_goal = recognizer.inference_phase(sequence, goal, percentage)

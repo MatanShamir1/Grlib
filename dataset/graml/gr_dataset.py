@@ -40,7 +40,7 @@ def generate_datasets(num_samples, agents: List, observation_creation_method : M
             is_same_goal = (np.random.choice([1, 0], 1, p=[1/len(agents), 1 - 1/len(agents)]))[0]
             first_agent = np.random.choice(agents)
             first_trace_percentage = random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
-            first_agent.record_video("maze_video_live.mp4")
+            #first_agent.record_video("maze_video_live.mp4")
             first_observation = first_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=first_trace_percentage, is_fragmented=is_fragmented, save_fig=False)
                 # first_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in first_observation] # list of dicts, each dict a sample comprised of image and text
             first_observation = first_agent.simplify_observation(first_observation)
@@ -51,11 +51,11 @@ def generate_datasets(num_samples, agents: List, observation_creation_method : M
             second_observation = second_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=second_trace_percentage, is_fragmented=is_fragmented, save_fig=False)
                 # second_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in second_observation]
             second_observation = second_agent.simplify_observation(second_observation)
-            # if not is_continuous: all_samples.append((
-            #     [torch.tensor(observation, dtype=torch.float32) for observation in first_observation],
-            #     [torch.tensor(observation, dtype=torch.float32) for observation in second_observation],
-            #     torch.tensor(is_same_goal, dtype=torch.float32)))
-            all_samples.append((first_observation, second_observation, torch.tensor(is_same_goal, dtype=torch.float32)))
+            all_samples.append((
+                [torch.tensor(observation, dtype=torch.float32) for observation in first_observation],
+                [torch.tensor(observation, dtype=torch.float32) for observation in second_observation],
+                torch.tensor(is_same_goal, dtype=torch.float32)))
+            # all_samples.append((first_observation, second_observation, torch.tensor(is_same_goal, dtype=torch.float32)))
             if i % 1000 == 0:
                 print(f'generated {i} samples')
         

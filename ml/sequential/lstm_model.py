@@ -85,12 +85,11 @@ def accuracy_per_epoch_cont(model, data_loader):
 
 class LstmObservations(nn.Module):
 	
-	def __init__(self): # TODO make sure the right cuda is used!
+	def __init__(self, input_size, hidden_size): # TODO make sure the right cuda is used!
 		super(LstmObservations,self).__init__()
 		#self.embeddor = CNNImageEmbeddor(obs_space, action_space)
-		# check if the traces are a bunch of images	
-		input_size = 4; hidden_dim = 8
-		self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_dim, batch_first=True)
+		# check if the traces are a bunch of images
+		self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size, batch_first=True)
 		self.dropout = nn.Dropout(0.5)  # Added dropout layer
 		# Initialize weights
 		for name, param in self.lstm.named_parameters():
@@ -102,7 +101,7 @@ class LstmObservations(nn.Module):
 
 	# tabular
 	def forward_tab(self, traces1, traces2, lengths1, lengths2):
-		out1, (ht1, ct1) = self.lstm(pack_padded_sequence(traces1, lengths1, batch_first=True, enforce_sorted=False), None) # traces1 & traces 2 shapes: batch_size X sequence_length X embedding_size
+		out1, (ht1, ct1) = self.lstm(pack_padded_sequence(traces1, lengths1, batch_first=True, enforce_sorted=False), None) # traces1 & traces 2 shapes: batch_size X max sequence_length X embedding_size
 		out2, (ht2, ct2) = self.lstm(pack_padded_sequence(traces2, lengths2, batch_first=True, enforce_sorted=False), None)
 		# out1, _ = pad_packed_sequence(out1, batch_first=True, total_length=max(lengths1))
 		# out2, _ = pad_packed_sequence(out2, batch_first=True, total_length=max(lengths2))
@@ -120,7 +119,6 @@ class LstmObservations(nn.Module):
 	# 	return manhattan_dis.squeeze()
 
 	def embed_sequence(self, trace):
-		trace = [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in trace]
 		trace = torch.stack([torch.tensor(observation, dtype=torch.float32) for observation in trace]).to(device)
 		out, (ht, ct) = self.lstm(trace, None)
 		return ht[-1]
@@ -145,6 +143,7 @@ def train_metric_model(model, train_loader, dev_loader, nepochs=5, patience = 2)
 		for (first_traces, second_traces, is_same_goals, first_traces_lengths, second_traces_lengths) in train_loader:
 			model.zero_grad()
 			y_pred = model.forward_tab(first_traces, second_traces, first_traces_lengths, second_traces_lengths)
+			if len(is_same_goals) == 1: is_same_goals = torch.squeeze(is_same_goals) # for the case of batches in size 1...
 			loss = F.binary_cross_entropy(y_pred, is_same_goals)
 			sum_loss += loss.item()
 			denominator += 1
