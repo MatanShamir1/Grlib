@@ -45,6 +45,7 @@ class GraqlRecognizer(ABC):
         for goal in self.active_goals:
             score = evaluation_function(inf_sequence, self.agents[goal_str_to_tuple(goal)], self.action_space)
             scores.append(score)
+        #scores = metrics.softmin(np.array(scores))
         if self.collect_statistics:
             results_path = get_graql_experiment_confidence_path(self.env_name)
             if not os.path.exists(results_path): os.makedirs(results_path)

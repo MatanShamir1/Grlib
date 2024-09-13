@@ -2,9 +2,10 @@ import random
 import sys
 from typing import List
 
-from stable_baselines3 import SAC
+from stable_baselines3 import SAC, TD3
 from consts import MAZE_PROBLEMS, MINIGRID_PROBLEMS
-from ml.neural.model import NeuralAgent
+from ml.neural.SB3model import NeuralAgent
+from ml.neural.ppo import PPOAlgo
 from ml.utils.format import minigrid_str_to_goal, maze_str_to_goal
 from ml.utils.storage import set_global_storage_configs
 from recognizer.graml_recognizer import MCTS_BASED, AGENT_BASED
@@ -33,6 +34,7 @@ def init(recognizer_str:str, is_fragmented:bool, collect_statistics:bool, is_inf
 		dynamic_goals = ['(6,1)', '(11,3)', '(11,5)', '(11,8)', '(1,7)', '(5,9)']
 		train_configs = [(None, None), (None, None), (None, None), (None, None), (None, None)] # irrelevant for now, check how to get rid of
 		specified_rl_algorithm = None
+		specified_rl_algorithm_inference = None
 		goals_adaptation_sequence_generation_method = MCTS_BASED
 		task_str_to_goal = minigrid_str_to_goal
 		input_size = 4; hidden_size = 8; batch_size = 16
@@ -46,22 +48,25 @@ def init(recognizer_str:str, is_fragmented:bool, collect_statistics:bool, is_inf
 		def problem_list_to_str_tuple(problems : List[str]):
 			return '_'.join([f"[{s.split('-')[-2]}]" for s in problems])
 
-	
+
 	elif task == "MAZE":
 		problem_name = "PointMaze-FourRoomsEnv-11x11-3-PROBLEMS"
 		env_name, problem_list = MAZE_PROBLEMS[problem_name]
-		learner_type = NeuralAgent
 		dynamic_goals = ['(7,3)', '(3,7)', '(6,4)', '(4,4)', '(3,4)']
 		train_configs = [(None, 200000), (None, 500000), (None, 200000)]
-		specified_rl_algorithm = SAC
 		goals_adaptation_sequence_generation_method = AGENT_BASED
 		task_str_to_goal = maze_str_to_goal
 		input_size = 6; hidden_size = 8; batch_size = 32
 		if recognizer_str == "graql":
-			print("Can't support GR as RL recognition yet. ask ben to give his framework here to evaluate next to his.")
-			exit(1)
+			learner_type = PPOAlgo
+			recognizer_type = GraqlRecognizer
+			specified_rl_algorithm = None # bens algorithm doesn't accept a specific algorithm... only ppo
+			specified_rl_algorithm_inference = TD3 # inference is not with bens env anyway.
 		else:
+			learner_type = NeuralAgent
 			recognizer_type = GramlRecognizer
+			specified_rl_algorithm = SAC
+			specified_rl_algorithm_inference = TD3
 		def goal_to_task_str(tuply):
 			tuply = tuply[1:-1] # remove the braces
 			#print(tuply)
@@ -86,7 +91,7 @@ def init(recognizer_str:str, is_fragmented:bool, collect_statistics:bool, is_inf
 	for goal in dynamic_goals:
 		for percentage in [0.3, 0.5, 0.7, 0.9, 1]:
 			kwargs = {"env_name":env_name, "problem_name":goal_to_task_str(goal)}
-			if specified_rl_algorithm: kwargs["algorithm"] = specified_rl_algorithm
+			if specified_rl_algorithm_inference: kwargs["algorithm"] = specified_rl_algorithm_inference
 			if train_configs[0][0]: kwargs["exploration_rate"] = train_configs[0][0]
 			if train_configs[0][1]: kwargs["num_timesteps"] = train_configs[0][1]
 			agent = learner_type(**kwargs)

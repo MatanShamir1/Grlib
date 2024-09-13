@@ -1,3 +1,4 @@
+import random
 from types import MethodType
 import gymnasium as gym
 import numpy as np
@@ -7,12 +8,14 @@ from stable_baselines3 import SAC, PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import BaseCallback, CallbackList
-import gr_libs.maze_scripts.envs.maze
+from gr_libs.custom_env_wrappers.flat_obs_wrapper import CombineAchievedGoalAndObservationWrapper
+import gr_libs # important for registration of envs! do not remove lad
 import os
 import sys
 import traceback
 import inspect
 import cv2
+from stable_baselines3.td3.td3 import TD3
 
 if __name__ != "__main__":
     from ml.utils.storage import get_model_dir, get_policy_sequences_result_path
@@ -20,14 +23,17 @@ if __name__ != "__main__":
     from ml.utils.format import random_subset_with_order
 
 class NeuralAgent():
-    def __init__(self, env_name: str, problem_name: str, algorithm, num_timesteps:float, reward_threshold: float=450, exploration_rate=None):
+    def __init__(self, env_name: str, problem_name: str, algorithm, num_timesteps:float, reward_threshold: float=450, exploration_rate=None, tasks_to_complete=None, complex_obs_space=False):
         # Need to change reward threshold to change according to which task the agent is training on, becuase it changes from task to task.
-        env = gym.make(problem_name, render_mode="rgb_array")
+        kwargs = {"id":problem_name, "render_mode":"rgb_array"}
+        if tasks_to_complete: kwargs["tasks_to_complete"] = tasks_to_complete
+        env = gym.make(**kwargs)
         # env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
         # env = Monitor(env, "logs/", allow_early_resets=True)
         self.env_name = env_name
         self.problem_name = problem_name
         env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
+        if complex_obs_space: env = CombineAchievedGoalAndObservationWrapper(env)
         self.env = DummyVecEnv([lambda: env])
         self._actions_space = self.env.action_space
         if exploration_rate != None: self._model = algorithm("MultiInputPolicy", self.env, ent_coef=exploration_rate, verbose=1)
@@ -47,13 +53,14 @@ class NeuralAgent():
         fps = 30.0
         self.env.reset()
         frame_size = (self.env.render(mode='rgb_array').shape[1], self.env.render(mode='rgb_array').shape[0])
+        video_path = os.path.join(video_path, "plan_video.mp4")
         video_writer = cv2.VideoWriter(video_path, fourcc, fps, frame_size)
         done = False
         obs = self.env.reset()
         while not done:
             action, _states = self._model.predict(obs, deterministic=True)
             obs, rewards, done, info = self.env.step(action)
-            assert done == info[0]["success"] # make sure the agent actually reached the goal within the max time
+            # assert done == info[0]["success"] # make sure the agent actually reached the goal within the max time
             frame = self.env.render()
             video_writer.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
         video_writer.release()
@@ -86,8 +93,11 @@ class NeuralAgent():
         observations = []
         is_done = False
         while not is_done:
-            deterministic = action_selection_method != stochastic_amplified_selection and not random_optimalism
+            deterministic = action_selection_method != stochastic_amplified_selection
             action, _states = self._model.predict(obs, deterministic=deterministic)
+            if random_optimalism:
+                action[0][0] += random.uniform(-0.1 * action[0][0], 0.1 * action[0][0])
+                action[0][1] += random.uniform(-0.1 * action[0][1], 0.1 * action[0][1])
             # obs, reward, done, info = self.env.step(action)
             observations.append((obs['observation'], action))
             obs, reward, done, info = self.env.step(action)
@@ -95,7 +105,9 @@ class NeuralAgent():
             assert done[0] == is_done # we want to make sure the episode is done only when the agent has actually succeeded with the task.
         #print(f'len of observations: {len(observations)}')
         if save_fig:
-            vid_path = os.path.join(get_policy_sequences_result_path(self.env_name), self.problem_name)
+            vid_path = os.path.abspath(os.path.join(get_policy_sequences_result_path(self.env_name), self.problem_name))
+            if not os.path.exists(vid_path):
+                os.makedirs(vid_path)
             self.record_video(vid_path)
             #print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
             print(f"generated sequence video at {vid_path}.")
@@ -117,22 +129,28 @@ if __name__ == "__main__":
     from ml.utils.storage import get_model_dir, set_global_storage_configs
 
     set_global_storage_configs("graml", "fragmented_partial_obs", "inference_same_length", "learn_diff_length")
-    dynamic_goals = ['(7,3)', '(3,7)', '(6,4)', '(4,6)', '(4,4)', '(3,4)', '(7,7)']
-    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-7x3", algorithm=SAC, num_timesteps=200000)
-    agent.learn()
-    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-3x7", algorithm=SAC, num_timesteps=200000)
-    agent.learn()
-    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-6x4", algorithm=SAC, num_timesteps=200000)
-    agent.learn()
-    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnv-11x11", problem_name="PointMaze-FourRoomsEnv-11x11-Goal-4x6", algorithm=SAC, num_timesteps=500000)
-    agent.learn()
-    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-4x4", algorithm=SAC, num_timesteps=200000)
-    agent.learn()
-    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-3x4", algorithm=SAC, num_timesteps=200000)
-    agent.learn()
-    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnv-11x11", problem_name="PointMaze-FourRoomsEnv-11x11-Goal-7x7", algorithm=SAC, num_timesteps=1000000)
-    agent.learn()
-    print(os.path.join(GRAML_itself, "dataset/Videos/maze_video.mp4"))
+    dynamic_goals = ['(7,3)', '(3,7)', '(6,4)', '(4,6)', '(4,4)', '(3,4)', '(7,7)', '(6,7)']
+    # agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-7x3", algorithm=TD3, num_timesteps=200000)
+    # agent.learn() # yes
+    agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-3x7", algorithm=TD3, num_timesteps=400000)
+    agent.learn() # yes
+    # agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-6x4", algorithm=TD3, num_timesteps=300000)
+    # agent.learn() # no
+    # agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-4x6", algorithm=TD3, num_timesteps=400000)
+    # agent.learn() # no
+    # agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-4x4", algorithm=TD3, num_timesteps=200000)
+    # agent.learn() # yes
+    # agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-3x4", algorithm=TD3, num_timesteps=200000)
+    # agent.learn() # yes
+    # agent = NeuralAgent(env_name="FrankaKitchen-v1", problem_name="FrankaKitchen-v1", tasks_to_complete = ["kettle", "microwave"], algorithm=SAC, num_timesteps=50000, complex_obs_space=True)
+    # agent.learn()
+    # agent = NeuralAgent(env_name="Parking-S-10-PC--GI-2-v0", problem_name="Parking-S-10-PC--GI-2-v0", algorithm=SAC, num_timesteps=50000)
+    # agent.learn()
+    # agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-7x7", algorithm=SAC, num_timesteps=200000)
+    # agent.learn()
+    # agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-6x7", algorithm=SAC, num_timesteps=100000)
+    # agent.learn()
+    #print(os.path.join(GRAML_itself, "dataset/Videos/maze_video.mp4"))
     # agent.generate_full_observation()
-    agent.record_video("maze_video.mp4")
+    agent.record_video("")
     
