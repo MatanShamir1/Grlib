@@ -87,4 +87,45 @@ MAZE_PROBLEMS = {
             ]
         )
     ,
+    'PointMaze-ObstaclesEnv-11x11-2-PROBLEMS':
+        (
+            'PointMaze-ObstaclesEnv-11x11',
+            [
+                "PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",
+                #"PointMaze-ObstaclesEnv-11x11-Goal-9x9", # this one doesn't work with dense rewards because of encountering local minima
+                "PointMaze-ObstaclesEnvDense-11x11-Goal-1x5"
+            ]
+        )
+    ,
+    'PointMaze-ObstaclesEnv-11x11-3-PROBLEMS':
+        (
+            'PointMaze-ObstaclesEnv-11x11',
+            [
+                "PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",
+                "PointMaze-ObstaclesEnvDense-11x11-Goal-9x9", # this one doesn't work with dense rewards because of encountering local minima
+                "PointMaze-ObstaclesEnvDense-11x11-Goal-1x5"
+            ]
+        )
+    ,
+}
+
+PARKING_PROBLEMS = {
+    'ParkingEnvContinuous-Hard-4-Problems':
+        (
+            'ParkingEnv',  # OBS
+            [
+                "Parking-S-10-PC--GI-8-v0",
+                "Parking-S-10-PC--GI-2-v0",
+                "Parking-S-10-PC--GI-5-v0",
+            ],
+        )
+    ,
+    'ParkingEnvUniversal-Hard-4-Problems':
+        (
+            'ParkingEnv',  # OBS
+            [
+                "parking-v0",
+            ],
+        )
+    ,
 }

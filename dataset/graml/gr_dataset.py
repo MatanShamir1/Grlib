@@ -20,7 +20,7 @@ class GRDataset(Dataset):
     def __getitem__(self, idx):
         return self.samples[idx] # returns a tuple - as appended in 'generate_dataset' last line
 
-def generate_datasets(num_samples, agents: List, observation_creation_method : MethodType, problems: str, env_name, preprocess_obss, is_fragmented=True, is_learn_same_length_sequences=False):
+def generate_datasets(num_samples, agents: List, observation_creation_method : MethodType, problems: str, env_name, preprocess_obss, is_fragmented=True, is_learn_same_length_sequences=False, gc_goal_set=None):
     dataset_directory = get_siamese_dataset_path(env_name=env_name, problem_names=problems)
     # if is_continuous: dataset_directory = os.path.join(dataset_directory, 'cont')
     if is_fragmented: addition = 'fragmented_'
@@ -37,20 +37,33 @@ def generate_datasets(num_samples, agents: List, observation_creation_method : M
             os.makedirs(dataset_directory)
         all_samples = []
         for i in range(num_samples):
-            is_same_goal = (np.random.choice([1, 0], 1, p=[1/len(agents), 1 - 1/len(agents)]))[0]
-            first_agent = np.random.choice(agents)
-            first_trace_percentage = random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
-            #first_agent.record_video("maze_video_live.mp4")
-            first_observation = first_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=first_trace_percentage, is_fragmented=is_fragmented, save_fig=False)
-                # first_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in first_observation] # list of dicts, each dict a sample comprised of image and text
-            first_observation = first_agent.simplify_observation(first_observation)
-            second_agent = first_agent
-            if not is_same_goal:
-                second_agent = np.random.choice([agent for agent in agents if agent != first_agent])
-            second_trace_percentage = first_trace_percentage if is_learn_same_length_sequences else random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
-            second_observation = second_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=second_trace_percentage, is_fragmented=is_fragmented, save_fig=False)
-                # second_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in second_observation]
-            second_observation = second_agent.simplify_observation(second_observation)
+            if gc_goal_set != None:
+                is_same_goal = (np.random.choice([1, 0], 1, p=[1/len(gc_goal_set), 1 - 1/len(gc_goal_set)]))[0]
+                first_agent_goal = np.random.choice(gc_goal_set)
+                first_trace_percentage = random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+                first_observation = agents[0].generate_partial_observation_gc(action_selection_method=observation_creation_method, percentage=first_trace_percentage, is_fragmented=is_fragmented, save_fig=False, goal_idx=first_agent_goal)
+                first_observation = agents[0].simplify_observation(first_observation)
+                second_agent_goal = first_agent_goal
+                if not is_same_goal:
+                    second_agent_goal = np.random.choice([goal for goal in gc_goal_set if goal != first_agent_goal])
+                second_trace_percentage = second_trace_percentage if is_learn_same_length_sequences else random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+                second_observation = agents[0].generate_partial_observation_gc(action_selection_method=observation_creation_method, percentage=second_trace_percentage, is_fragmented=is_fragmented, save_fig=False, goal_idx=second_agent_goal)
+                second_observation = agents[0].simplify_observation(second_observation)
+            else:
+                is_same_goal = (np.random.choice([1, 0], 1, p=[1/len(agents), 1 - 1/len(agents)]))[0]
+                first_agent = np.random.choice(agents)
+                first_trace_percentage = random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+                #first_agent.record_video("maze_video_live.mp4")
+                first_observation = first_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=first_trace_percentage, is_fragmented=is_fragmented, save_fig=False)
+                    # first_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in first_observation] # list of dicts, each dict a sample comprised of image and text
+                first_observation = first_agent.simplify_observation(first_observation)
+                second_agent = first_agent
+                if not is_same_goal:
+                    second_agent = np.random.choice([agent for agent in agents if agent != first_agent])
+                second_trace_percentage = first_trace_percentage if is_learn_same_length_sequences else random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+                second_observation = second_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=second_trace_percentage, is_fragmented=is_fragmented, save_fig=False)
+                    # second_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in second_observation]
+                second_observation = second_agent.simplify_observation(second_observation)
             all_samples.append((
                 [torch.tensor(observation, dtype=torch.float32) for observation in first_observation],
                 [torch.tensor(observation, dtype=torch.float32) for observation in second_observation],

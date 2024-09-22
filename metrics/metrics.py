@@ -6,6 +6,7 @@ from typing import List, Dict, Tuple, Any
 from math import log2
 from numpy.core.fromnumeric import mean
 from gymnasium.spaces.discrete import Discrete
+import torch
 from torch.distributions.categorical import Categorical
 
 # from ml.neural import BaseAlgo
@@ -76,6 +77,35 @@ def stochastic_selection(actions_probs):
 
 def greedy_selection(actions_probs):
     return np.argmax(actions_probs)
+
+def measure_sequence_similarity(seq1, seq2):
+    """Measures the sequence similarity between two sequences of observations and actions.
+
+    Args:
+    seq1: A tensor of tensors representing the first sequence.
+    seq2: A tensor of tensors representing the second sequence.
+
+    Returns:
+    A float representing the sequence similarity.
+    """
+
+    # Ensure both sequences have the same length
+    if len(seq1) != len(seq2):
+        raise ValueError("Sequences must have the same length.")
+
+    # Calculate the Euclidean distance between corresponding elements in the sequences
+    distances = []
+    for obs1, obs2 in zip(seq1, seq2):
+        distance = torch.norm(obs1 - obs2)
+    distances.append(distance)
+
+    # Calculate the average distance over all elements
+    average_distance = torch.mean(torch.tensor(distances))
+
+    # Convert the distance to a similarity score (higher is better)
+    similarity = 1.0 - average_distance
+
+    return similarity
 
 
 def traj_to_policy(observations: List[Tuple[State, Any]], actions: Discrete, epsilon: float = 0.) -> Dict[
