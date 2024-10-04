@@ -1,3 +1,4 @@
+import argparse
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,9 +16,13 @@ sys.path.insert(0, GRAML_itself)
 
 from GRAML.ml.utils import get_embeddings_result_path
 from GRAML.ml.utils.storage import set_global_storage_configs, get_graql_experiment_confidence_path
+from GRAML.metrics.metrics import measure_average_sequence_distance
 
 def get_tasks_embeddings_dir_path(env_name):
 	return GRAML_itself + '/' + get_embeddings_result_path(env_name)
+
+def get_figures_dir_path(domain_name, env_name):
+	return os.path.join(GRAML_itself, "figures", domain_name, env_name)
 
 def similarities_vector_to_std_deviation_units_vector(ref_dict: dict, relative_to_largest):
 	"""
@@ -45,19 +50,21 @@ def similarities_vector_to_std_deviation_units_vector(ref_dict: dict, relative_t
 		ref_dict[goal] = abs(value - reference_value) / std_dev
 	return ref_dict
 
-def analyze_and_produce_plots(algorithm: str, confs: list[str]):
-	if algorithm == "graml":
-		env_name, fragmented_status, inf_same_length_status, learn_same_length_status = confs[0], confs[1], confs[2], confs[3]
-		set_global_storage_configs(algorithm, fragmented_status, inf_same_length_status, learn_same_length_status)
-		assert os.path.exists(get_embeddings_result_path(confs[0])), "Embeddings weren't made for this environment, run graml_main.py with this environment first."
+def analyze_and_produce_plots(recognizer_type: str, domain_name: str, env_name: str, fragmented_status: str, inf_same_length_status: str, learn_same_length_status: str):
+	if recognizer_type == "graml":
+		assert os.path.exists(get_embeddings_result_path(domain_name)), "Embeddings weren't made for this environment, run graml_main.py with this environment first."
 		tasks_embedding_dicts = {}
+		tasks_plans_dict = {}
 		goals_similarity_dict = {}
+		plans_similarity_dict = {}
 
-		embeddings_dir_path = get_tasks_embeddings_dir_path(env_name)
-		for embeddings_file_name in os.listdir(embeddings_dir_path):
+		embeddings_dir_path = get_tasks_embeddings_dir_path(domain_name)
+		for embeddings_file_name in [filename for filename in os.listdir(embeddings_dir_path) if 'embeddings' in filename]:
 			with open(os.path.join(embeddings_dir_path, embeddings_file_name), 'rb') as emb_file:
 				splitted_name = embeddings_file_name.split('_')
 				goal, percentage = splitted_name[0], splitted_name[1]
+				with open(os.path.join(embeddings_dir_path, f'{goal}_{percentage}_plans_dict.pkl'), 'rb') as plan_file:
+					tasks_plans_dict[f"{goal}_{percentage}"] = dill.load(plan_file)
 				tasks_embedding_dicts[f"{goal}_{percentage}"] = dill.load(emb_file)
 	
 		for goal_percentage, embedding_dict in tasks_embedding_dicts.items():
@@ -71,18 +78,23 @@ def analyze_and_produce_plots(algorithm: str, confs: list[str]):
 			if goal not in goals_similarity_dict.keys(): goals_similarity_dict[goal] = {}
 			goals_similarity_dict[goal][percentage] = similarities_vector_to_std_deviation_units_vector(ref_dict=similarities, relative_to_largest=True)
    
+		for goal_percentage, plans_dict in tasks_plans_dict.items():
+			goal, percentage = goal_percentage.split('_')
+			real_plan = plans_dict[f"{goal}_true"]
+			sequence_similarities = {d_goal:measure_average_sequence_distance(real_plan, plan) for d_goal,plan in plans_dict.items() if 'true' not in d_goal} # aps = agent plan sequence?
+			if goal not in plans_similarity_dict.keys(): plans_similarity_dict[goal] = {}
+			plans_similarity_dict[goal][percentage] = similarities_vector_to_std_deviation_units_vector(ref_dict=sequence_similarities, relative_to_largest=False)
+
 		goals = list(goals_similarity_dict.keys())
 		percentages = sorted(set(percentage for similarities in goals_similarity_dict.values() for percentage in similarities.keys()))
 		num_percentages = len(percentages)
-		fig_string = f"{algorithm}_{env_name}_{fragmented_status}_{inf_same_length_status}_{learn_same_length_status}"
+		fig_string = f"{recognizer_type}_{domain_name}_{env_name}_{fragmented_status}_{inf_same_length_status}_{learn_same_length_status}"
 
 	else: # algorithm = "graql"
-		env_name, fragmented_status = confs[0], confs[1]
-		set_global_storage_configs(algorithm, fragmented_status)
-		assert os.path.exists(get_graql_experiment_confidence_path(env_name)), "Embeddings weren't made for this environment, run graml_main.py with this environment first."
+		assert os.path.exists(get_graql_experiment_confidence_path(domain_name)), "Embeddings weren't made for this environment, run graml_main.py with this environment first."
 		tasks_scores_dict = {}
 		goals_similarity_dict = {}
-		experiments_dir_path = get_graql_experiment_confidence_path(env_name)
+		experiments_dir_path = get_graql_experiment_confidence_path(domain_name)
 		for experiments_file_name in os.listdir(experiments_dir_path):
 			with open(os.path.join(experiments_dir_path, experiments_file_name), 'rb') as exp_file:
 				splitted_name = experiments_file_name.split('_')
@@ -98,7 +110,7 @@ def analyze_and_produce_plots(algorithm: str, confs: list[str]):
 		goals = list(goals_similarity_dict.keys())
 		percentages = sorted(set(percentage for similarities in goals_similarity_dict.values() for percentage in similarities.keys()))
 		num_percentages = len(percentages)
-		fig_string = f"{algorithm}_{env_name}_{fragmented_status}"
+		fig_string = f"{recognizer_type}_{domain_name}_{env_name}_{fragmented_status}"
 	
 	fig, axes = plt.subplots(nrows=num_percentages, ncols=1, figsize=(10, 6 * num_percentages))
 
@@ -114,9 +126,16 @@ def analyze_and_produce_plots(algorithm: str, confs: list[str]):
 		bar_width = 0.8 / num_dynamic_goals
 		bar_positions = np.arange(num_goals)
 
-		for j, dynamic_goal in enumerate(dynamic_goals):
-			similarities = [goals_similarity_dict[goal][percentage][dynamic_goal] for goal in goals]
-			ax.bar(bar_positions + j * bar_width, similarities, bar_width, label=f"{dynamic_goal}")
+		if recognizer_type == "graml":
+			for j, dynamic_goal in enumerate(dynamic_goals):
+				goal_similarities = [goals_similarity_dict[goal][percentage][dynamic_goal] + 0.04 for goal in goals]
+				plan_similarities = [plans_similarity_dict[goal][percentage][dynamic_goal] + 0.04 for goal in goals]
+				ax.bar(bar_positions + j * bar_width, goal_similarities, bar_width/2, label=f"embedding of {dynamic_goal}")
+				ax.bar(bar_positions + j * bar_width + bar_width/2, plan_similarities, bar_width/2, label=f"plan to {dynamic_goal}")
+		else:
+				for j, dynamic_goal in enumerate(dynamic_goals):
+					goal_similarities = [goals_similarity_dict[goal][percentage][dynamic_goal] + 0.04 for goal in goals]
+					ax.bar(bar_positions + j * bar_width, goal_similarities, bar_width, label=f"policy to {dynamic_goal}")
 
 		x_labels = []
 		for true_goal in goals:
@@ -129,21 +148,80 @@ def analyze_and_produce_plots(algorithm: str, confs: list[str]):
 			x_labels.append(label)
 
 		ax.set_ylabel('Distance (units in st. deviations)', fontsize=10)
-		ax.set_title(f'Confidence level for {env_name}, {fragmented_status}. Accuracy: {correct_tasks / tasks_num}', fontsize=12)
+		ax.set_title(f'Confidence level for {domain_name}, {env_name}, {fragmented_status}. Accuracy: {correct_tasks / tasks_num}', fontsize=12)
 		ax.set_xticks(bar_positions + bar_width * (num_dynamic_goals - 1) / 2)
 		ax.set_xticklabels(x_labels, fontsize=8)
 		ax.legend()
 
 	# Save the figure
-	fig.savefig(f"{fig_string}_goal_similarities_combined.png")
-	print(f"figure saved at: {os.path.curdir}/{fig_string}_goal_similarities_combined.png")
+	fig_dir = get_figures_dir_path(domain_name=domain_name, env_name=env_name)
+	if not os.path.exists(fig_dir):
+		os.makedirs(fig_dir)
+	fig_path = os.path.join(fig_dir, f"{fig_string}_stats.png")
+	fig.savefig(fig_path)
+	print(f"figure saved at: {fig_path}")
 
 	# Show plot
 	plt.tight_layout()
 	plt.show()
-	
+
+ 
+def parse_args():
+	parser = argparse.ArgumentParser(
+		description="Parse command-line arguments for the RL experiment.",
+		formatter_class=argparse.RawTextHelpFormatter
+	)
+
+	# Required arguments
+	required_group = parser.add_argument_group("Required arguments")
+	required_group.add_argument("--domain", choices=["point_maze", "minigrid", "parking", "franka_kitchen"], required=True, help="Domain type (point_maze, minigrid, parking, or franka_kitchen)")
+	required_group.add_argument("--recognizer", choices=["graml", "graql", "draco"], required=True, help="Recognizer type (graml, graql, draco). graql only for discrete domains.")
+	required_group.add_argument("--task", choices=["L1", "L2", "L3"], required=True, help="Task identifier (e.g., L1, L2,...,L5)")
+	required_group.add_argument("--partial_obs_type", required=True, choices=["fragmented", "continuing"], help="Give fragmented or continuing partial observations for inference phase inputs.")
+
+	# Optional arguments
+	optional_group = parser.add_argument_group("Optional arguments")
+	optional_group.add_argument("--minigrid_env", choices=["four_rooms", "obstacles"], help="Minigrid environment (four_rooms or obstacles)")
+	optional_group.add_argument("--parking_env", choices=["agent", "gc_agent"], help="Parking environment (agent or gc_agent)")
+	optional_group.add_argument("--point_maze_env", choices=["obstacles", "four_rooms"], help="Parking environment (agent or gc_agent)")
+	optional_group.add_argument("--franka_env", choices=["comb1", "comb2"], help="Franka Kitchen environment (comb1 or comb2)")
+	optional_group.add_argument("--learn_same_seq_len", help="Learn with the same sequence length")
+	optional_group.add_argument("--inference_same_seq_len", help="Infer with the same sequence length")
+
+	args = parser.parse_args()
+ 
+	### VALIDATE INPUTS ###
+	# Assert that all required arguments are provided
+	assert args.domain is not None and args.recognizer is not None and args.task is not None, "Missing required arguments: domain, recognizer, or task"
+
+	 # Validate the combination of domain and environment
+	if args.domain == "minigrid" and args.minigrid_env is None:
+		parser.error("Missing required argument: --minigrid_env must be provided when --domain is minigrid")
+	elif args.domain == "parking" and args.parking_env is None:
+		parser.error("Missing required argument: --parking_env must be provided when --domain is parking")
+	elif args.domain == "point_maze" and args.point_maze_env is None:
+		parser.error("Missing required argument: --point_maze_env must be provided when --domain is point_maze")
+	elif args.domain == "franka_kitchen" and args.franka_env is None:
+		parser.error("Missing required argument: --franka_env must be provided when --domain is franka_kitchen")
+
+	# Set default values for optional arguments if not provided and assert they're only given for graml
+	if args.recognizer != "graml":
+		if args.learn_same_seq_len != None: parser.error("learn_same_seq_len is only relevant for graml.")
+		if args.inference_same_seq_len != None: parser.error("inference_same_seq_len is only relevant for graml.")
+	else:
+		if args.learn_same_seq_len == None: args.learn_same_seq_len = False
+		if args.inference_same_seq_len == None: args.inference_same_seq_len = False
+
+	return args
+
 if __name__ == "__main__":
-	# checks:
-	assert len(sys.argv) == 3 and sys.argv[1] in ["graql", "graml"], f"Assertion failed: len(sys.argv) is {len(sys.argv)} while it needs to be 3.\n Example 1: \n\t /usr/bin/python scripts/generate_statistics_plots.py graml \"MiniGrid-Walls-13x13-v0/fragmented_partial_obs/inference_same_length/learn_same_length\" \n Example 2:\n\t /usr/bin/python scripts/generate_statistics_plots.py graql \"MiniGrid-Walls-13x13-v0/fragmented_partial_obs\""
-	confs = sys.argv[2].split("/")
-	analyze_and_produce_plots(sys.argv[1], confs)
+	args = parse_args()
+	set_global_storage_configs(recognizer_str=args.recognizer, is_fragmented=args.partial_obs_type,
+                            is_inference_same_length_sequences=args.inference_same_seq_len, is_learn_same_length_sequences=args.learn_same_seq_len)
+	env_name, = [x for x in [args.minigrid_env, args.parking_env, args.point_maze_env, args.franka_env] if isinstance(x, str)]
+	if args.inference_same_seq_len: inference_same_seq_len = "inference_same_seq_len"
+	else: inference_same_seq_len = "inference_diff_seq_len"
+	if args.learn_same_seq_len: learn_same_seq_len = "learn_same_seq_len"
+	else: learn_same_seq_len = "learn_diff_seq_len"
+	analyze_and_produce_plots(args.recognizer, domain_name=args.domain, env_name=env_name, fragmented_status=args.partial_obs_type,
+                           inf_same_length_status=inference_same_seq_len, learn_same_length_status=learn_same_seq_len)

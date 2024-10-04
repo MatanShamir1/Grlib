@@ -4,10 +4,8 @@ import os
 import random
 
 from stable_baselines3 import SAC
-from dataset.graml.gr_dataset import GRDataset, generate_datasets
 from ml import utils
 from ml.base import RLAgent
-from metrics import metrics
 from typing import List, Tuple, Type
 from types import MethodType
 import numpy as np
@@ -16,10 +14,11 @@ from torch.nn.utils.rnn import pad_sequence
 import torch
 from ml.planner.mcts import mcts_model
 import dill
-
+from recognizer.graml.gr_dataset import GRDataset, generate_datasets
 from ml.sequential.lstm_model import LstmObservations, train_metric_model, train_metric_model_cont
-from ml.utils.format import minigrid_str_to_goal, random_subset_with_order
-from ml.utils.storage import get_model_dir, get_embeddings_result_path
+from ml.utils.format import random_subset_with_order
+from ml.utils.storage import get_lstm_model_dir, get_embeddings_result_path
+from metrics import metrics # import first, very dependent
 
 MCTS_BASED, AGENT_BASED, GC_AGENT_BASED = 0, 1, 2
 
@@ -60,77 +59,99 @@ def save_weights(model : LstmObservations, path):
 	torch.save(model.state_dict(), path)
 
 class GramlRecognizer(ABC):
-	def __init__(self, method: Type[ABC], env_name: str, problems: List[str],  train_configs: List, goal_to_task_str:MethodType, task_str_to_goal:MethodType, goals_adaptation_sequence_generation_method, is_fragmented=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False, collect_statistics=True, specified_rl_algorithm = None, gc_sequence_generation=False, gc_goal_set=None):
-		assert len(train_configs) == len(problems), "There should be exploration rate for every problem."
+	def __init__(self, method: Type[ABC], env_name: str, problems: List[str],  train_configs: List,
+              task_str_to_goal:MethodType, problem_list_to_str_tuple:MethodType, num_samples: int,
+              goals_adaptation_sequence_generation_method, specified_rl_algorithm, input_size: int, hidden_size: int, batch_size: int,
+              partial_obs_type: str=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False,
+              collect_statistics=True, gc_sequence_generation=False,
+              gc_goal_set=None, tasks_to_complete: bool=False):
+		assert len(train_configs) == len(problems), "There should be train configs for every problem."
 		self.train_configs = train_configs
 		self.problems = problems
 		self.env_name = env_name
 		self.rl_agents_method = method
 		self.agents: List[ABC] = []
-		self.is_fragmented = is_fragmented
+		self.partial_obs_type = partial_obs_type
 		self.is_inference_same_length_sequences = is_inference_same_length_sequences
 		self.is_learn_same_length_sequences = is_learn_same_length_sequences
 		# if is_continuous: self.train_func = train_metric_model_cont; self.collate_func = collate_fn_cont
 		self.train_func = train_metric_model; self.collate_func = collate_fn
 		self.collect_statistics = collect_statistics
-		self.goal_to_task_str = goal_to_task_str
 		self.task_str_to_goal = task_str_to_goal
 		self.specified_rl_algorithm = specified_rl_algorithm
 		self.goals_adaptation_sequence_generation_method = goals_adaptation_sequence_generation_method
 		if gc_sequence_generation:
 			assert gc_goal_set != None
 		self.gc_goal_set = gc_goal_set
+		self.tasks_to_complete = tasks_to_complete
+		self.problem_list_to_str_tuple = problem_list_to_str_tuple
+  
+		# metric-model related fields
+		self.input_size = input_size
+		self.hidden_size = hidden_size
+		self.batch_size = batch_size
+		self.num_samples = num_samples
+		
 
-	def domain_learning_phase(self, problem_list_to_str_tuple:MethodType, input_size, hidden_size, batch_size):
+	def domain_learning_phase(self):
 		# start by training each rl agent on the base goal set
 		for problem_name, (exploration_rate, num_timesteps) in zip(self.problems, self.train_configs):
 			kwargs = {"env_name":self.env_name, "problem_name":problem_name}
-			if self.specified_rl_algorithm: kwargs["algorithm"] = self.specified_rl_algorithm
+			kwargs["algorithm"] = self.specified_rl_algorithm
 			if exploration_rate: kwargs["exploration_rate"] = exploration_rate
 			if num_timesteps: kwargs["num_timesteps"] = num_timesteps
+			if self.tasks_to_complete: kwargs["tasks_to_complete"] = [problem_name]; problem_name = self.env_name; kwargs["env_name"] = kwargs["env_name"][:-3] + "Env"; kwargs["problem_name"] = self.env_name; kwargs["complex_obs_space"] = True
 			agent = self.rl_agents_method(**kwargs)
 			agent.learn()
 			self.agents.append(agent)
 		self.obs_space, self.preprocess_obss = utils.get_obss_preprocessor(self.agents[0].env.observation_space)
 		# train the network so it will find a metric for the observations of the base agents such that traces of agents to different goals are far from one another		
-		self.model_directory = get_model_dir(env_name=self.env_name, model_name=problem_list_to_str_tuple(self.problems), class_name=self.__class__.__name__)
-		last_path = r"lstm_model"
+		self.model_directory = get_lstm_model_dir(env_name=self.env_name, model_name=self.problem_list_to_str_tuple(self.problems))
+		last_path = r"lstm_model_"
 		# if self.is_continuous : last_path += r"_cont"
-		if self.is_fragmented : last_path += r"_fragmented"
+		last_path += self.partial_obs_type
 		last_path += r".pth"
 		self.model_file_path = os.path.join(self.model_directory, last_path)
-		self.model = LstmObservations(input_size=input_size, hidden_size=hidden_size)
+		self.model = LstmObservations(input_size=self.input_size, hidden_size=self.hidden_size)
 		self.model.to(utils.device)
 
 		if os.path.exists(self.model_file_path):
 			print(f"Loading pre-existing lstm model in {self.model_file_path}")
 			load_weights(loaded_model=self.model, path=self.model_file_path)
 		else:
-			train_samples, dev_samples = generate_datasets(10000, self.agents, metrics.stochastic_amplified_selection, problem_list_to_str_tuple(self.problems), self.env_name, self.preprocess_obss, self.is_fragmented, self.is_learn_same_length_sequences, self.gc_goal_set)
+			train_samples, dev_samples = generate_datasets(num_samples=self.num_samples,
+                                                  		   agents=self.agents,
+                                                       	   observation_creation_method=metrics.stochastic_amplified_selection,
+                                                           problems=self.problem_list_to_str_tuple(self.problems),
+                                                           env_name=self.env_name,
+                                                           preprocess_obss=self.preprocess_obss,
+                                                           is_fragmented=self.partial_obs_type=="fragmented",
+                                                           is_learn_same_length_sequences=self.is_learn_same_length_sequences,
+                                                           gc_goal_set=self.gc_goal_set)
+
 			train_dataset = GRDataset(len(train_samples), train_samples)
 			dev_dataset = GRDataset(len(dev_samples), dev_samples)
-			self.train_func(self.model,	train_loader=DataLoader(train_dataset, batch_size=batch_size, shuffle=False, collate_fn=self.collate_func),
-							dev_loader=DataLoader(dev_dataset, batch_size=batch_size, shuffle=False, collate_fn=self.collate_func))
+			self.train_func(self.model,	train_loader=DataLoader(train_dataset, batch_size=self.batch_size, shuffle=False, collate_fn=self.collate_func),
+							dev_loader=DataLoader(dev_dataset, batch_size=self.batch_size, shuffle=False, collate_fn=self.collate_func))
 			save_weights(model=self.model, path=self.model_file_path)
 
-	def goals_adaptation_phase(self, new_goals):
-		self.current_goals = new_goals
+	def goals_adaptation_phase(self, dynamic_goals_problems, dynamic_train_configs):
+		self.current_goals = [self.task_str_to_goal(problem) for problem in dynamic_goals_problems]
 		# start by training each rl agent on the base goal set
-		problems_goals = [(self.goal_to_task_str(tuply),tuply) for tuply in new_goals]
 		self.embeddings_dict = {} # relevant if the embedding of the plan occurs during the goals adaptation phase
 		self.plans_dict = {} # relevant if the embedding of the plan occurs during the inference phase
 		# will change, for now let an optimal agent give us the trace
-		for problem_name, goal in problems_goals:
+		for i, (problem_name, goal) in enumerate(zip(dynamic_goals_problems, self.current_goals)):
 			if self.goals_adaptation_sequence_generation_method == MCTS_BASED:
 				obs = mcts_model.plan(self.env_name, problem_name, self.task_str_to_goal(problem_name))
 			elif self.goals_adaptation_sequence_generation_method == AGENT_BASED:
 				kwargs = {"env_name":self.env_name, "problem_name":problem_name}
 				if self.specified_rl_algorithm: kwargs["algorithm"] = self.specified_rl_algorithm
-				if self.train_configs[0][0]: kwargs["exploration_rate"] = self.train_configs[0][0]
-				if self.train_configs[0][1]: kwargs["num_timesteps"] = self.train_configs[0][1]
+				if dynamic_train_configs[i][0]!=None: kwargs["exploration_rate"] = dynamic_train_configs[i][0]
+				kwargs["num_timesteps"] = dynamic_train_configs[i][1]
 				agent = self.rl_agents_method(**kwargs)
 				agent.learn()
-				obs = agent.generate_observation(action_selection_method=metrics.greedy_selection, random_optimalism=False, save_fig=False)
+				obs = agent.generate_observation(action_selection_method=metrics.greedy_selection, random_optimalism=False, save_fig=True)
 			elif self.goals_adaptation_sequence_generation_method == GC_AGENT_BASED:
 				kwargs = {"env_name":self.env_name, "problem_name":problem_name}
 				if self.specified_rl_algorithm: kwargs["algorithm"] = self.specified_rl_algorithm
@@ -138,24 +159,35 @@ class GramlRecognizer(ABC):
 				if self.train_configs[0][1]: kwargs["num_timesteps"] = self.train_configs[0][1]
 				agent = self.rl_agents_method(**kwargs)
 				agent.learn()
-				obs = agent.generate_observation_gc(action_selection_method=metrics.greedy_selection, random_optimalism=False, save_fig=False, goal_idx=int(goal))
+				obs = agent.generate_observation_gc(action_selection_method=metrics.greedy_selection, random_optimalism=False, save_fig=True, goal_idx=int(goal))
 			else:
 				raise TypeError("goals_adaptation_sequence_generation_method must be either AGENT_BASED or MCTS_BASED")
 
 			if self.is_inference_same_length_sequences:
-				self.plans_dict[goal] = obs
+				self.plans_dict[str(goal)] = obs
 				continue
 			# if got here, the embedding occurs during goals adaptation phase - faster but doesn't allow adjusting plan length after receiving the sequence at inference time.
-			partial_obs = random_subset_with_order(obs, (int)(random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]) * len(obs)), self.is_fragmented)
+			partial_obs = random_subset_with_order(obs, (int)(random.choice([0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]) * len(obs)), is_fragmented=self.partial_obs_type=="fragmented")
 			# if self.is_continuous: embedding = self.model.embed_sequence_cont(partial_obs, self.preprocess_obss)
 			embedding = self.model.embed_sequence(partial_obs)
-			self.embeddings_dict[goal] = embedding
+			self.embeddings_dict[str(goal)] = embedding
    
 	def get_goal_plan(self, goal):
 		assert self.plans_dict, "plans_dict wasn't created during goals_adaptation_phase and now inference phase can't return the plans. when inference_same_length, keep the plans and not their embeddings during goals_adaptation_phase."
 		return self.plans_dict[goal]
 
-	def inference_phase(self, inf_sequence, true_goal, percentage):
+	def dump_plans(self, true_sequence, true_goal, percentage):
+		assert self.plans_dict, "plans_dict wasn't created during goals_adaptation_phase and now inference phase can't return the plans. when inference_same_length, keep the plans and not their embeddings during goals_adaptation_phase."
+		# Arrange storage
+		embeddings_path = get_embeddings_result_path(self.env_name)
+		if not os.path.exists(embeddings_path):
+			os.makedirs(embeddings_path)
+		self.plans_dict[f"{true_goal}_true"] = true_sequence
+		with open(embeddings_path + f'/{true_goal}_{percentage}_plans_dict.pkl', 'wb') as plans_file:
+			dill.dump({goal:self.agents[0].simplify_observation(obs) for goal, obs in self.plans_dict.items()}, plans_file)
+		self.plans_dict.pop(f"{true_goal}_true")
+
+	def inference_phase(self, inf_sequence, true_goal, percentage) -> str:
 		# Arrange storage
 		embeddings_path = get_embeddings_result_path(self.env_name)
 		if not os.path.exists(embeddings_path):
@@ -165,7 +197,7 @@ class GramlRecognizer(ABC):
 		if self.is_inference_same_length_sequences:
 			assert self.plans_dict, "plans_dict wasn't created during goals_adaptation_phase and now inference phase can't embed the plans. when inference_same_length, keep the plans and not their embeddings during goals_adaptation_phase."
 			for goal, seq in self.plans_dict.items():
-				partial_obs = random_subset_with_order(seq, len(inf_sequence), self.is_fragmented)
+				partial_obs = random_subset_with_order(seq, len(inf_sequence), is_fragmented=self.partial_obs_type=="fragmented")
 				# if self.is_continuous: embedding = self.model.embed_sequence_cont(partial_obs, self.preprocess_obss)
 				simplified_partial_obs = self.agents[0].simplify_observation(partial_obs)
 				embedding = self.model.embed_sequence(simplified_partial_obs)

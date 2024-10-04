@@ -25,7 +25,7 @@ class BaseAlgo(RLAgent):
     def __init__(self, num_frames_per_proc, gamma, lr, gae_lambda, entropy_coef,
                  value_loss_coef, max_grad_norm, recurrence, preprocess_obss, reshape_reward, episodes,
                  decaying_epsilon, epsilon, problem_name, env_name, algo: str, seed: int, procs: int, use_text: bool,
-                 argmax: bool, models_dir: str, goal_hypothesis: str):
+                 argmax: bool, goal_hypothesis: str):
         """
         Initializes a `BaseAlgo` instance.
 
@@ -68,7 +68,6 @@ class BaseAlgo(RLAgent):
             gamma=gamma,
             problem_name=problem_name,
             env_name=env_name,
-            models_dir=models_dir,
             goal_hypothesis=goal_hypothesis
         )
         # Store parameters
@@ -93,8 +92,7 @@ class BaseAlgo(RLAgent):
 
         model_name = problem_name
         self.model_dir = utils.get_model_dir(
-            models_dir=models_dir,
-            n_episodes=episodes,
+            env_name=env_name,
             model_name=problem_name,
             class_name=self.class_name()
         )

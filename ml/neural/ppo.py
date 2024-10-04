@@ -22,7 +22,7 @@ class PPOAlgo(BaseAlgo):
                          value_loss_coef, max_grad_norm, recurrence, preprocess_obss, reshape_reward, episodes=episodes,
                          decaying_epsilon=decaying_epsilon, epsilon=epsilon, problem_name=problem_name,
                          env_name=env_name, algo='ppo',
-                         seed=seed, procs=procs, use_text=use_text, argmax=argmax, models_dir=models_dir, goal_hypothesis=goal_hypothesis)
+                         seed=seed, procs=procs, use_text=use_text, argmax=argmax, goal_hypothesis=goal_hypothesis)
         self.clip_eps = clip_eps
         self.epochs = epochs
         self.batch_size = batch_size

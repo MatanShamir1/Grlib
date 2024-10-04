@@ -5,7 +5,6 @@ import ml
 import gymnasium as gym
 import random
 
-
 def get_obss_preprocessor(obs_space):
 	# Check if obs_space is an image space
 	if isinstance(obs_space, gym.spaces.Box):
@@ -44,49 +43,6 @@ def get_obss_preprocessor(obs_space):
 		raise ValueError("Unknown observation space: " + str(obs_space))
 
 	return obs_space, preprocess_obss
-
-def minigrid_str_to_goal(str):
-	"""
-	This function extracts the goal size (width and height) from a MiniGrid environment name.
-
-	Args:
-		env_name: The name of the MiniGrid environment (string).
-
-	Returns:
-		A tuple of integers representing the goal size (width, height).
-	"""
-	# Split the environment name by separators
-	parts = str.split("-")
-	# Find the part containing the goal size (usually after "DynamicGoal")
-	goal_part = [part for part in parts if "x" in part]
-	# Extract width and height from the goal part
-	width, height = goal_part[0].split("x")
-	return (int(width), int(height))
-
-def maze_str_to_goal(str):
-	"""
-	This function extracts the goal size (width and height) from a MiniGrid environment name.
-
-	Args:
-		env_name: The name of the MiniGrid environment (string).
-
-	Returns:
-		A tuple of integers representing the goal size (width, height).
-	"""
-	# Split the environment name by separators
-	parts = str.split("-")
-	# Find the part containing the goal size (usually after "DynamicGoal")
-	sizes_parts = [part for part in parts if "x" in part]
-	goal_part = sizes_parts[1]
-	# Extract width and height from the goal part
-	width, height = goal_part[0].split("x")
-	return (int(width), int(height))
-
-def goal_str_to_tuple(str):
-	assert str[0] == "(" and str[-1] == ")"
-	str = str[1:-1]
-	width, height = str.split(',')
-	return (int(width), int(height))
 
 
 def preprocess_images(images, device=None):

@@ -3,6 +3,7 @@ from torch.utils.data import Dataset
 import random
 from types import MethodType
 from typing import List
+from metrics.metrics import measure_average_sequence_distance
 from ml.utils import get_siamese_dataset_path
 from ml.base import RLAgent
 import os
@@ -64,6 +65,8 @@ def generate_datasets(num_samples, agents: List, observation_creation_method : M
                 second_observation = second_agent.generate_partial_observation(action_selection_method=observation_creation_method, percentage=second_trace_percentage, is_fragmented=is_fragmented, save_fig=False)
                     # second_observation = [preprocess_obss([obs])[0] for ((obs, (_, _)), _) in second_observation]
                 second_observation = second_agent.simplify_observation(second_observation)
+                if is_same_goal:
+                    observations_distance = measure_average_sequence_distance(first_observation, second_observation)
             all_samples.append((
                 [torch.tensor(observation, dtype=torch.float32) for observation in first_observation],
                 [torch.tensor(observation, dtype=torch.float32) for observation in second_observation],
@@ -71,7 +74,7 @@ def generate_datasets(num_samples, agents: List, observation_creation_method : M
             # all_samples.append((first_observation, second_observation, torch.tensor(is_same_goal, dtype=torch.float32)))
             if i % 1000 == 0:
                 print(f'generated {i} samples')
-        
+
         total_samples = len(all_samples)
         train_size = int(0.8 * total_samples)
         train_samples = all_samples[:train_size]

@@ -16,7 +16,6 @@ GRAML_itself = os.path.dirname(currentdir)
 GRAML_includer = os.path.dirname(os.path.dirname(currentdir))
 sys.path.insert(0, GRAML_includer)
 sys.path.insert(0, GRAML_itself)
-from ml.utils.format import minigrid_str_to_goal
 
 def get_plans_result_path(env_name):
 	return os.path.join("dataset", (env_name), "plans")

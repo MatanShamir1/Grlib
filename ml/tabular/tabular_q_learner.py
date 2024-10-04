@@ -1,3 +1,4 @@
+# Don't import stuff from metrics! it's a higher level module.
 import os.path
 import pickle
 import random
@@ -13,10 +14,9 @@ from random import Random
 from typing import List, Iterable
 from gymnasium.error import InvalidAction
 
-from metrics.metrics import softmax
 from ml.tabular import TabularState
 from ml.tabular.tabular_rl_agent import TabularRLAgent
-from ml.utils import get_model_dir, random_subset_with_order
+from ml.utils import get_agent_model_dir, random_subset_with_order, softmax
 from ml.utils.storage import get_policy_sequences_result_path
 from scripts.get_plans_images import create_sequence_image
 
@@ -58,7 +58,7 @@ class TabularQLearner(TabularRLAgent):
         self.valid_only = valid_only
         self.check_partial_goals = check_partial_goals
         self.goal_literals_achieved = set()
-        self.model_directory = get_model_dir(env_name=env_name, model_name=problem_name, class_name=self.class_name())
+        self.model_directory = get_agent_model_dir(model_name=problem_name, class_name=self.class_name())
         self.model_file_path = os.path.join(self.model_directory, TabularQLearner.MODEL_FILE_NAME)
         self._conf_file = os.path.join(self.model_directory, TabularQLearner.CONF_FILE)
 

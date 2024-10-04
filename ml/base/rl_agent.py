@@ -3,18 +3,18 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 State = Any
-
-
 class RLAgent(ABC):
-    def __init__(self,
-                 episodes: int,
-                 decaying_eps: bool,
-                 epsilon: float,
-                 learning_rate: float,
-                 gamma: float,
-                 problem_name: str,
-                 env_name: str
-                 ):
+    def __init__(
+            self,
+            episodes: int,
+            decaying_eps: bool,
+            epsilon: float,
+            learning_rate: float,
+            gamma: float,
+            problem_name: str,
+            env_name: str,
+            goal_hypothesis: str
+    ):
         self.episodes = episodes
         self.decaying_eps = decaying_eps
         self.epsilon = epsilon
@@ -22,6 +22,7 @@ class RLAgent(ABC):
         self.gamma = gamma
         self.problem_name = problem_name
         self.env_name = env_name
+        self.goal_hypothesis = goal_hypothesis
         self.env = None
         self.states_counter = {}
 
@@ -43,5 +44,6 @@ class RLAgent(ABC):
             self.states_counter[observation_str] = self.states_counter[observation_str] + 1
         else:
             self.states_counter[observation_str] = 1
-        if len(self.states_counter) % 200 == 0:
+        if len(self.states_counter) % 10000 == 0:
             print(f"probably error to many {len(self.states_counter)}")
+

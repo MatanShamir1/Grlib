@@ -6,7 +6,7 @@ from tqdm import tqdm
 import pickle
 
 from ml.utils.format import random_subset_with_order
-from ml.utils.storage import get_model_dir
+from ml.utils.storage import get_agent_model_dir
 from .utils import Node
 from .utils import Tree
 from gymnasium.envs.registration import register
@@ -240,7 +240,7 @@ def save_model_and_generate_policy(tree, original_root, model_file_path, monteCa
 
 def plan(env_name, problem_name, goal):
 	global newely_expanded
-	model_dir = get_model_dir(env_name=env_name, model_name=problem_name, class_name="MCTS")
+	model_dir = get_agent_model_dir(model_name=problem_name, class_name="MCTS")
 	model_file_path = os.path.join(model_dir, "mcts_model.pth")
 	if os.path.exists(model_file_path):
 		print(f"Loading pre-existing mcts planner in {model_file_path}")
