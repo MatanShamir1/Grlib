@@ -1,16 +1,16 @@
 import sys
 import os
 import inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-GRAML_itself = os.path.dirname(currentdir)
-GRAML_includer = os.path.dirname(os.path.dirname(currentdir))
-sys.path.insert(0, GRAML_includer)
-sys.path.insert(0, GRAML_itself)
+# currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+# GRAML_itself = os.path.dirname(currentdir)
+# GRAML_includer = os.path.dirname(os.path.dirname(currentdir))
+# sys.path.insert(0, GRAML_includer)
+# sys.path.insert(0, GRAML_itself)
 import gymnasium as gym
 from minigrid.wrappers import RGBImgPartialObsWrapper, ImgObsWrapper
 import numpy as np
-import GRAML.ml.utils as utils
-import GRAML.ml as ml
+import grlib.ml.utils as utils
+import grlib.ml as ml
 import pickle
 import gym
 import minigrid

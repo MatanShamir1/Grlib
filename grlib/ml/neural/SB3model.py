@@ -279,11 +279,11 @@ if __name__ == "__main__":
     if package_root not in sys.path:
         sys.path.insert(0, package_root)
     # agent = NeuralAgent("PandaReachSimple-g-m01xm01-v3", "PandaReachSimple-g-m01xm01-v3")
-    currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-    GRAML_itself = os.path.dirname(currentdir)
-    GRAML_includer = os.path.dirname(os.path.dirname(currentdir))
-    sys.path.insert(0, GRAML_includer)
-    sys.path.insert(0, GRAML_itself)
+    # currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    # GRAML_itself = os.path.dirname(currentdir)
+    # GRAML_includer = os.path.dirname(os.path.dirname(currentdir))
+    # sys.path.insert(0, GRAML_includer)
+    # sys.path.insert(0, GRAML_itself)
 
     from ml.utils.storage import get_agent_model_dir, set_global_storage_configs
 

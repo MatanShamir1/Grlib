@@ -8,11 +8,11 @@ import inspect
 import torch
 import dill
 
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-GRAML_itself = os.path.dirname(currentdir)
-GRAML_includer = os.path.dirname(os.path.dirname(currentdir))
-sys.path.insert(0, GRAML_includer)
-sys.path.insert(0, GRAML_itself)
+# currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+# GRAML_itself = os.path.dirname(currentdir)
+# GRAML_includer = os.path.dirname(os.path.dirname(currentdir))
+# sys.path.insert(0, GRAML_includer)
+# sys.path.insert(0, GRAML_itself)
 
 from GRAML.ml.utils import get_embeddings_result_path
 from GRAML.ml.utils.storage import set_global_storage_configs, get_graql_experiment_confidence_path
