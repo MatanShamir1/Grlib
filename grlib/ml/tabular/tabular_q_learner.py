@@ -13,11 +13,10 @@ from typing import Any
 from random import Random
 from typing import List, Iterable
 from gymnasium.error import InvalidAction
-
-from ml.tabular import TabularState
-from ml.tabular.tabular_rl_agent import TabularRLAgent
-from ml.utils import get_agent_model_dir, random_subset_with_order, softmax
-from ml.utils.storage import get_policy_sequences_result_path
+from grlib.ml.tabular import TabularState
+from grlib.ml.tabular.tabular_rl_agent import TabularRLAgent
+from grlib.ml.utils import get_agent_model_dir, random_subset_with_order, softmax
+from grlib.ml.utils.storage import get_policy_sequences_result_path, set_global_storage_configs
 from scripts.get_plans_images import create_sequence_image
 
 
@@ -58,7 +57,7 @@ class TabularQLearner(TabularRLAgent):
         self.valid_only = valid_only
         self.check_partial_goals = check_partial_goals
         self.goal_literals_achieved = set()
-        self.model_directory = get_agent_model_dir(model_name=problem_name, class_name=self.class_name())
+        self.model_directory = get_agent_model_dir(env_name=env_name, model_name=problem_name, class_name=self.class_name())
         self.model_file_path = os.path.join(self.model_directory, TabularQLearner.MODEL_FILE_NAME)
         self._conf_file = os.path.join(self.model_directory, TabularQLearner.CONF_FILE)
 
@@ -349,7 +348,7 @@ class TabularQLearner(TabularRLAgent):
     def simplify_observation(self, observation):
         return [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in observation] # list of tuples, each tuple the sample
         
-    def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig = False):
+    def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig = False, specific_vid_name: str=None):
         """
         Generate a single observation given a list of agents
 
@@ -368,42 +367,54 @@ class TabularQLearner(TabularRLAgent):
             The generated sequence terminates when a maximum number of steps is reached or when the environment 
             episode terminates.
         """
-        
+        if save_fig == False:
+            assert specific_vid_name == None, "You can't specify a vid path when you don't even save the figure."
         obs, _ = self.env.reset()
-        MAX_STEPS = 20
+        MAX_STEPS = 32
         done = False
         steps = []
         for step_index in range(MAX_STEPS):
             x, y = self.env.unwrapped.agent_pos
             str_state = "({},{}):{}".format(x, y, obs['direction'])
-            action_probs = self.q_table[str_state] / np.sum(self.q_table[str_state])  # Normalize probabilities
+            relevant_actions_idx = 3
+            action_probs = self.q_table[str_state][:relevant_actions_idx] / np.sum(self.q_table[str_state][:relevant_actions_idx])  # Normalize probabilities
             if step_index == 0 and random_optimalism:
-                print("in 1st step in generating plan and got random optimalism.")
+                # print("in 1st step in generating plan and got random optimalism.")
                 std_dev = np.std(action_probs)
-                uniques_sorted = np.unique(action_probs)
-                num_of_stds = (uniques_sorted[-1] - uniques_sorted[-2]) / std_dev
-                if num_of_stds < 0.75:
-                    sorted_indices = np.argsort(action_probs)
-                    action = np.random.choice([sorted_indices[-1], sorted_indices[-2]])
+                # uniques_sorted = np.unique(action_probs)
+                num_of_stds = abs(action_probs[0] - action_probs[2]) / std_dev
+                if num_of_stds < 2.1:
+                    # sorted_indices = np.argsort(action_probs)
+                    # action = np.random.choice([sorted_indices[-1], sorted_indices[-2]])
+                    action = np.random.choice([0, 2])
+                    if action == 0:
+                        steps.append(((obs, self.env.unwrapped.agent_pos), action))
+                        obs, reward, terminated, truncated, info = self.env.step(action)
+                        assert reward >= 0
+                        action = 2
+                        step_index += 1
                 else: action = action_selection_method(action_probs)
             else:
                 action = action_selection_method(action_probs)
             steps.append(((obs, self.env.unwrapped.agent_pos), action))
-            obs, reward, terminated, truncated, _ = self.env.step(action)
+            obs, reward, terminated, truncated, info = self.env.step(action)
+            assert reward >= 0
             done = terminated | truncated
             if done:
                 break
 
+        #assert len(steps) >= 2
         if save_fig:
             img_path = os.path.join(get_policy_sequences_result_path(self.env_name), self.problem_name)
+            if specific_vid_name: img_path += f"_{specific_vid_name}"
             sequence = [pos for ((state, pos), action) in steps]
             #print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
             print(f"generating sequence image at {img_path}.")
             create_sequence_image(sequence, img_path, self.problem_name)
 
         return steps
-    
-    def generate_partial_observation(self, action_selection_method: MethodType, percentage: float, save_fig = False, is_fragmented = True, random_optimalism=False):
+
+    def generate_partial_observation(self, action_selection_method: MethodType, percentage: float, save_fig = False, is_fragmented = True, random_optimalism=True, specific_vid_name=None):
         """
         Generate a single observation given a list of agents
 
@@ -423,6 +434,18 @@ class TabularQLearner(TabularRLAgent):
             episode terminates.
         """
 
-        steps = self.generate_observation(action_selection_method, save_fig, random_optimalism) # steps are a full observation
-        return random_subset_with_order(steps, (int)(percentage * len(steps)), is_fragmented)
+        steps = self.generate_observation(action_selection_method=action_selection_method, random_optimalism=random_optimalism, save_fig=save_fig, specific_vid_name=specific_vid_name) # steps are a full observation
+        result = random_subset_with_order(steps, (int)(percentage * len(steps)), is_fragmented)
+        if percentage >= 0.8:
+            assert len(result) > 2
+        return result
+    
+if __name__ == "__main__":
+    set_global_storage_configs("graml", "fragmented_partial_obs", "inference_same_length", "learn_diff_length")
+    from grlib.metrics.metrics import greedy_selection
+    import gr_libs # to register everything
+    agent = TabularQLearner(env_name="minigrid", problem_name="MiniGrid-LavaCrossingS9N2-DynamicGoal-1x7-v0")
+    agent.generate_observation(greedy_selection, True, True)
+    
+    # python experiments.py --recognizer graml --domain point_maze --task L5 --partial_obs_type continuing --point_maze_env obstacles --collect_stats --inference_same_seq_len
         

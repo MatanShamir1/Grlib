@@ -7,8 +7,10 @@ from PIL import Image
 import numpy as np
 
 from gymnasium.envs.registration import register
-from minigrid.core.world_object import Wall
+from minigrid.core.world_object import Wall, Lava
 from minigrid.wrappers import RGBImgPartialObsWrapper, ImgObsWrapper
+
+from grlib.environment.utils.format import minigrid_str_to_goal
 
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -25,13 +27,18 @@ def get_policy_sequences_result_path(env_name):
 
 def create_sequence_image(sequence, img_path, problem_name):
 	if not os.path.exists(os.path.dirname(img_path)): os.makedirs(os.path.dirname(img_path))
-	env_id = "MiniGrid-CustomColorS13N4-DynamicGoal-" + problem_name.split("-DynamicGoal-")[1]
+	env_id = problem_name.split("-DynamicGoal-")[0] + "-DynamicGoal-" + problem_name.split("-DynamicGoal-")[1]
 	result = register(
 		id=env_id,
 		entry_point="gr_libs.minigrid_scripts.envs:CustomColorEnv",
-		kwargs={"size": 13, "num_crossings": 4, "goal_pos": minigrid_str_to_goal(problem_name), "obstacle_type": Wall, "start_pos": (1, 1), "plan": sequence},
+		kwargs={"size": 13 if 'Simple' in problem_name else 9,
+          		"num_crossings": 4 if 'Simple' in problem_name else 3,
+            	"goal_pos": minigrid_str_to_goal(problem_name),
+             	"obstacle_type": Wall if 'Simple' in problem_name else Lava,
+            	"start_pos": (1, 1) if 'Simple' in problem_name else (3, 1),
+             	"plan": sequence},
 	)
-	print(result)
+	#print(result)
 	env = gymnasium.make(id=env_id)
 	env = RGBImgPartialObsWrapper(env) # Get pixel observations
 	env = ImgObsWrapper(env) # Get rid of the 'mission' field
@@ -67,7 +74,7 @@ def analyze_and_produce_images(env_name):
 
 if __name__ == "__main__":
 	# preventing circular imports. only needed for running this as main anyway.
-	from ml.utils.storage import get_models_dir, get_model_dir
+	from grlib.ml.utils.storage import get_models_dir, get_model_dir
 	# checks:
 	assert len(sys.argv) == 2, f"Assertion failed: len(sys.argv) is {len(sys.argv)} while it needs to be 2.\n Example: \n\t /usr/bin/python scripts/get_plans_images.py MiniGrid-Walls-13x13-v0"
 	assert os.path.exists(get_models_dir(sys.argv[1])), "plans weren't made for this environment, run graml_main.py with this environment first."

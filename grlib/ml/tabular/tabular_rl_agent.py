@@ -4,8 +4,8 @@ from typing import Collection, Literal, Any
 from random import Random
 import numpy as np
 
-from ml.base import RLAgent
-from ml.base import State
+from grlib.ml.base import RLAgent
+from grlib.ml.base import State
 
 
 class TabularRLAgent(RLAgent):

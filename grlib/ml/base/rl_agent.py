@@ -3,6 +3,13 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 State = Any
+
+class ContextualAgent:
+    def __init__(self, problem_name, problem_goal, agent):
+        self.problem_name = problem_name
+        self.problem_goal = problem_goal
+        self.agent = agent
+
 class RLAgent(ABC):
     def __init__(
             self,
@@ -12,8 +19,7 @@ class RLAgent(ABC):
             learning_rate: float,
             gamma: float,
             problem_name: str,
-            env_name: str,
-            goal_hypothesis: str
+            env_name: str
     ):
         self.episodes = episodes
         self.decaying_eps = decaying_eps
@@ -22,7 +28,6 @@ class RLAgent(ABC):
         self.gamma = gamma
         self.problem_name = problem_name
         self.env_name = env_name
-        self.goal_hypothesis = goal_hypothesis
         self.env = None
         self.states_counter = {}
 

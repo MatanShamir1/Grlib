@@ -1,2 +1,2 @@
-from ml.neural.utils.dictlist import DictList
-from ml.neural.utils.penv import ParallelEnv
+from grlib.ml.neural.utils.dictlist import DictList
+from grlib.ml.neural.utils.penv import ParallelEnv

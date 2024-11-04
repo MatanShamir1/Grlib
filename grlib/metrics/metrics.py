@@ -11,10 +11,9 @@ from gymnasium.spaces.discrete import Discrete
 # import torch
 # from torch.distributions.categorical import Categorical
 
-# from ml.neural import BaseAlgo
-from ml.base import State
-from ml.base.rl_agent import RLAgent
-from ml.neural.SB3model import NeuralAgent
+from ..ml.base import State
+from ..ml.base.rl_agent import RLAgent
+from ..ml.neural.SB3model import NeuralAgent
 
 
 def kl_divergence(p1: List[float], p2: List[float]) -> float:
@@ -58,7 +57,7 @@ def amplify(values, alpha=1.0):
     values = values[:3]**alpha # currently only choose to turn or move forward
     return values / np.sum(values)
 
-def stochastic_amplified_selection(actions_probs, alpha=15.0):
+def stochastic_amplified_selection(actions_probs, alpha=8.0):
     action_probs_amplified = amplify(actions_probs, alpha)
     choice = np.random.choice(len(action_probs_amplified), p=action_probs_amplified)
     if choice == 3:
@@ -84,12 +83,12 @@ def measure_average_sequence_distance(seq1, seq2):
 
     # Ensure both sequences have the same length
     min_seq_len = np.min([len(seq1), len(seq2)])
-    assert np.max([len(seq1), len(seq2)]) <= 10*min_seq_len, "We can't really measure similarity in case the sequences are really not the same... maybe just return a default NOT_SIMILAR here."
+    assert np.max([len(seq1), len(seq2)]) <= 30*min_seq_len, "We can't really measure similarity in case the sequences are really not the same... maybe just return a default NOT_SIMILAR here."
 
     # Calculate the Euclidean distance between corresponding elements in the sequences
     distances = []
     for i in range(0, min_seq_len):
-        distances.append(np.sum(np.abs(seq1[i]-seq2[i])))
+        distances.append(np.sum(np.abs(np.array(seq1[i])-np.array(seq2[i]))))
 
     # Calculate the average distance over all elements
     return np.mean(np.array(distances))

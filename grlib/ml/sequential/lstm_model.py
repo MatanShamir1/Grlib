@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from types import MethodType
 import numpy as np
-from ml.utils import device
+from grlib.ml.utils import device
 from torch.nn.utils.rnn import pack_padded_sequence
 
 

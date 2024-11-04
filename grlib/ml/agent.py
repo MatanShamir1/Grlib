@@ -1,7 +1,7 @@
 import torch
 
-from ml import utils
-from ml.utils.other import device
+from grlib.ml import utils
+from grlib.ml.utils.other import device
 # from ml.neural import ACModel
 
 

@@ -1,14 +1,14 @@
-from environment.environment import SupportedEnvs
+from grlib.environment.environment import SupportedEnvs
 
-from highway_env.envs import ParkingEnv
-#from panda_gym.envs import PandaMyReachEnv
+from gr_libs.highway_env_scripts.envs.parking_env import ParkingEnv
+from gr_libs.panda_gym_scripts.envs import PandaMyReachEnv
 import gymnasium
 import numpy as np
 import pandas as pd
 
 
-# def panda_goal_extraction(env: PandaMyReachEnv):
-#     return env.task.goal
+def panda_goal_extraction(env: PandaMyReachEnv):
+    return env.task.goal
 
 
 def parking_goal_extraction(env: ParkingEnv):
@@ -18,7 +18,7 @@ def parking_goal_extraction(env: ParkingEnv):
 
 
 GOALS_EXTRACTORS = {
-    # SupportedEnvs.PandaGym.value: panda_goal_extraction,
+    SupportedEnvs.PandaGym.value: panda_goal_extraction,
     SupportedEnvs.Parking.value: parking_goal_extraction,
 }
 

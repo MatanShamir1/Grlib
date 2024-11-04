@@ -2,15 +2,15 @@ import os
 import torch
 import numpy as np
 import gymnasium
-from ml.neural.goal_extractors import extract_goal
+from grlib.ml.neural.goal_extractors import extract_goal
 from typing import Optional
 
-from ml.base import RLAgent
+from grlib.ml.base import RLAgent
 from stable_baselines3 import SAC, PPO
 from rl_zoo3.utils import get_model_path, get_latest_run_id
 from collections import OrderedDict
 from rl_zoo3 import create_test_env
-from ml.utils import storage
+from grlib.ml.utils import storage
 
 NETWORK_SETUP = {
     "sac": OrderedDict([('batch_size', 512), ('buffer_size', 100000), ('ent_coef', 'auto'), ('gamma', 0.95), ('learning_rate', 0.001), ('learning_starts', 5000), ('n_timesteps', 50000.0), ('normalize', "{'norm_obs': False, 'norm_reward': False}"), ('policy', 'MultiInputPolicy'), ('policy_kwargs', 'dict(net_arch=[64, 64])'), ('replay_buffer_class', 'HerReplayBuffer'), ('replay_buffer_kwargs', "dict( goal_selection_strategy='future', n_sampled_goal=4 )"), ('normalize_kwargs', {'norm_obs': False, 'norm_reward': False})]),
@@ -35,12 +35,12 @@ class StableBaseLineTrainedAgent(RLAgent):
             problem_name: str,
             env_name: str,
             exp_id: int,
-            folder: str,
             algo: str,
             load_best: bool,
             load_checkpoint: bool,
             load_last_checkpoint: bool,
             goal_hypothesis: Optional[str] = None,
+            model_dir: Optional[str] = None,
     ):
         super().__init__(
             episodes=episodes,
@@ -49,10 +49,57 @@ class StableBaseLineTrainedAgent(RLAgent):
             learning_rate=learning_rate,
             gamma=gamma,
             env_name=env_name,
-            problem_name=problem_name,
-            goal_hypothesis=goal_hypothesis
+            problem_name=problem_name
         )
-        self._model = self.algorithm.load(self._model_file_path)
+        if exp_id == 0:
+            exp_id = get_latest_run_id(os.path.join(model_dir, algo), problem_name)
+            print(
+                (
+                    f"StableBaseLineTrainedAgent2:: env_name:{env_name},"
+                    f" problem name:{problem_name},"
+                    f" Taking latest experiment id:{exp_id})"
+                )
+            )
+        self._exp_id = exp_id
+        self._folder = model_dir
+        self._algo = algo
+        self._load_best = load_best
+        self._load_checkpoint = load_checkpoint
+        self._load_last_checkpoint = load_last_checkpoint
+
+        z, model_path, log_path = get_model_path(exp_id, model_dir, algo, problem_name, load_best, load_checkpoint,
+                                                 load_last_checkpoint)
+        print(f"z:{z}")
+        print(f"model path:{model_path}")
+        print(f"log path:{log_path}")
+        custom_objects = {
+            "learning_rate": 0.0,
+            "lr_schedule": lambda _: 0.0,
+            "clip_range": lambda _: 0.0,
+        }
+        kwargs = {'seed': 0, 'buffer_size': 1}
+
+        hyperparams = NETWORK_SETUP[algo]
+        print(f"hyperparams:{hyperparams}")
+
+        should_render = False
+        n_envs = 1
+        env = create_test_env(
+            goal_hypothesis,
+            n_envs=n_envs,
+            stats_path=f"{self._folder}/{self._algo}/{self.problem_name}_{exp_id}/{self.problem_name}",
+            seed=0,
+            log_dir=None,
+            should_render=should_render,
+            hyperparams=hyperparams,
+            env_kwargs={},
+        )
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+        kwargs = {'seed': 0, 'buffer_size': 1}
+        print(f"{model_path=}")
+
+        self.model = ALGOS[self._algo].load(model_path, env=env, custom_objects=custom_objects, device=device, **kwargs)
 
         self.env = env
 
@@ -122,17 +169,18 @@ class SACTrainedAgent(StableBaseLineTrainedAgent):
     def __init__(self,
                  problem_name: str,
                  env_name: str,
+                 goal_hypothesis: str,
                  episodes: int = -1,
                  decaying_eps: bool = False,
                  epsilon: float = 0.95,
                  learning_rate: float = 0.001,
                  gamma: float = 0.95,
                  exp_id: int = 0,
-                 folder: str = "dataset/{env_name}/models",
+                 model_dir: str = "ben_dataset/dataset/{env_name}/models/{goal_hypothesis}",
                  load_best: bool = 0,
                  load_checkpoint: bool = None,
                  load_last_checkpoint: bool = False):
-        print(f"folder:{folder.format(env_name=env_name)}")
+        print(f"folder:{model_dir.format(env_name=env_name)}")
         super().__init__(episodes=episodes,
                          decaying_eps=decaying_eps,
                          epsilon=epsilon,
@@ -141,7 +189,7 @@ class SACTrainedAgent(StableBaseLineTrainedAgent):
                          problem_name=problem_name,
                          env_name=env_name,
                          exp_id=exp_id,
-                         folder=folder.format(env_name=env_name),
+                         model_dir=model_dir.format(env_name=env_name),
                          algo=SACTrainedAgent.NAME,
                          load_best=load_best,
                          load_checkpoint=load_checkpoint,
@@ -175,20 +223,19 @@ class PPOTrainedAgent(StableBaseLineTrainedAgent):
     def __init__(self,
                  problem_name: str,
                  env_name: str,
-                 models_dir: str,
                  episodes: int = -1,
                  decaying_eps: bool = False,
                  epsilon: float = 0.95,
                  learning_rate: float = 0.001,
                  gamma: float = 0.95,
                  exp_id: int = 0,
-                 folder: str = "dataset/{env_name}/models",
+                 model_dir: str = "ben_dataset/dataset/{env_name}/models",
                  load_best: bool = 0,
                  load_checkpoint: bool = None,
                  load_last_checkpoint: bool = False,
                  goal_hypothesis: Optional[str] = None,
     ):
-        print(f"folder:{folder.format(env_name=env_name)}")
+        print(f"folder:{model_dir.format(env_name=env_name)}")
         super().__init__(episodes=episodes,
                          decaying_eps=decaying_eps,
                          epsilon=epsilon,
@@ -196,9 +243,8 @@ class PPOTrainedAgent(StableBaseLineTrainedAgent):
                          gamma=gamma,
                          problem_name=problem_name,
                          env_name=env_name,
-                         models_dir=models_dir,
                          exp_id=exp_id,
-                         folder=folder.format(env_name=env_name),
+                         model_dir=model_dir.format(env_name=env_name),
                          algo=PPOTrainedAgent.NAME,
                          load_best=load_best,
                          load_checkpoint=load_checkpoint,
@@ -229,3 +275,6 @@ class PPOTrainedAgent(StableBaseLineTrainedAgent):
     def set_goal(self):
         self._goal = extract_goal(env_name=self.env_name, env=self.env.envs[0])
         print(f"{self._goal=}")
+
+if __name__ == "__main__":
+    agent = PPOTrainedAgent("PandaMyReachDenseX0y0X0y0X0y0-v3", "PandaEnvContinuousMedium", exp_id=1, goal_hypothesis="PandaMyReachDenseX0y0X0y0X0y0-v3")

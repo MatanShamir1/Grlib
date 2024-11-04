@@ -54,13 +54,13 @@ def get_observation_file_name(observability_percentage: float):
 def get_env_dir(env_name):
     global IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES, RECOGNIZER_STR
     if RECOGNIZER_STR == GRAML: return os.path.join(get_storage_framework_dir(), env_name, IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES)
-    else: return os.path.join(get_storage_framework_dir(), env_name)
+    else: return os.path.join(get_storage_framework_dir(), env_name, IS_FRAGMENTED)
 
 def get_observations_dir(env_name):
     return os.path.join(get_env_dir(env_name=env_name), _get_observations_directory_name())
 
-def get_agent_model_dir(model_name, class_name):
-    return os.path.join(get_storage_dir(), _get_models_directory_name(), model_name, class_name)
+def get_agent_model_dir(env_name, model_name, class_name):
+    return os.path.join(get_storage_dir(), _get_models_directory_name(), env_name, model_name, class_name)
 
 def get_lstm_model_dir(env_name, model_name):
     return os.path.join(get_env_dir(env_name=env_name), model_name)
@@ -75,6 +75,9 @@ def get_siamese_dataset_path(env_name, problem_names):
 
 def get_embeddings_result_path(env_name):
     return os.path.join(get_env_dir(env_name), "goal_embeddings")
+
+def get_experiment_results_path(domain, env, task):
+    return os.path.join(get_env_dir(domain), "experiment_results", env, task, "experiment_results")
 
 def get_plans_result_path(env_name):
     return os.path.join(get_env_dir(env_name), "plans")

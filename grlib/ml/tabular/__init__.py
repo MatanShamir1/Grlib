@@ -1,3 +1,3 @@
-from ml.tabular.state import TabularState
-from ml.tabular.tabular_q_learner import TabularQLearner
-from ml.sequential.lstm_model import LstmObservations
+from grlib.ml.tabular.state import TabularState
+from grlib.ml.tabular.tabular_q_learner import TabularQLearner
+from grlib.ml.sequential.lstm_model import LstmObservations

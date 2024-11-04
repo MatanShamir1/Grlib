@@ -1,1 +1,1 @@
-from ml.sequential.lstm_model import LstmObservations
+from grlib.ml.sequential.lstm_model import LstmObservations
