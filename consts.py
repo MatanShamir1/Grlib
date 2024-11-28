@@ -21,30 +21,27 @@ PROBLEMS = {
         "point_maze":
         {
             "additional_combined_recognizer_kwargs": {
-                "learner_type": NeuralAgent,
-                "specified_rl_algorithm_learning": SAC,
-                "specified_rl_algorithm_inference": TD3
+                "learner_type": NeuralAgent
             },
             "tasks": {
                 "obstacles": # relevants for increasing number of dynamic goals are L111-L555, increasing base goals L1-L5, static goal recognition L11-L55
                     {
                         "L1": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -61,22 +58,21 @@ PROBLEMS = {
                         },
                         "L2": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -93,23 +89,22 @@ PROBLEMS = {
                         },
                         "L3": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -126,24 +121,23 @@ PROBLEMS = {
                         },
                         "L4": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -160,25 +154,24 @@ PROBLEMS = {
                         },
                         "L5": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -195,18 +188,17 @@ PROBLEMS = {
                         },
                         "L11": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, TD3, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -223,20 +215,19 @@ PROBLEMS = {
                         },
                         "L22": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, TD3, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -253,22 +244,21 @@ PROBLEMS = {
                         },
                         "L33": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 300000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, TD3, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, TD3, 300000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -285,24 +275,23 @@ PROBLEMS = {
                         },
                         "L44": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 300000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, TD3, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, TD3, 300000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -319,26 +308,25 @@ PROBLEMS = {
                         },
                         "L55": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 300000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, TD3, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, TD3, 300000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -355,25 +343,24 @@ PROBLEMS = {
                         },
                         "L111": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(None, 200000)),
-                                                            # ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(None, 200000)),
-                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(None, 200000))
+                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(SAC, TD3, 200000)),
+                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -390,25 +377,24 @@ PROBLEMS = {
                         },
                         "L222": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(None, 200000)),
-                                                            # ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(None, 200000)),
-                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(None, 200000)),
-                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(SAC, TD3, 200000)),
+                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(SAC, TD3, 200000)),
+                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -425,25 +411,24 @@ PROBLEMS = {
                         },
                         "L333": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(None, 200000)),
-                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(None, 200000)),
-                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(SAC, TD3, 200000)),
+                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(SAC, TD3, 200000)),
+                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -460,25 +445,24 @@ PROBLEMS = {
                         },
                         "L444": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(None, 200000))
+                                                            #("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -495,25 +479,24 @@ PROBLEMS = {
                         },
                         "L555": {
                            "base_goals_problems_train_configs": [
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(None, 200000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(None, 200000)),
-                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(None, 200000))
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x1",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-9x9",(SAC, 200000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-1x5",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x4",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x6",(SAC, 200000)),
+                                                    ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x7",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(None, 200000)),
-                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(None, 200000))
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-3x6",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-6x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-7x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-4x7",(SAC, TD3, 200000)),
+                                                            ("PointMaze-ObstaclesEnvDense-11x11-Goal-8x8",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -533,27 +516,26 @@ PROBLEMS = {
                     {
                         "L111": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(None, 400000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(None, 200000))
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(SAC, 400000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x4",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-7x3",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(None, 200000)),
-                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(None, 200000)),
-                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(None, 200000)),
-                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(None, 200000)),
-                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x3",(None, 200000))
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-7x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x3",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -570,27 +552,26 @@ PROBLEMS = {
                         },
                         "L222": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(None, 400000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(None, 200000))
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(SAC, 400000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x4",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-7x3",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(None, 200000)),
-                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(None, 200000)),
-                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(None, 200000)),
-                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x3",(None, 200000))
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-7x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x3",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -607,27 +588,26 @@ PROBLEMS = {
                         },
                         "L333": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(None, 400000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(None, 200000))
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(SAC, 400000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x4",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-7x3",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(None, 200000)),
-                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(None, 200000)),
-                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x3",(None, 200000))
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-7x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x3",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -644,27 +624,26 @@ PROBLEMS = {
                         },
                         "L444": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(None, 400000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(None, 200000))
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(SAC, 400000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x4",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-7x3",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(None, 200000)),
-                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x3",(None, 200000))
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-7x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(SAC, TD3, 200000)),
+                                                            # ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x3",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -681,27 +660,26 @@ PROBLEMS = {
                         },
                         "L555": {
                            "base_goals_problems_train_configs": [
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(None, 400000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(None, 200000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(None, 200000))
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(SAC, 400000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(SAC, 200000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x4",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-7x3",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(None, 200000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x3",(None, 200000))
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-7x3",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x7",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-8x2",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-2x8",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x4",(SAC, TD3, 200000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-4x3",(SAC, TD3, 200000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -718,20 +696,19 @@ PROBLEMS = {
                         },
                         "L11": {
                             "base_goals_problems_train_configs": [
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(None, 400000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(None, 300000)),
-                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(None, 300000))
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(SAC, 400000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(SAC, 300000)),
+                                                    ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(SAC, 300000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(None, 300000)),
-                                                            ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(None, 400000)), # this one doesn't work with dense rewards because of encountering local minima
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(None, 300000)),
-                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(None, 300000))
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-9x1",(SAC, TD3, 300000)),
+                                                            ("PointMaze-FourRoomsEnv-11x11-Goal-9x9",(SAC, SAC, 400000)), # this one doesn't work with dense rewards because of encountering local minima
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-1x9",(SAC, TD3, 300000)),
+                                                            ("PointMaze-FourRoomsEnvDense-11x11-Goal-3x3",(SAC, SAC, 300000))
                                                            ],
                             "task_str_to_goal": maze_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC,
                                 "input_size": 6,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -764,12 +741,12 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x3-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x5-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x8-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x7-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x3-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x5-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x8-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x7-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -793,12 +770,12 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x3-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x5-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x8-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x7-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x3-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x5-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x8-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x7-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -823,12 +800,12 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x3-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x5-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x8-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x7-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x3-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x5-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x8-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x7-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -854,12 +831,12 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-10x6-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x3-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x5-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x8-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x7-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x3-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x5-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x8-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x7-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -887,12 +864,12 @@ PROBLEMS = {
                                                     
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x3-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x5-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x8-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x7-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x3-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x5-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x8-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x7-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-5x9-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -915,9 +892,9 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -941,10 +918,10 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -969,11 +946,11 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                           ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None))
+                                                           ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -999,12 +976,12 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-10x6-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-10x6-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-10x6-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -1022,13 +999,13 @@ PROBLEMS = {
                         },
                         "L55": {
                             "base_goals_problems_train_configs": [
-                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None)),
-                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None)),
-                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None)),
-                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None)),
-                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None)),
-                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-10x6-v0",(None, None)),
-                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x9-v0",(None, None))
+                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None, None)),
+                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None, None)),
+                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None, None)),
+                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None, None)),
+                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None, None)),
+                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-10x6-v0",(None, None, None)),
+                                                    ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x9-v0",(None, None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
                                                             ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None)),
@@ -1064,9 +1041,9 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x9-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -1093,10 +1070,10 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x9-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -1123,11 +1100,11 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x9-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                           ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None))
+                                                           ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -1154,12 +1131,12 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x9-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-10x6-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-10x6-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -1186,13 +1163,13 @@ PROBLEMS = {
                                                     ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x9-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-10x6-v0",(None, None)),
-                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x9-v0",(None, None))
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-7x11-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-8x1-v0",(None, None, None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-10x6-v0",(None,None,  None)),
+                                                            ("MiniGrid-SimpleCrossingS13N4-DynamicGoal-6x9-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -1222,9 +1199,9 @@ PROBLEMS = {
                                                     ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None)),
@@ -1255,10 +1232,10 @@ PROBLEMS = {
                                                     ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x1-v0",(None, None))
@@ -1288,11 +1265,11 @@ PROBLEMS = {
                                                     ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x1-v0",(None, None))
                                                            ],
@@ -1321,12 +1298,12 @@ PROBLEMS = {
                                                     ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x1-v0",(None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
@@ -1354,13 +1331,13 @@ PROBLEMS = {
                                                     ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x1-v0",(None, None))
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x1-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -1383,9 +1360,9 @@ PROBLEMS = {
                                                     ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None)),
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None))
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -1409,10 +1386,10 @@ PROBLEMS = {
                                                     ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x1-v0",(None, None))
@@ -1440,11 +1417,11 @@ PROBLEMS = {
                                                     ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x1-v0",(None, None))
                                                            ],
@@ -1472,12 +1449,12 @@ PROBLEMS = {
                                                     ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None, None)),
                                                             #("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x1-v0",(None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
@@ -1505,13 +1482,13 @@ PROBLEMS = {
                                                     ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x1-v0",(None, None))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None)),
-                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x1-v0",(None, None))
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x3-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-6x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-2x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-5x2-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-4x5-v0",(None, None, None)),
+                                                            ("MiniGrid-LavaCrossingS9N2-DynamicGoal-1x1-v0",(None, None, None))
                                                            ],
                             "task_str_to_goal": minigrid_str_to_goal,
                             "additional_graml_kwargs": {
@@ -1534,8 +1511,6 @@ PROBLEMS = {
         {
             "additional_combined_recognizer_kwargs": {
                 "learner_type": NeuralAgent,
-                "specified_rl_algorithm_learning": PPO,
-                "specified_rl_algorithm_inference": TD3,
                 "use_goal_directed_problem": True
             },
             "tasks": {
@@ -1543,20 +1518,19 @@ PROBLEMS = {
                     {
                         "L111": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("parking-v0",(None, 400000))
+                                                    ("parking-v0",(PPO, 400000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-1-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-4-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-8-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-11-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-14-v0",(None, 400000)),
-                                                            #("Parking-S-14-PC--GI-18-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-21-v0",(None, 300000))
+                                                            ("Parking-S-14-PC--GI-1-v0",(PPO, TD3, 200000)),
+                                                            #("Parking-S-14-PC--GI-4-v0",(PPO, TD3, 200000)),
+                                                            #("Parking-S-14-PC--GI-8-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-11-v0",(PPO, TD3, 200000)),
+                                                            #("Parking-S-14-PC--GI-14-v0",(PPO, TD3, 400000)),
+                                                            #("Parking-S-14-PC--GI-18-v0",(PPO, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-21-v0",(PPO, TD3, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": PPO, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1573,20 +1547,19 @@ PROBLEMS = {
                         },
                         "L222": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("parking-v0",(None, 400000))
+                                                    ("parking-v0",(PPO, 400000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-1-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-4-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-8-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-11-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-14-v0",(None, 400000)),
-                                                            #("Parking-S-14-PC--GI-18-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-21-v0",(None, 300000))
+                                                            ("Parking-S-14-PC--GI-1-v0",(PPO, TD3, 200000)),
+                                                            #("Parking-S-14-PC--GI-4-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-8-v0",(PPO, TD3, 200000)),
+                                                            #("Parking-S-14-PC--GI-11-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-14-v0",(PPO, TD3, 400000)),
+                                                            #("Parking-S-14-PC--GI-18-v0",(PPO, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-21-v0",(PPO, TD3, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": PPO, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1603,20 +1576,19 @@ PROBLEMS = {
                         },
                         "L333": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("parking-v0",(None, 400000))
+                                                    ("parking-v0",(PPO, 400000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-1-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-4-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-8-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-11-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-14-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-18-v0",(None, 400000)),
-                                                            #("Parking-S-14-PC--GI-21-v0",(None, 300000))
+                                                            ("Parking-S-14-PC--GI-1-v0",(PPO, TD3, 200000)),
+                                                            #("Parking-S-14-PC--GI-4-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-8-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-11-v0",(PPO, TD3, 200000)),
+                                                            #("Parking-S-14-PC--GI-14-v0",(PPO, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-18-v0",(PPO, TD3, 400000)),
+                                                            #("Parking-S-14-PC--GI-21-v0",(PPO, TD3, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": PPO, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1633,20 +1605,19 @@ PROBLEMS = {
                         },
                         "L444": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("parking-v0",(None, 400000))
+                                                    ("parking-v0",(PPO, 400000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            #("Parking-S-14-PC--GI-1-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-4-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-8-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-11-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-14-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-18-v0",(None, 400000)),
-                                                            #("Parking-S-14-PC--GI-21-v0",(None, 300000))
+                                                            #("Parking-S-14-PC--GI-1-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-4-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-8-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-11-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-14-v0",(PPO, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-18-v0",(PPO, TD3, 400000)),
+                                                            #("Parking-S-14-PC--GI-21-v0",(PPO, TD3, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": PPO, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1663,20 +1634,19 @@ PROBLEMS = {
                         },
                         "L555": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("parking-v0",(None, 400000))
+                                                    ("parking-v0",(PPO, 400000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-1-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-4-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-8-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-11-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-14-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-18-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-21-v0",(None, 300000))
+                                                            ("Parking-S-14-PC--GI-1-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-4-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-8-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-11-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-14-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-18-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-21-v0",(SAC, TD3, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": PPO, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1696,26 +1666,25 @@ PROBLEMS = {
                     {
                         "L1": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-20-v0",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-1-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-4-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-8-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-11-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-14-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-18-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-21-v0",(None, 300000))
+                                                            ("Parking-S-14-PC--GI-1-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-4-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-8-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-11-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-14-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-18-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-21-v0",(SAC, TD3, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1730,26 +1699,25 @@ PROBLEMS = {
                         },
                         "L2": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-20-v0",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-1-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-4-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-8-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-11-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-14-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-18-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-21-v0",(None, 300000))
+                                                            ("Parking-S-14-PC--GI-1-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-4-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-8-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-11-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-14-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-18-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-21-v0",(SAC, TD3, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1764,26 +1732,25 @@ PROBLEMS = {
                         },
                         "L3": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-20-v0",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-1-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-4-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-8-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-11-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-14-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-18-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-21-v0",(None, 300000))
+                                                            ("Parking-S-14-PC--GI-1-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-4-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-8-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-11-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-14-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-18-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-21-v0",(SAC, TD3, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1798,26 +1765,25 @@ PROBLEMS = {
                         },
                         "L4": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-20-v0",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-1-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-4-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-8-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-11-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-14-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-18-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-21-v0",(None, 300000))
+                                                            ("Parking-S-14-PC--GI-1-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-4-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-8-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-11-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-14-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-18-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-21-v0",(SAC, TD3, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1832,26 +1798,25 @@ PROBLEMS = {
                         },
                         "L5": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-20-v0",(None, 300000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-20-v0",(SAC, 300000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-1-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-4-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-8-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-11-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-14-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-18-v0",(None, 400000)),
-                                                            ("Parking-S-14-PC--GI-21-v0",(None, 300000))
+                                                            ("Parking-S-14-PC--GI-1-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-4-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-8-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-11-v0",(SAC, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-14-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-18-v0",(SAC, TD3, 400000)),
+                                                            ("Parking-S-14-PC--GI-21-v0",(SAC, TD3, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1866,26 +1831,25 @@ PROBLEMS = {
                         },
                         "L11": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-20-v0",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                            ("Parking-S-14-PC--GI-3-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-7-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-10-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-13-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-15-v0",(SAC, SAC, 200000)),
+                                                            #("Parking-S-14-PC--GI-17-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-20-v0",(PPO, SAC, 200000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1900,26 +1864,25 @@ PROBLEMS = {
                         },
                         "L22": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-20-v0",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                            ("Parking-S-14-PC--GI-3-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-7-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-10-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-13-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-15-v0",(SAC, SAC, 200000)),
+                                                            #("Parking-S-14-PC--GI-17-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-20-v0",(PPO, SAC, 200000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1934,26 +1897,25 @@ PROBLEMS = {
                         },
                         "L33": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-20-v0",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                            ("Parking-S-14-PC--GI-3-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-7-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-10-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-13-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-15-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-17-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-20-v0",(PPO, SAC, 200000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -1968,26 +1930,25 @@ PROBLEMS = {
                         },
                         "L44": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    #("Parking-S-14-PC--GI-20-v0",(SAC, 200000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                            ("Parking-S-14-PC--GI-3-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-7-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-10-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-13-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-15-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-17-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-20-v0",(PPO, SAC, 200000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2002,26 +1963,25 @@ PROBLEMS = {
                         },
                         "L55": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-20-v0",(None, 300000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-20-v0",(SAC, 300000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-20-v0",(None, 300000))
+                                                            ("Parking-S-14-PC--GI-3-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-7-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-10-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-13-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-15-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-17-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-20-v0",(PPO, SAC, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2036,26 +1996,25 @@ PROBLEMS = {
                         },
                         "L111": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-20-v0",(None, 300000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-20-v0",(SAC, 300000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                            ("Parking-S-14-PC--GI-3-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-7-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-10-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-13-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-15-v0",(SAC, SAC, 200000)),
+                                                            #("Parking-S-14-PC--GI-17-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-20-v0",(PPO, SAC, 200000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2070,26 +2029,25 @@ PROBLEMS = {
                         },
                         "L222": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-20-v0",(None, 300000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-20-v0",(SAC, 300000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                            ("Parking-S-14-PC--GI-3-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-7-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-10-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-13-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-15-v0",(SAC, SAC, 200000)),
+                                                            #("Parking-S-14-PC--GI-17-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-20-v0",(PPO, SAC, 200000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2104,26 +2062,25 @@ PROBLEMS = {
                         },
                         "L333": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-20-v0",(None, 300000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-20-v0",(SAC, 300000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                            ("Parking-S-14-PC--GI-3-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-7-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-10-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-13-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-15-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-17-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-20-v0",(PPO, SAC, 200000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2138,26 +2095,25 @@ PROBLEMS = {
                         },
                         "L444": {
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-20-v0",(None, 300000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-20-v0",(SAC, 300000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                            #("Parking-S-14-PC--GI-20-v0",(None, 200000))
+                                                            ("Parking-S-14-PC--GI-3-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-7-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-10-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-13-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-15-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-17-v0",(PPO, PPO, 200000)),
+                                                            #("Parking-S-14-PC--GI-20-v0",(PPO, SAC, 200000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2172,26 +2128,25 @@ PROBLEMS = {
                         },
                         "L555": { # python experiments.py --recognizer graml --domain parking --task L555 --partial_obs_type fragmented --parking_env gd_agent --collect_stats --inference_same_seq_len
                             "base_goals_problems_train_configs": [
-                                                    ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                    ("Parking-S-14-PC--GI-20-v0",(None, 300000))
+                                                    ("Parking-S-14-PC--GI-3-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-7-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-10-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-13-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-15-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-17-v0",(SAC, 200000)),
+                                                    ("Parking-S-14-PC--GI-20-v0",(SAC, 300000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("Parking-S-14-PC--GI-3-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-7-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-10-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-13-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-15-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-17-v0",(None, 200000)),
-                                                            ("Parking-S-14-PC--GI-20-v0",(None, 300000))
+                                                            ("Parking-S-14-PC--GI-3-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-7-v0",(PPO, TD3, 200000)),
+                                                            ("Parking-S-14-PC--GI-10-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-13-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-15-v0",(SAC, SAC, 200000)),
+                                                            ("Parking-S-14-PC--GI-17-v0",(PPO, PPO, 200000)),
+                                                            ("Parking-S-14-PC--GI-20-v0",(PPO, SAC, 300000))
                                                            ],
                             "task_str_to_goal": parking_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gd_agent, mustn't be the same as specified_rl_algorithm_learning
                                 "input_size": 8,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2211,8 +2166,6 @@ PROBLEMS = {
         {
             "additional_combined_recognizer_kwargs": {
                 "learner_type": NeuralAgent,
-                "specified_rl_algorithm_learning": SAC,
-                "specified_rl_algorithm_inference": PPO,
                 "use_goal_directed_problem": False
             },
             "tasks": {
@@ -2220,24 +2173,23 @@ PROBLEMS = {
                     {
                         "L111": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("PandaMyReachDense-v3",(None, 800000))
+                                                    ("PandaMyReachDense-v3",(SAC, 800000))
                                                     ],
                             "dynamic_goals_train_configs": [ # goals = [(-0.5, -0.5, 0.1), (-0.3, -0.3, 0.1), (-0.1, -0.1, 0.1), (-0.5, 0.2, 0.1), (-0.3, 0.2, 0.1), (-0.1, 0.1, 0.1), (0.2, -0.2, 0.1), (0.2, -0.3, 0.1), (0.1, -0.1, 0.1), (0.2, 0.2, 0.1), (0.0, 0.0, 0.1), (0.1, 0.1, 0.1)]
-                                                            #("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(None, 200000)),
+                                                            #("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(SAC, PPO, 200000)),
                                                             # 3 similar:
-                                                            #("PandaMyReachDenseXM0y5X0y2X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseXM0y3X0y2X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y1X0y1X0y1-v3",(None, 200000)),
+                                                            #("PandaMyReachDenseXM0y5X0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseXM0y3X0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y1X0y1X0y1-v3",(SAC, PPO, 200000)),
                                                             # 3 similar:
-                                                            #("PandaMyReachDenseX0y2XM0y2X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseX0y1XM0y1X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(None, 200000)),
+                                                            #("PandaMyReachDenseX0y2XM0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseX0y1XM0y1X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(SAC, PPO, 200000)),
                                                            ],
                             "task_str_to_goal": panda_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 9,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2254,24 +2206,23 @@ PROBLEMS = {
                         },
                         "L222": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("PandaMyReachDense-v3",(None, 800000))
+                                                    ("PandaMyReachDense-v3",(SAC, 800000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(None, 400000)),
-                                                            #("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(None, 400000)),
-                                                            #("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(None, 400000)),
+                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(SAC, PPO, 400000)),
+                                                            #("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(SAC, PPO, 400000)),
+                                                            #("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(SAC, PPO, 400000)),
                                                             # 3 similar:
-                                                            ("PandaMyReachDenseXM0y5X0y2X0y1-v3",(None, 400000)),
-                                                            #("PandaMyReachDenseXM0y3X0y2X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseXM0y1X0y1X0y1-v3",(None, 400000)),
+                                                            ("PandaMyReachDenseXM0y5X0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            #("PandaMyReachDenseXM0y3X0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseXM0y1X0y1X0y1-v3",(SAC, PPO, 400000)),
                                                             # 3 similar
-                                                            #("PandaMyReachDenseX0y2XM0y2X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseX0y1XM0y1X0y1-v3",(None, 400000)),
-                                                            #("PandaMyReachDenseX0y2X0y2X0y1-v3",(None, 400000))
+                                                            #("PandaMyReachDenseX0y2XM0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseX0y1XM0y1X0y1-v3",(SAC, PPO, 400000)),
+                                                            #("PandaMyReachDenseX0y2X0y2X0y1-v3",(SAC, PPO, 400000))
                                                            ],
                             "task_str_to_goal": panda_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 9,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2288,24 +2239,23 @@ PROBLEMS = {
                         },
                         "L333": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("PandaMyReachDense-v3",(None, 800000))
+                                                    ("PandaMyReachDense-v3",(SAC, 800000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(None, 400000)),
-                                                            #("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(None, 400000)),
+                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(SAC, PPO, 400000)),
+                                                            #("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(SAC, PPO, 400000)),
                                                             # 3 similar:
-                                                            ("PandaMyReachDenseXM0y5X0y2X0y1-v3",(None, 400000)),
-                                                            #("PandaMyReachDenseXM0y3X0y2X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseXM0y1X0y1X0y1-v3",(None, 400000)),
+                                                            ("PandaMyReachDenseXM0y5X0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            #("PandaMyReachDenseXM0y3X0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseXM0y1X0y1X0y1-v3",(SAC, PPO, 400000)),
                                                             # 3 similar
-                                                            ("PandaMyReachDenseX0y2XM0y2X0y1-v3",(None, 400000)),
-                                                            #("PandaMyReachDenseX0y1XM0y1X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(None, 400000))
+                                                            ("PandaMyReachDenseX0y2XM0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            #("PandaMyReachDenseX0y1XM0y1X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(SAC, PPO, 400000))
                                                            ],
                             "task_str_to_goal": panda_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 9,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2322,24 +2272,23 @@ PROBLEMS = {
                         },
                         "L444": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("PandaMyReachDense-v3",(None, 800000))
+                                                    ("PandaMyReachDense-v3",(SAC, 800000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            #("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(None, 400000)),
+                                                            #("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(SAC, PPO, 400000)),
                                                             # 3 similar:
-                                                            #("PandaMyReachDenseXM0y5X0y2X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseXM0y3X0y2X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseXM0y1X0y1X0y1-v3",(None, 400000)),
+                                                            #("PandaMyReachDenseXM0y5X0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseXM0y3X0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseXM0y1X0y1X0y1-v3",(SAC, PPO, 400000)),
                                                             # 3 similar4
-                                                            #("PandaMyReachDenseX0y2XM0y2X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseX0y1XM0y1X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(None, 400000))
+                                                            #("PandaMyReachDenseX0y2XM0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseX0y1XM0y1X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(SAC, PPO, 400000))
                                                            ],
                             "task_str_to_goal": panda_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 9,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2356,24 +2305,23 @@ PROBLEMS = {
                         },
                         "L555": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("PandaMyReachDense-v3",(None, 800000))
+                                                    ("PandaMyReachDense-v3",(SAC, 800000))
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(None, 400000)),
+                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(SAC, PPO, 400000)),
                                                             # 3 similar:
-                                                            ("PandaMyReachDenseXM0y5X0y2X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseXM0y3X0y2X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseXM0y1X0y1X0y1-v3",(None, 400000)),
+                                                            ("PandaMyReachDenseXM0y5X0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseXM0y3X0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseXM0y1X0y1X0y1-v3",(SAC, PPO, 400000)),
                                                             # 3 similar4
-                                                            ("PandaMyReachDenseX0y2XM0y2X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseX0y1XM0y1X0y1-v3",(None, 400000)),
-                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(None, 400000))
+                                                            ("PandaMyReachDenseX0y2XM0y2X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseX0y1XM0y1X0y1-v3",(SAC, PPO, 400000)),
+                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(SAC, PPO, 400000))
                                                            ],
                             "task_str_to_goal": panda_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 9,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2393,29 +2341,28 @@ PROBLEMS = {
                     {
                         "L111": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("PandaMyReachDenseX0y0X0y0X0y0-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y5XM0y5X0y2-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseX0y3X0y3X0y1-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y85XM0y85X0y1-v3",(None, 200000)),
+                                                    ("PandaMyReachDenseX0y0X0y0X0y0-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y5XM0y5X0y2-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseX0y3X0y3X0y1-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y85XM0y85X0y1-v3",(SAC, 200000)),
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            #("PandaMyReachDenseX0y4X0y4X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseX0y15X0y25X0y1-v3",(None, 200000)),
+                                                            #("PandaMyReachDenseX0y4X0y4X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseX0y15X0y25X0y1-v3",(SAC, PPO, 200000)),
                                                             # 5 similar:
-                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseXM0y15XM0y15X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseXM0y2XM0y2X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y4XM0y4X0y1-v3",(None, 200000)),
+                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseXM0y15XM0y15X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseXM0y2XM0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y4XM0y4X0y1-v3",(SAC, PPO, 200000)),
                                                             # 3similar:
-                                                            #("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y6XM0y6X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseXM0y7XM0y7X0y1-v3",(None, 200000))
+                                                            #("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y6XM0y6X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseXM0y7XM0y7X0y1-v3",(SAC, PPO, 200000))
                                                            ],
                             "task_str_to_goal": panda_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 9,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2432,29 +2379,28 @@ PROBLEMS = {
                         },
                         "L222": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("PandaMyReachDenseX0y0X0y0X0y0-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y5XM0y5X0y2-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseX0y3X0y3X0y1-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y85XM0y85X0y1-v3",(None, 200000)),
+                                                    ("PandaMyReachDenseX0y0X0y0X0y0-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y5XM0y5X0y2-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseX0y3X0y3X0y1-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y85XM0y85X0y1-v3",(SAC, 200000)),
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            #("PandaMyReachDenseX0y4X0y4X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseX0y15X0y25X0y1-v3",(None, 200000)),
+                                                            #("PandaMyReachDenseX0y4X0y4X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseX0y15X0y25X0y1-v3",(SAC, PPO, 200000)),
                                                             # 5 similar:
-                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y15XM0y15X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseXM0y2XM0y2X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y4XM0y4X0y1-v3",(None, 200000)),
+                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y15XM0y15X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseXM0y2XM0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y4XM0y4X0y1-v3",(SAC, PPO, 200000)),
                                                             # 3similar:
-                                                            #("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y6XM0y6X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseXM0y7XM0y7X0y1-v3",(None, 200000))
+                                                            #("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y6XM0y6X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseXM0y7XM0y7X0y1-v3",(SAC, PPO, 200000))
                                                            ],
                             "task_str_to_goal": panda_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 9,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2471,29 +2417,28 @@ PROBLEMS = {
                         },
                         "L333": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("PandaMyReachDenseX0y0X0y0X0y0-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y5XM0y5X0y2-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseX0y3X0y3X0y1-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y85XM0y85X0y1-v3",(None, 200000)),
+                                                    ("PandaMyReachDenseX0y0X0y0X0y0-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y5XM0y5X0y2-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseX0y3X0y3X0y1-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y85XM0y85X0y1-v3",(SAC, 200000)),
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PandaMyReachDenseX0y15X0y15X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseX0y2X0y2X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseX0y15X0y25X0y1-v3",(None, 200000)),
+                                                            ("PandaMyReachDenseX0y15X0y15X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseX0y2X0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseX0y15X0y25X0y1-v3",(SAC, PPO, 200000)),
                                                             # 5 similar:
-                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseXM0y15XM0y15X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y2XM0y2X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseXM0y4XM0y4X0y1-v3",(None, 200000)),
+                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseXM0y15XM0y15X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y2XM0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseXM0y4XM0y4X0y1-v3",(SAC, PPO, 200000)),
                                                             # 3similar:
-                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseXM0y6XM0y6X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y7XM0y7X0y1-v3",(None, 200000))
+                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseXM0y6XM0y6X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y7XM0y7X0y1-v3",(SAC, PPO, 200000))
                                                            ],
                             "task_str_to_goal": panda_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 9,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2510,29 +2455,28 @@ PROBLEMS = {
                         },
                         "L444": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("PandaMyReachDenseX0y0X0y0X0y0-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y5XM0y5X0y2-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseX0y3X0y3X0y1-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y85XM0y85X0y1-v3",(None, 200000)),
+                                                    ("PandaMyReachDenseX0y0X0y0X0y0-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y5XM0y5X0y2-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseX0y3X0y3X0y1-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y85XM0y85X0y1-v3",(SAC, 200000)),
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PandaMyReachDenseX0y15X0y15X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseX0y2X0y2X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseX0y15X0y25X0y1-v3",(None, 200000)),
+                                                            ("PandaMyReachDenseX0y15X0y15X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseX0y2X0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseX0y15X0y25X0y1-v3",(SAC, PPO, 200000)),
                                                             # 5 similar:
-                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(None, 200000)),
-                                                            #("PandaMyReachDenseXM0y15XM0y15X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y2XM0y2X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y4XM0y4X0y1-v3",(None, 200000)),
+                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(SAC, PPO, 200000)),
+                                                            #("PandaMyReachDenseXM0y15XM0y15X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y2XM0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y4XM0y4X0y1-v3",(SAC, PPO, 200000)),
                                                             # 3similar:
-                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y6XM0y6X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y7XM0y7X0y1-v3",(None, 200000))
+                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y6XM0y6X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y7XM0y7X0y1-v3",(SAC, PPO, 200000))
                                                            ],
                             "task_str_to_goal": panda_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 9,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2549,29 +2493,28 @@ PROBLEMS = {
                         },
                         "L555": { # should only be one problem... maybe can add more dynamic goals to show increasing difficulty as number of dynamic goals increase
                             "base_goals_problems_train_configs": [
-                                                    ("PandaMyReachDenseX0y0X0y0X0y0-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y5XM0y5X0y2-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseX0y3X0y3X0y1-v3",(None, 200000)),
-                                                    ("PandaMyReachDenseXM0y85XM0y85X0y1-v3",(None, 200000)),
+                                                    ("PandaMyReachDenseX0y0X0y0X0y0-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y3XM0y3X0y1-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y5XM0y5X0y2-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseX0y3X0y3X0y1-v3",(SAC, 200000)),
+                                                    ("PandaMyReachDenseXM0y85XM0y85X0y1-v3",(SAC, 200000)),
                                                     ],
                             "dynamic_goals_train_configs": [
-                                                            ("PandaMyReachDenseX0y15X0y15X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseX0y15X0y25X0y1-v3",(None, 200000)),
+                                                            ("PandaMyReachDenseX0y15X0y15X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseX0y2X0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseX0y15X0y25X0y1-v3",(SAC, PPO, 200000)),
                                                             # 5 similar:
-                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y15XM0y15X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y2XM0y2X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y4XM0y4X0y1-v3",(None, 200000)),
+                                                            ("PandaMyReachDenseXM0y1XM0y1X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y15XM0y15X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y2XM0y2X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y4XM0y4X0y1-v3",(SAC, PPO, 200000)),
                                                             # 3similar:
-                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y6XM0y6X0y1-v3",(None, 200000)),
-                                                            ("PandaMyReachDenseXM0y7XM0y7X0y1-v3",(None, 200000))
+                                                            ("PandaMyReachDenseXM0y5XM0y5X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y6XM0y6X0y1-v3",(SAC, PPO, 200000)),
+                                                            ("PandaMyReachDenseXM0y7XM0y7X0y1-v3",(SAC, PPO, 200000))
                                                            ],
                             "task_str_to_goal": panda_str_to_goal,
                             "additional_graml_kwargs": {
-                                "specified_rl_algorithm_adaptation": SAC, # since this is gc_agent, must be the same as specified_rl_algorithm_learning
                                 "input_size": 9,
                                 "hidden_size": 8,
                                 "batch_size": 32,
@@ -2664,6 +2607,7 @@ PROBLEMS = {
 # python experiments.py --recognizer graml --domain point_maze --task L333 --partial_obs_type fragmented --point_maze_env four_rooms --collect_stats --inference_same_seq_len
 # python experiments.py --recognizer graml --domain point_maze --task L444 --partial_obs_type fragmented --point_maze_env four_rooms --collect_stats --inference_same_seq_len
 # python experiments.py --recognizer graml --domain point_maze --task L555 --partial_obs_type fragmented --point_maze_env four_rooms --collect_stats --inference_same_seq_len
+# python experiments.py --domain point_maze --point_maze_env four_rooms --task L555 --partial_obs_type fragmented --recognizer graml --collect_stats--inference_same_seq_len
 
 # python experiments.py --recognizer graml --domain point_maze --task L111 --partial_obs_type continuing --point_maze_env four_rooms --collect_stats --inference_same_seq_len --learn_same_seq_len
 # python experiments.py --recognizer graml --domain point_maze --task L222 --partial_obs_type continuing --point_maze_env four_rooms --collect_stats --inference_same_seq_len --learn_same_seq_len

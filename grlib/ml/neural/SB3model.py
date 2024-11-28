@@ -37,28 +37,7 @@ def create_vec_env(kwargs):
 	# create the model, it will not be a pretrained one anyway
 	# env = gym.make(**kwargs)
 	env = gym.make(**kwargs)
-	# #self.env = make_vec_env(problem_name, env_kwargs={'render_mode': 'rgb_array'})
-	# # env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
-	# # env = Monitor(env, "logs/", allow_early_resets=True)
-	# if tasks_to_complete and len(tasks_to_complete): problem_name += "".join(task+"_" for task in tasks_to_complete)
-	# # env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
-	# if complex_obs_space: env = CombineAchievedGoalAndObservationWrapper(env)
 	return DummyVecEnv([lambda: env])
-	# hyperparams = NETWORK_SETUP[algorithm]
-	# # print(f"hyperparams:{hyperparams}")
-
-	# should_render = True
-	# n_envs = 1
-	# self.env = create_test_env(
-	# 	self.problem_name,
-	# 	n_envs=n_envs,
-	# 	stats_path=None,
-	# 	seed=0,
-	# 	log_dir=None,
-	# 	should_render=should_render,
-	# 	hyperparams=hyperparams,
-	# 	env_kwargs={'render_mode': 'rgb_array'},
-	# )
  
 def change_goal_to_specific_desired(obs, desired):
 	try:
@@ -130,8 +109,6 @@ class NeuralAgent():
 			obs, rewards, general_done, info = self.env.step(action)
 			if isinstance(general_done, np.ndarray): general_done = general_done[0]
 			change_goal_to_specific_desired(obs, desired)
-			if general_done == True:
-				pass
 			if "success" in info[0].keys(): success_done = info[0]["success"] # make sure the agent actually reached the goal within the max time
 			elif "is_success" in info[0].keys(): success_done = info[0]["is_success"] # make sure the agent actually reached the goal within the max time
 			elif "step_task_completions" in info[0].keys(): success_done = (len(info[0]["step_task_completions"]) == 1) # bug of dummyVecEnv, it removes the episode_task_completions from the info dict.
@@ -235,22 +212,6 @@ class NeuralAgent():
 					"lr_schedule": lambda _: 0.0,
 					"clip_range": lambda _: 0.0,
 				}
-
-				# hyperparams = NETWORK_SETUP[self.algorithm]
-				# # print(f"hyperparams:{hyperparams}")
-
-				# should_render = True
-				# n_envs = 1
-				# self.env = create_test_env(
-				# 	self.problem_name,
-				# 	n_envs=n_envs,
-				# 	stats_path=self._model_file_path[:-4],
-				# 	seed=0,
-				# 	log_dir=None,
-				# 	should_render=should_render,
-				# 	hyperparams=hyperparams,
-				# 	env_kwargs={'render_mode': 'rgb_array'},
-				# )
 				kwargs = {"id": self.problem_name, "render_mode": "rgb_array"}
 				self.env = create_vec_env(kwargs)
 				self._actions_space = self.env.action_space
@@ -316,21 +277,6 @@ class NeuralAgent():
 			obs = self.env.reset()
 			change_goal_to_specific_desired(obs, desired)
 		except Exception as e:
-			# hyperparams = NETWORK_SETUP[self.algorithm]
-			# # print(f"hyperparams:{hyperparams}")
-
-			# should_render = True
-			# n_envs = 1
-			# self.env = create_test_env(
-			# 	self.problem_name,
-			# 	n_envs=n_envs,
-			# 	stats_path=None,
-			# 	seed=0,
-			# 	log_dir=None,
-			# 	should_render=should_render,
-			# 	hyperparams=hyperparams,
-			# 	env_kwargs={'render_mode': 'rgb_array'},
-			# )
 			kwargs = {"id": self.problem_name, "render_mode": "rgb_array"}
 			self.env = create_vec_env(kwargs)
 			obs = self.env.reset()
@@ -377,21 +323,6 @@ class NeuralAgent():
 							obs = self.env.reset()
 							change_goal_to_specific_desired(obs, desired)
 						except Exception as e:
-							# hyperparams = NETWORK_SETUP[self.algorithm]
-							# # print(f"hyperparams:{hyperparams}")
-
-							# should_render = True
-							# n_envs = 1
-							# self.env = create_test_env(
-							# 	self.problem_name,
-							# 	n_envs=n_envs,
-							# 	stats_path=None,
-							# 	seed=0,
-							# 	log_dir=None,
-							# 	should_render=should_render,
-							# 	hyperparams=hyperparams,
-							# 	env_kwargs={'render_mode': 'rgb_array'},
-							# )
 							kwargs = {"id": self.problem_name, "render_mode": "rgb_array"}
 							self.env = create_vec_env(kwargs)
 							obs = self.env.reset()
@@ -476,35 +407,11 @@ if __name__ == "__main__":
 	print("this is package root:" + package_root)
 	if package_root not in sys.path:
 		sys.path.insert(0, package_root)
-	# agent = NeuralAgent("PandaReachSimple-g-m01xm01-v3", "PandaReachSimple-g-m01xm01-v3")
-	# currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-	# GRAML_itself = os.path.dirname(currentdir)
-	# GRAML_includer = os.path.dirname(os.path.dirname(currentdir))
-	# sys.path.insert(0, GRAML_includer)
-	# sys.path.insert(0, GRAML_itself)
 
 	from grlib.ml.utils.storage import get_agent_model_dir, set_global_storage_configs
 
 	set_global_storage_configs("graml", "fragmented_partial_obs", "inference_same_length", "learn_diff_length")
-	# agent = NeuralAgent(env_name="panda", problem_name="PandaMyReachDense-v3", algorithm=SAC, num_timesteps=400000)
-	# agent.learn()
-	# num_timesteps = 400000
-	# while True:
-	#     agent = NeuralAgent(env_name="FrankaKitchenEnv", problem_name="FrankaKitchen-v1", tasks_to_complete = ["bottom burner"], algorithm=SAC, num_timesteps=400000, complex_obs_space=True)
-	#     agent.learn()
-	#     if agent.env.is_success_once:
-	#         break
-	#     else:
-	#         num_timesteps += 100000
-	# agent = NeuralAgent(env_name="FrankaKitchenEnv", problem_name="FrankaKitchen-v1", tasks_to_complete = ["bottom burner"], algorithm=SAC, num_timesteps=400000, complex_obs_space=True)
-	# agent.learn()
-	
 	agent = NeuralAgent(env_name="point_maze", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-9x1", algorithm=SAC, num_timesteps=200000)
 	agent.learn()
-	
-	# agent = NeuralAgent(env_name="PointMaze-FourRoomsEnvDense-11x11", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-7x7", algorithm=SAC, num_timesteps=200000)
-	# agent.learn()
-	
-	# agent.record_video("", desired=np.array([[-0.30391812, -0.26489487,  0.14062837]]))
 	agent.record_video("")
 	

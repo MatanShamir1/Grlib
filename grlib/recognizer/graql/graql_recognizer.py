@@ -14,7 +14,7 @@ from grlib.ml.utils.storage import get_graql_experiment_confidence_path
 
 class GraqlRecognizer(ABC):
 	def __init__(self, method: Type[RLAgent], env_name: str, problems: List[str], evaluation_function,
-				 specified_rl_algorithm_learning=None, collect_statistics=True, train_configs=None, task_str_to_goal=None, is_universal=False, use_goal_directed_problem=None):
+				 collect_statistics=True, train_configs=None, task_str_to_goal=None, is_universal=False, use_goal_directed_problem=None):
 		self.is_universal = is_universal
 		if is_universal:
 			assert len(problems) == 1, "you should only give 1 problem to the universal goal recognizer, like parking-v0, etc."
@@ -26,7 +26,6 @@ class GraqlRecognizer(ABC):
 		else: self.active_goals = [self.task_str_to_goal(problem_name) for problem_name in problems]
 		self.agents = {} # consider changing to ContextualAgent
 		self.collect_statistics = collect_statistics
-		self.specified_rl_algorithm = specified_rl_algorithm_learning
 		assert train_configs != None
 		self.train_configs = train_configs
 		self.evaluation_function = evaluation_function
@@ -36,12 +35,8 @@ class GraqlRecognizer(ABC):
 		for i, problem_name in enumerate(self.problems):
 			agent_kwargs = {"env_name": self.env_name,
 							"problem_name": problem_name}
-			if self.train_configs[i][1]: agent_kwargs["num_timesteps"] = self.train_configs[i][1]
-			if self.specified_rl_algorithm: agent_kwargs["algorithm"] = self.specified_rl_algorithm
-			# if problem_name in ["Parking-S-14-PC--GI-14-v0", "Parking-S-14-PC--GI-18-v0"]:
-			# 	agent_kwargs["algorithm"] = TD3
-			if problem_name in ["Parking-S-14-PC--GI-15-v0", "Parking-S-14-PC--GI-13-v0", "Parking-S-14-PC--GI-20-v0"]:
-				agent_kwargs["algorithm"] = SAC
+			if self.train_configs[i][0] != None: agent_kwargs["algorithm"] = self.train_configs[i][0]
+			if self.train_configs[i][1] != None: agent_kwargs["num_timesteps"] = self.train_configs[i][1]
 			agent = self.rl_agents_method(**agent_kwargs)
 			agent.learn()
 			self.agents[self.task_str_to_goal(problem_name)] = agent
@@ -53,10 +48,8 @@ class GraqlRecognizer(ABC):
 		for i, (problem_name, goal) in enumerate(zip(dynamic_goals_problems, self.active_goals)):
 			agent_kwargs = {"env_name": self.env_name,
 							"problem_name": problem_name}
+			if dynamic_train_configs[i][0]: agent_kwargs["algorithm"] = dynamic_train_configs[i][0]
 			if dynamic_train_configs[i][1]: agent_kwargs["num_timesteps"] = dynamic_train_configs[i][1]
-			if self.specified_rl_algorithm: agent_kwargs["algorithm"] = self.specified_rl_algorithm
-			elif problem_name in ["Parking-S-14-PC--GI-15-v0", "Parking-S-14-PC--GI-13-v0", "Parking-S-14-PC--GI-20-v0"]:
-				agent_kwargs["algorithm"] = SAC
 			agent = self.rl_agents_method(**agent_kwargs)
 			agent.learn()
 			self.agents[goal] = agent

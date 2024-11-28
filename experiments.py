@@ -30,11 +30,6 @@ def run_experiments(args):
 	task_str_to_goal = task_inputs[args.task]["task_str_to_goal"]
 	learner_type = domain_inputs["additional_combined_recognizer_kwargs"]["learner_type"]
 	dynamic_goals_problems, dynamic_train_configs = zip(*task_inputs[args.task]["dynamic_goals_train_configs"])
-	if "specified_rl_algorithm_learning" in domain_inputs["additional_combined_recognizer_kwargs"].keys():
-		recognizer_kwargs["specified_rl_algorithm_learning"] = domain_inputs["additional_combined_recognizer_kwargs"]["specified_rl_algorithm_learning"]
-	specified_rl_algorithm_inference = None
-	if "specified_rl_algorithm_inference" in domain_inputs["additional_combined_recognizer_kwargs"].keys():
-		specified_rl_algorithm_inference = domain_inputs["additional_combined_recognizer_kwargs"]["specified_rl_algorithm_inference"]
 	if "use_goal_directed_problem" in domain_inputs["additional_combined_recognizer_kwargs"].keys() and env_name == 'gc_agent':
 		recognizer_kwargs["use_goal_directed_problem"] = domain_inputs["additional_combined_recognizer_kwargs"]["use_goal_directed_problem"]
 
@@ -61,23 +56,18 @@ def run_experiments(args):
 	recognizer.domain_learning_phase()
 	dlp_time = time.time() - start_dlp_time
 	start_ga_time = time.time()
-	recognizer.goals_adaptation_phase(dynamic_goals_problems=dynamic_goals_problems, dynamic_train_configs=dynamic_train_configs)
+	recognizer.goals_adaptation_phase(dynamic_goals_problems=dynamic_goals_problems, dynamic_train_configs=tuple((config[0], config[2]) for config in dynamic_train_configs))
 	ga_time = time.time() - start_ga_time
 	# experiments
 	total_tasks, total_correct, results = 0, 0, {}
 	for percentage in [0.3, 0.5, 0.7, 0.9, 1]:
 		curr_num_tasks, curr_correct, curr_sum_inf_time = 0, 0, 0
-		for problem in dynamic_goals_problems:
+		for problem, dynamic_train_config in zip(dynamic_goals_problems, dynamic_train_configs):
 			goal = str(task_str_to_goal(problem))
 			start_inf_time = time.time()
 			kwargs = {"env_name":args.domain, "problem_name":problem}
-			# edge case: a TD3 agent that doesn't work. it will default to SAC which does work for that problem.
-			if problem not in ["PointMaze-FourRoomsEnv-11x11-Goal-9x9", "PointMaze-FourRoomsEnvDense-11x11-Goal-3x3", "Parking-S-14-PC--GI-13-v0", "Parking-S-14-PC--GI-15-v0", "Parking-S-14-PC--GI-20-v0"]:
-				if specified_rl_algorithm_inference: kwargs["algorithm"] = specified_rl_algorithm_inference
-				if problem in ["Parking-S-14-PC--GI-3-v0", "Parking-S-14-PC--GI-10-v0", "Parking-S-14-PC--GI-17-v0"]:
-					kwargs["algorithm"] = PPO
-			if dynamic_train_configs[0][0]: kwargs["exploration_rate"] = dynamic_train_configs[0][0]
-			if dynamic_train_configs[0][1]: kwargs["num_timesteps"] = dynamic_train_configs[0][1]
+			if dynamic_train_config[1]: kwargs["algorithm"] = dynamic_train_config[1]
+			if dynamic_train_config[2]: kwargs["num_timesteps"] = dynamic_train_config[2]
 			agent = learner_type(**kwargs)
 			agent.learn()
 			generate_obs_kwargs = {"action_selection_method": stochastic_amplified_selection,
@@ -128,7 +118,7 @@ def parse_args():
 	required_group.add_argument("--recognizer", choices=["graml", "graql", "draco"], required=True, help="Recognizer type (graml, graql, draco). graql only for discrete domains.")
 	required_group.add_argument("--task", choices=["L1", "L2", "L3", "L4", "L5", "L11", "L22", "L33", "L44", "L55", "L111", "L222", "L333", "L444", "L555"], required=True, help="Task identifier (e.g., L1, L2,...,L5)")
 	required_group.add_argument("--partial_obs_type", required=True, choices=["fragmented", "continuing"], help="Give fragmented or continuing partial observations for inference phase inputs.")
-# python experiments.py --recognizer graml --domain point_maze --task L555 --partial_obs_type fragmented --point_maze_env four_rooms --collect_stats --inference_same_seq_len
+
 	# Optional arguments
 	optional_group = parser.add_argument_group("Optional arguments")
 	optional_group.add_argument("--collect_stats", action="store_true", help="Whether to collect statistics")
@@ -166,26 +156,6 @@ def parse_args():
 	return args
 
 if __name__ == "__main__":
-	# assert (len(sys.argv) == 7 and sys.argv[1] in ["graml"] and sys.argv[2] in ["continuing_partial_obs", "fragmented_partial_obs"] and sys.argv[3] in ["inference_same_length", "inference_diff_length"] and sys.argv[4] in ["learn_same_length", "learn_diff_length"] and sys.argv[5] in ['no_collect_statistics', 'collect_statistics'] and sys.argv[6] in ["MAZE:FOUR_ROOMS", "MAZE:OBSTACLES", "MINIGRID", "PARKING:GC_AGENT", "PARKING:AGENT", "KITCHEN:COMB1"]) \
-	# 		or (len(sys.argv) == 5 and sys.argv[1] in ["graql"] and sys.argv[2] in ["continuing_partial_obs", "fragmented_partial_obs"] and sys.argv[3] in ['no_collect_statistics', 'collect_statistics'] and sys.argv[4] in ["MAZE:FOUR_ROOMS", "MAZE:OBSTACLES", "MINIGRID", "PARKING:GC_AGENT", "PARKING:AGENT", "KITCHEN:COMB1"]) \
-	#    ,f"Assertion failed: incorrect arguments.\nExample 1: \n\t python graml_main.py graml [continuing_partial_obs/fragmented_partial_obs] [inference_same_length/inference_diff_length] [learn_same_length/learn_diff_length] [collect_statistics/no_collect_statistics]\nExample 2: \n\t python graml_main.py graql [continuing_partial_obs/fragmented_partial_obs] [collect_statistics/no_collect_statistics]"
-	# if sys.argv[1] == "graml":
-	# 	set_global_storage_configs(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-	# 	init(recognizer_str=sys.argv[1], is_fragmented=sys.argv[2] == "fragmented_partial_obs", is_inference_same_length_sequences=sys.argv[3] == "inference_same_length", is_learn_same_length_sequences=sys.argv[4] == "learn_same_length", collect_statistics=sys.argv[5] == "collect_statistics", task=sys.argv[6])
-	# else: # graql
-	# 	set_global_storage_configs(sys.argv[1], sys.argv[2])
-	# 	init(recognizer_str=sys.argv[1], is_fragmented=sys.argv[2] == "fragmented_partial_obs", collect_statistics=sys.argv[3] == "collect_statistics", task=sys.argv[4])
 	args = parse_args()
 	set_global_storage_configs(recognizer_str=args.recognizer, is_fragmented=args.partial_obs_type, is_inference_same_length_sequences=args.inference_same_seq_len, is_learn_same_length_sequences=args.learn_same_seq_len)
 	run_experiments(args)
-
-# python experiments.py --recognizer graml --domain point_maze --task L44 --partial_obs_type fragmented --point_maze_env obstacles --inference_same_seq_len --collect_stats	
-# python experiments.py --recognizer graml --domain point_maze --task L1 --partial_obs_type fragmented --point_maze_env obstacles --inference_same_seq_len --collect_stats
-# python experiments.py --recognizer graml --domain point_maze --task L5 --partial_obs_type continuing --point_maze_env four_rooms --inference_same_seq_len --learn_same_seq_len --collect_stats
-# python experiments.py --recognizer graql --domain point_maze --task L1 --partial_obs_type fragmented --point_maze_env obstacles --collect_stats
-# python experiments.py --recognizer graql --domain point_maze --task L1 --partial_obs_type continuing --point_maze_env four_rooms --collect_stats
-# python experiments.py --recognizer graml --domain parking --task L5 --partial_obs_type continuing --parking_env gc_agent --collect_stats --inference_same_seq_len
-
-# python experiments.py --recognizer graml --domain panda --task L3 --partial_obs_type fragmented --panda_env gc_agent --collect_stats --inference_same_seq_len
-
-# python experiments.py --recognizer graml --domain minigrid --task L3 --partial_obs_type fragmented --minigrid_env obstacles --collect_stats --inference_same_seq_len

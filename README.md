@@ -1,5 +1,6 @@
-### GRAML ###
-## Setup:
+### GRLib ###
+GRLib is a python package containing implementations of Goal Recognition (GR) algorithms which use MDPs to represent the decision making process. All agents in those algorithms interact with an environment that's registered in gym API.
+## Setup: ##
 1. Ensure you have python 3.11 installed.
 If you have root permissions, simply use:
 ```

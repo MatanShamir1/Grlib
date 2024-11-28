@@ -62,8 +62,7 @@ class GramlRecognizer(ABC):
 	def __init__(self, method: Type[ABC], env_name: str, problems: List[str],  train_configs: List,
               task_str_to_goal:MethodType, problem_list_to_str_tuple:MethodType, num_samples: int,
               goals_adaptation_sequence_generation_method, input_size: int, hidden_size: int, batch_size: int,
-              partial_obs_type: str=True, specified_rl_algorithm_learning=None, specified_rl_algorithm_adaptation=None, 
-              is_inference_same_length_sequences=False, is_learn_same_length_sequences=False,
+              partial_obs_type: str=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False,
               collect_statistics=True, gc_sequence_generation=False,
               gc_goal_set=None, tasks_to_complete: bool=False, use_goal_directed_problem=None):
 		assert len(train_configs) == len(problems), "There should be train configs for every problem."
@@ -79,8 +78,6 @@ class GramlRecognizer(ABC):
 		self.train_func = train_metric_model; self.collate_func = collate_fn
 		self.collect_statistics = collect_statistics
 		self.task_str_to_goal = task_str_to_goal
-		self.specified_rl_algorithm_learning = specified_rl_algorithm_learning
-		self.specified_rl_algorithm_adaptation = specified_rl_algorithm_adaptation
 		self.goals_adaptation_sequence_generation_method = goals_adaptation_sequence_generation_method
 		self.gc_sequence_generation = gc_sequence_generation
 		if gc_sequence_generation:
@@ -100,18 +97,12 @@ class GramlRecognizer(ABC):
 
 	def domain_learning_phase(self):
 		# start by training each rl agent on the base goal set
-		for problem_name, (exploration_rate, num_timesteps) in zip(self.problems, self.train_configs):
+		for problem_name, (algorithm, num_timesteps) in zip(self.problems, self.train_configs):
 			kwargs = {"env_name":self.env_name, "problem_name":problem_name}
-			if self.specified_rl_algorithm_learning: kwargs["algorithm"] = self.specified_rl_algorithm_learning
-			if exploration_rate: kwargs["exploration_rate"] = exploration_rate
-			if num_timesteps: kwargs["num_timesteps"] = num_timesteps
-			if self.tasks_to_complete: kwargs["tasks_to_complete"] = [problem_name]; problem_name = self.env_name; kwargs["env_name"] = kwargs["env_name"][:-3] + "Env"; kwargs["problem_name"] = self.env_name; kwargs["complex_obs_space"] = True
+			if algorithm != None: kwargs["algorithm"] = algorithm
+			if num_timesteps != None: kwargs["num_timesteps"] = num_timesteps
+			# if self.tasks_to_complete: kwargs["tasks_to_complete"] = [problem_name]; problem_name = self.env_name; kwargs["env_name"] = kwargs["env_name"][:-3] + "Env"; kwargs["problem_name"] = self.env_name; kwargs["complex_obs_space"] = True
 			if self.gc_sequence_generation: kwargs["is_gc"] = True
-			# edge case: not working for GI-14, GI-18, GI-15. TODO remove this by training them properly and changing configuration to be agent specific.
-			# if problem_name in ["Parking-S-14-PC--GI-14-v0", "Parking-S-14-PC--GI-18-v0"]:
-			# 	kwargs["algorithm"] = TD3
-			if problem_name in ["Parking-S-14-PC--GI-15-v0", "Parking-S-14-PC--GI-13-v0", "Parking-S-14-PC--GI-20-v0"]:
-				kwargs["algorithm"] = SAC
 			agent = self.rl_agents_method(**kwargs)
 			agent.learn()
 			self.agents.append(ContextualAgent(problem_name=problem_name, problem_goal=self.task_str_to_goal(problem_name), agent=agent))
@@ -158,22 +149,15 @@ class GramlRecognizer(ABC):
 				obs = mcts_model.plan(self.env_name, problem_name, self.task_str_to_goal(problem_name), save_fig=True)
 			elif self.goals_adaptation_sequence_generation_method == AGENT_BASED:
 				kwargs = {"env_name":self.env_name, "problem_name":problem_name}
-				if self.specified_rl_algorithm_adaptation: kwargs["algorithm"] = self.specified_rl_algorithm_adaptation
-				# edge case: not working for GI-14, GI-18, GI-15. TODO remove this by training them properly and changing configuration to be agent specific.
-				# if problem_name in ["Parking-S-14-PC--GI-14-v0", "Parking-S-14-PC--GI-18-v0"]:
-				# 	kwargs["algorithm"] = TD3
-				if problem_name in ["Parking-S-14-PC--GI-15-v0"]:
-					kwargs["algorithm"] = SAC
-				if dynamic_train_configs[i][0]!=None: kwargs["exploration_rate"] = dynamic_train_configs[i][0]
-				if dynamic_train_configs[i][1]!=None: kwargs["num_timesteps"] = dynamic_train_configs[i][1]
+				if dynamic_train_configs[i][0] != None: kwargs["algorithm"] = dynamic_train_configs[i][0]
+				if dynamic_train_configs[i][1] != None: kwargs["num_timesteps"] = dynamic_train_configs[i][1]
 				agent = self.rl_agents_method(**kwargs)
 				agent.learn()
 				obs = agent.generate_observation(action_selection_method=metrics.greedy_selection, random_optimalism=False, save_fig=True)
 			elif self.goals_adaptation_sequence_generation_method == GC_AGENT_BASED:
 				kwargs = {"env_name":self.env_name, "problem_name":self.problems[0]}
-				if self.specified_rl_algorithm_adaptation: kwargs["algorithm"] = self.specified_rl_algorithm_adaptation
-				if self.train_configs[0][0]: kwargs["exploration_rate"] = self.train_configs[0][0]
-				if self.train_configs[0][1]: kwargs["num_timesteps"] = self.train_configs[0][1]
+				if self.train_configs[0][0] != None: kwargs["algorithm"] = self.train_configs[0][0]
+				if self.train_configs[0][1] != None: kwargs["num_timesteps"] = self.train_configs[0][1]
 				kwargs["is_gc"] = True
 				agent = self.rl_agents_method(**kwargs)
 				agent.learn()
