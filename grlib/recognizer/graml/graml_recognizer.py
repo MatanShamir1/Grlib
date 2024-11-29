@@ -62,7 +62,7 @@ class GramlRecognizer(ABC):
 	def __init__(self, method: Type[ABC], env_name: str, problems: List[str],  train_configs: List,
               task_str_to_goal:MethodType, problem_list_to_str_tuple:MethodType, num_samples: int,
               goals_adaptation_sequence_generation_method, input_size: int, hidden_size: int, batch_size: int,
-              partial_obs_type: str=True, is_inference_same_length_sequences=False, is_learn_same_length_sequences=False,
+              partial_obs_type: str, is_inference_same_length_sequences=True, is_learn_same_length_sequences=True,
               collect_statistics=True, gc_sequence_generation=False,
               gc_goal_set=None, tasks_to_complete: bool=False, use_goal_directed_problem=None):
 		assert len(train_configs) == len(problems), "There should be train configs for every problem."
@@ -121,6 +121,7 @@ class GramlRecognizer(ABC):
 			print(f"Loading pre-existing lstm model in {self.model_file_path}")
 			load_weights(loaded_model=self.model, path=self.model_file_path)
 		else:
+			print(f"{self.model_file_path} doesn't exist, training the model")
 			train_samples, dev_samples = generate_datasets(num_samples=self.num_samples,
                                                   		   agents=self.agents,
                                                        	   observation_creation_method=metrics.stochastic_amplified_selection,
@@ -209,7 +210,7 @@ class GramlRecognizer(ABC):
 				to_dump = {goal:self.agents[0].agent.simplify_observation(obs) for goal, obs in self.plans_dict.items()}
 			dill.dump(to_dump, plans_file)
 		self.plans_dict.pop(f"{true_goal}_true")
-# python experiments.py --recognizer graml --domain parking --task L5 --partial_obs_type fragmented --parking_env gc_agent --collect_stats --inference_same_seq_len
+
 	def inference_phase(self, inf_sequence, true_goal, percentage) -> str:
 		# Arrange storage
 		embeddings_path = get_embeddings_result_path(self.env_name)

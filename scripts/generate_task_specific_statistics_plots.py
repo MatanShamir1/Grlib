@@ -110,11 +110,11 @@ def analyze_and_produce_plots(recognizer_type: str, domain_name: str, env_name: 
 	# Initialize matrices of size len(goals) x len(goals)
 	confusion_matrix_goals, confusion_matrix_plans = np.zeros((len(goals), len(goals))), np.zeros((len(goals), len(goals)))
 
-	if domain_name == 'point_maze' and args.task == 'L555':
-		if env_name == 'obstacles':
-			goals = ['(4, 7)', '(3, 6)', '(5, 5)', '(8, 8)', '(6, 3)', '(7, 4)']
-		else: # if env_name is 'four_rooms'
-			goals = ['(2, 8)', '(3, 7)', '(3, 4)', '(4, 4)', '(4, 3)', '(7, 3)', '(8, 2)']
+	# if domain_name == 'point_maze' and args.task == 'L555':
+	# 	if env_name == 'obstacles':
+	# 		goals = ['(4, 7)', '(3, 6)', '(5, 5)', '(8, 8)', '(6, 3)', '(7, 4)']
+	# 	else: # if env_name is 'four_rooms'
+	# 		goals = ['(2, 8)', '(3, 7)', '(3, 4)', '(4, 4)', '(4, 3)', '(7, 3)', '(8, 2)']
 
 	# Populate confusion matrix with similarity values for goals
 	for i, true_goal in enumerate(goals):
@@ -122,11 +122,12 @@ def analyze_and_produce_plots(recognizer_type: str, domain_name: str, env_name: 
 			percentage = percentages[-3]
 			confusion_matrix_goals[i, j] = goals_similarity_dict[true_goal][percentage].get(dynamic_goal, 0)
 
-	# Populate confusion matrix with similarity values for plans
-	for i, true_goal in enumerate(goals):
-		for j, dynamic_goal in enumerate(goals):
-			percentage = percentages[-1]
-			confusion_matrix_plans[i, j] = plans_similarity_dict[true_goal][percentage].get(dynamic_goal, 0)
+	if plans_similarity_dict:
+		# Populate confusion matrix with similarity values for plans
+		for i, true_goal in enumerate(goals):
+			for j, dynamic_goal in enumerate(goals):
+				percentage = percentages[-1]
+				confusion_matrix_plans[i, j] = plans_similarity_dict[true_goal][percentage].get(dynamic_goal, 0)
 
 	# Create the figure and subplots for the unified display
 	fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6), sharex=True)

@@ -32,7 +32,7 @@ def create_folders_if_necessary(path):
 def get_storage_framework_dir():
     global IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES, RECOGNIZER_STR
     assert RECOGNIZER_STR == "graql" and IS_FRAGMENTED!=None or (RECOGNIZER_STR == "graml" and IS_FRAGMENTED!=None and IS_INFERENCE_SAME_LEN_SEQUENCES!=None and IS_LEARN_SAME_LEN_SEQUENCES!=None), "You must call 'set_global_storage_configs' before using API from 'storage' module."
-    return f"{get_storage_dir()}/{RECOGNIZER_STR}"
+    return os.path.join(get_storage_dir(),RECOGNIZER_STR)
 
 def get_storage_dir():
     return "dataset"

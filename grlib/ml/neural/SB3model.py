@@ -269,7 +269,7 @@ class NeuralAgent():
 		steps = self.generate_observation(action_selection_method, save_fig=save_fig, random_optimalism=random_optimalism) # steps are a full observation
 		return random_subset_with_order(steps, (int)(percentage * len(steps)), is_fragmented)
 
-	def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig = False,
+	def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig=False,
 							 specific_vid_name=None, with_dict=False, desired=None):
 		if save_fig == False:
 			assert specific_vid_name == None, "You can't specify a vid path when you don't even save the figure."

@@ -36,6 +36,7 @@ def generate_datasets(num_samples, agents: List[ContextualAgent], observation_cr
 		with open(dataset_dev_path, 'rb') as dev_file:
 			dev_samples = dill.load(dev_file)
 	else:
+		print(f"{dataset_directory} doesn't exist, generating datasets")
 		if not os.path.exists(dataset_directory):
 			os.makedirs(dataset_directory)
 		all_samples = []
