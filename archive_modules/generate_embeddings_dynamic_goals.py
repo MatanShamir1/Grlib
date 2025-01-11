@@ -69,7 +69,7 @@ def offline_dynamic_tasks_embeddings(env_name, goals):
 	return tasks_embeddings_dict
 
 if __name__ == "__main__":
-	assert len(sys.argv) == 3, f"Assertion failed: len(sys.argv) is {len(sys.argv)} while it needs to be 3.\n Example: \n\t /usr/bin/python scripts/generate_embeddings_dynamic_goals.py MiniGrid-Walls-13x13-v0 dataset/MiniGrid-Walls-13x13-v0/models/[11x1]_[11x11]_[1x11]_[8x1]/GramlRecognizer/dynamic_goals.conf"
+	assert len(sys.argv) == 3, f"Assertion failed: len(sys.argv) is {len(sys.argv)} while it needs to be 3.\n Example: \n\t /usr/bin/python scripts/generate_embeddings_dynamic_goals.py MiniGrid-Walls-13x13-v0 dataset/MiniGrid-Walls-13x13-v0/models/[11x1]_[11x11]_[1x11]_[8x1]/Graml/dynamic_goals.conf"
 	assert os.path.exists(get_embeddings_result_path(sys.argv[1])), "embeddings weren't made for this environment, run graml_main.py with this environment first."
 	problems_path = sys.argv[2]
 	with open(problems_path, 'r') as file:

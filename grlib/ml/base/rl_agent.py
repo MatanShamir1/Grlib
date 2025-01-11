@@ -19,7 +19,7 @@ class RLAgent(ABC):
             learning_rate: float,
             gamma: float,
             problem_name: str,
-            env_name: str
+            domain_name: str
     ):
         self.episodes = episodes
         self.decaying_eps = decaying_eps
@@ -27,7 +27,7 @@ class RLAgent(ABC):
         self.learning_rate = learning_rate
         self.gamma = gamma
         self.problem_name = problem_name
-        self.env_name = env_name
+        self.domain_name = domain_name
         self.env = None
         self.states_counter = {}
 

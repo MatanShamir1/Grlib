@@ -13,11 +13,10 @@ from typing import Any
 from random import Random
 from typing import List, Iterable
 from gymnasium.error import InvalidAction
+from grlib.environment.environment import QLEARNING, MinigridProperty
 from grlib.ml.tabular import TabularState
 from grlib.ml.tabular.tabular_rl_agent import TabularRLAgent
 from grlib.ml.utils import get_agent_model_dir, random_subset_with_order, softmax
-from grlib.ml.utils.storage import get_policy_sequences_result_path, set_global_storage_configs
-from scripts.get_plans_images import create_sequence_image
 
 
 class TabularQLearner(TabularRLAgent):
@@ -29,9 +28,10 @@ class TabularQLearner(TabularRLAgent):
     CONF_FILE = r"conf.pkl"
 
     def __init__(self,
-                 env_name: str,
+                 domain_name: str,
                  problem_name: str,
-                 episodes: int = 100000,
+                 algorithm: str,
+                 num_timesteps: int,
                  decaying_eps: bool = True,
                  eps: float = 1.0,
                  alpha: float = 0.5,
@@ -43,9 +43,9 @@ class TabularQLearner(TabularRLAgent):
                  valid_only: bool = False
                  ):
         super().__init__(
-            env_name=env_name,
+            domain_name=domain_name,
             problem_name=problem_name,
-            episodes=episodes,
+            episodes=num_timesteps,
             decaying_eps=decaying_eps,
             eps=eps,
             alpha=alpha,
@@ -54,10 +54,11 @@ class TabularQLearner(TabularRLAgent):
             rand=rand,
             learning_rate=learning_rate
         )
+        assert algorithm == QLEARNING, f"algorithm {algorithm} is not supported by {self.__class__.__name__}"
         self.valid_only = valid_only
         self.check_partial_goals = check_partial_goals
         self.goal_literals_achieved = set()
-        self.model_directory = get_agent_model_dir(env_name=env_name, model_name=problem_name, class_name=self.class_name())
+        self.model_directory = get_agent_model_dir(domain_name=domain_name, model_name=problem_name, class_name=self.class_name())
         self.model_file_path = os.path.join(self.model_directory, TabularQLearner.MODEL_FILE_NAME)
         self._conf_file = os.path.join(self.model_directory, TabularQLearner.CONF_FILE)
 
@@ -66,6 +67,8 @@ class TabularQLearner(TabularRLAgent):
         if os.path.exists(self.model_file_path):
             print(f"Loading pre-existing model in {self.model_file_path}")
             self.load_q_table(path=self.model_file_path)
+        else:
+            print(f"Creating new model in {self.model_file_path}")
         if os.path.exists(self._conf_file):
             print(f"Loading pre-existing conf file in {self._conf_file}")
             with open(self._conf_file, "rb") as f:
@@ -348,7 +351,7 @@ class TabularQLearner(TabularRLAgent):
     def simplify_observation(self, observation):
         return [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in observation] # list of tuples, each tuple the sample
         
-    def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig = False, specific_vid_name: str=None):
+    def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig = False, fig_path: str=None, env_prop=None):
         """
         Generate a single observation given a list of agents
 
@@ -368,7 +371,9 @@ class TabularQLearner(TabularRLAgent):
             episode terminates.
         """
         if save_fig == False:
-            assert specific_vid_name == None, "You can't specify a vid path when you don't even save the figure."
+            assert fig_path == None, "You can't specify a vid path when you don't even save the figure."
+        else:
+            assert fig_path != None, "You must specify a vid path when you save the figure."
         obs, _ = self.env.reset()
         MAX_STEPS = 32
         done = False
@@ -405,16 +410,14 @@ class TabularQLearner(TabularRLAgent):
 
         #assert len(steps) >= 2
         if save_fig:
-            img_path = os.path.join(get_policy_sequences_result_path(self.env_name), self.problem_name)
-            if specific_vid_name: img_path += f"_{specific_vid_name}"
             sequence = [pos for ((state, pos), action) in steps]
             #print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
-            print(f"generating sequence image at {img_path}.")
-            create_sequence_image(sequence, img_path, self.problem_name)
+            print(f"generating sequence image at {fig_path}.")
+            env_prop.create_sequence_image(sequence, fig_path, self.problem_name) # TODO change that assumption, cannot assume this is minigrid env
 
         return steps
 
-    def generate_partial_observation(self, action_selection_method: MethodType, percentage: float, save_fig = False, is_fragmented = True, random_optimalism=True, specific_vid_name=None):
+    def generate_partial_observation(self, action_selection_method: MethodType, percentage: float, save_fig = False, is_consecutive = True, random_optimalism=True, fig_path=None):
         """
         Generate a single observation given a list of agents
 
@@ -434,17 +437,16 @@ class TabularQLearner(TabularRLAgent):
             episode terminates.
         """
 
-        steps = self.generate_observation(action_selection_method=action_selection_method, random_optimalism=random_optimalism, save_fig=save_fig, specific_vid_name=specific_vid_name) # steps are a full observation
-        result = random_subset_with_order(steps, (int)(percentage * len(steps)), is_fragmented)
+        steps = self.generate_observation(action_selection_method=action_selection_method, random_optimalism=random_optimalism, save_fig=save_fig, fig_path=fig_path) # steps are a full observation
+        result = random_subset_with_order(steps, (int)(percentage * len(steps)), is_consecutive)
         if percentage >= 0.8:
             assert len(result) > 2
         return result
     
 if __name__ == "__main__":
-    set_global_storage_configs("graml", "fragmented_partial_obs", "inference_same_length", "learn_diff_length")
     from grlib.metrics.metrics import greedy_selection
     import gr_libs # to register everything
-    agent = TabularQLearner(env_name="minigrid", problem_name="MiniGrid-LavaCrossingS9N2-DynamicGoal-1x7-v0")
+    agent = TabularQLearner(domain_name="minigrid", problem_name="MiniGrid-LavaCrossingS9N2-DynamicGoal-1x7-v0")
     agent.generate_observation(greedy_selection, True, True)
     
     # python experiments.py --recognizer graml --domain point_maze --task L5 --partial_obs_type continuing --point_maze_env obstacles --collect_stats --inference_same_seq_len

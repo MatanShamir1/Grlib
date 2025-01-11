@@ -1,10 +1,13 @@
-from grlib.recognizer.graml.graml_recognizer import GramlRecognizer
-from grlib.recognizer.graql.graql_recognizer import GraqlRecognizer
+from grlib.recognizer.graml.graml_recognizer import GCGraml, ExpertBasedGraml, MCTSBasedGraml
+from grlib.recognizer.gr_as_rl.gr_as_rl_recognizer import Graql, Draco, GCDraco
 
 def recognizer_str_to_obj(recognizer_str: str):
-    if recognizer_str == "graml":
-        return GramlRecognizer
-    elif recognizer_str == "graql":
-        return GraqlRecognizer
-    elif recognizer_str == "draco":
-        return GraqlRecognizer
+    recognizer_map = {
+        "GCGraml": GCGraml,
+        "ExpertBasedGraml": ExpertBasedGraml,
+        "MCTSBasedGraml": MCTSBasedGraml,
+        "Graql": Graql,
+        "Draco": Draco,
+        "GCDraco": GCDraco
+    }
+    return recognizer_map.get(recognizer_str)

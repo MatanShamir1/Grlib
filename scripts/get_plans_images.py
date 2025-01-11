@@ -2,15 +2,6 @@ import sys
 import os
 import pickle
 import inspect
-import gymnasium
-from PIL import Image
-import numpy as np
-
-from gymnasium.envs.registration import register
-from minigrid.core.world_object import Wall, Lava
-from minigrid.wrappers import RGBImgPartialObsWrapper, ImgObsWrapper
-
-from grlib.environment.utils.format import minigrid_str_to_goal
 
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -24,31 +15,6 @@ def get_plans_result_path(env_name):
 
 def get_policy_sequences_result_path(env_name):
 	return os.path.join("dataset", (env_name), "policy_sequences")
-
-def create_sequence_image(sequence, img_path, problem_name):
-	if not os.path.exists(os.path.dirname(img_path)): os.makedirs(os.path.dirname(img_path))
-	env_id = problem_name.split("-DynamicGoal-")[0] + "-DynamicGoal-" + problem_name.split("-DynamicGoal-")[1]
-	result = register(
-		id=env_id,
-		entry_point="gr_libs.minigrid_scripts.envs:CustomColorEnv",
-		kwargs={"size": 13 if 'Simple' in problem_name else 9,
-          		"num_crossings": 4 if 'Simple' in problem_name else 3,
-            	"goal_pos": minigrid_str_to_goal(problem_name),
-             	"obstacle_type": Wall if 'Simple' in problem_name else Lava,
-            	"start_pos": (1, 1) if 'Simple' in problem_name else (3, 1),
-             	"plan": sequence},
-	)
-	#print(result)
-	env = gymnasium.make(id=env_id)
-	env = RGBImgPartialObsWrapper(env) # Get pixel observations
-	env = ImgObsWrapper(env) # Get rid of the 'mission' field
-	obs, _ = env.reset() # This now produces an RGB tensor only
-
-	img = env.get_frame()
-
-	####### save image to file
-	image_pil = Image.fromarray(np.uint8(img)).convert('RGB')
-	image_pil.save(r"{}.png".format(img_path))
 
 
 # TODO: instead of loading the model and having it produce the sequence again, just save the sequence from the framework run, and have this script accept the whole path (including is_fragmented etc.)

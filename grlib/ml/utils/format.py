@@ -51,14 +51,14 @@ def preprocess_images(images, device=None):
 	return torch.tensor(images, device=device, dtype=torch.float)
 
 
-def random_subset_with_order(sequence, subset_size, is_fragmented = True):
+def random_subset_with_order(sequence, subset_size, is_consecutive = True):
 	if subset_size >= len(sequence):
 		return sequence
 	else:
-		if is_fragmented:
-			indices_to_select = sorted(random.sample(range(len(sequence)), subset_size))  # Randomly select indices to keep
-		else:
+		if is_consecutive:
 			indices_to_select = [i for i in range(subset_size)]
+		else:
+			indices_to_select = sorted(random.sample(range(len(sequence)), subset_size))  # Randomly select indices to keep
 		return [sequence[i] for i in indices_to_select]  # Return the elements corresponding to the selected indices
 
 

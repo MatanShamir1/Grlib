@@ -1,2 +1,2 @@
-from grlib.recognizer.graml.graml_recognizer import GramlRecognizer
-from grlib.recognizer.graql.graql_recognizer import GraqlRecognizer
+from grlib.recognizer.graml.graml_recognizer import Graml
+from grlib.recognizer.gr_as_rl.gr_as_rl_recognizer import Graql

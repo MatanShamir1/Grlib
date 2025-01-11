@@ -1,1 +1,0 @@
-from .format import maze_str_to_goal, minigrid_str_to_goal, parking_str_to_goal, goal_str_to_tuple, panda_str_to_goal

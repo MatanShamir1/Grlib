@@ -13,7 +13,7 @@ from gymnasium.spaces.discrete import Discrete
 
 from ..ml.base import State
 from ..ml.base.rl_agent import RLAgent
-from ..ml.neural.SB3model import NeuralAgent
+from ..ml.neural.deep_rl_learner import DeepRLAgent
 
 
 def kl_divergence(p1: List[float], p2: List[float]) -> float:
@@ -118,7 +118,7 @@ def pass_observation_patcher(observations: List[Any], agent: RLAgent) -> Generat
 
 def mean_wasserstein_distance(
         observations: List[Tuple[State, Any]],
-        agent: NeuralAgent,
+        agent: DeepRLAgent,
         actions: gymnasium.spaces.Box,
         observation_patcher: Callable[[List[Any], RLAgent], Generator[None, None, None]] = pass_observation_patcher
 ):
@@ -146,7 +146,7 @@ def mean_wasserstein_distance(
     return mean(distances)
 
 
-def mean_action_distance_continuous(observations: List[Tuple[State, Any]], agent: NeuralAgent, actions: gymnasium.spaces.Box):
+def mean_action_distance_continuous(observations: List[Tuple[State, Any]], agent: DeepRLAgent, actions: gymnasium.spaces.Box):
     distances = []
     for observation, action in observations:
         action2, _ = agent.model.predict(
@@ -181,7 +181,7 @@ def z_score(x, mean_action: float, std_dev: float):
 
 def mean_p_value(
         observations: List[Tuple[State, Any]],
-        agent: NeuralAgent,
+        agent: DeepRLAgent,
         actions: gymnasium.spaces.Box,
         observation_patcher: Callable[[List[Any], RLAgent], Generator[None, None, None]] = pass_observation_patcher
 ):

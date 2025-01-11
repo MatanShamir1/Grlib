@@ -16,7 +16,7 @@ class TabularRLAgent(RLAgent):
     """
 
     def __init__(self,
-                 env_name: str,
+                 domain_name: str,
                  problem_name: str,
                  episodes: int,
                  decaying_eps: bool,
@@ -33,7 +33,7 @@ class TabularRLAgent(RLAgent):
             epsilon=eps,
             learning_rate=learning_rate,
             gamma=gamma,
-            env_name=env_name,
+            domain_name=domain_name,
             problem_name=problem_name
         )
         self.env = gym.make(id=problem_name)

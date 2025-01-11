@@ -1,47 +1,26 @@
 import csv
 import os
-from typing import List
 import torch
 import logging
 import sys
 
 from .other import device
 
-IS_FRAGMENTED = None
-IS_INFERENCE_SAME_LEN_SEQUENCES = None
-IS_LEARN_SAME_LEN_SEQUENCES = None
-RECOGNIZER_STR = None
-GRAQL = "graql"
-GRAML = "graml"
-
-def set_global_storage_configs(recognizer_str, is_fragmented, is_inference_same_length_sequences=None, is_learn_same_length_sequences=None):
-    global IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES, RECOGNIZER_STR
-    RECOGNIZER_STR = recognizer_str
-    IS_FRAGMENTED = is_fragmented
-    if is_inference_same_length_sequences: IS_INFERENCE_SAME_LEN_SEQUENCES = "inference_same_seq_len"
-    else: IS_INFERENCE_SAME_LEN_SEQUENCES = "inference_diff_seq_len"
-    if is_learn_same_length_sequences: IS_LEARN_SAME_LEN_SEQUENCES = "learn_same_seq_len"
-    else: IS_LEARN_SAME_LEN_SEQUENCES = "learn_diff_seq_len"
-
 def create_folders_if_necessary(path):
-    dirname = os.path.dirname(path)
-    if not os.path.isdir(dirname):
-        os.makedirs(dirname)
+    if not os.path.exists(path):
+        os.makedirs(path)
 
 
-def get_storage_framework_dir():
-    global IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES, RECOGNIZER_STR
-    assert RECOGNIZER_STR == "graql" and IS_FRAGMENTED!=None or (RECOGNIZER_STR == "graml" and IS_FRAGMENTED!=None and IS_INFERENCE_SAME_LEN_SEQUENCES!=None and IS_LEARN_SAME_LEN_SEQUENCES!=None), "You must call 'set_global_storage_configs' before using API from 'storage' module."
-    return os.path.join(get_storage_dir(),RECOGNIZER_STR)
+def get_storage_framework_dir(recognizer: str):
+    return os.path.join(get_storage_dir(),recognizer)
 
 def get_storage_dir():
     return "dataset"
 
-
 def _get_models_directory_name():
     return "models"
 
-def _get_datasets_directory_name():
+def _get_siamese_datasets_directory_name():
     return "siamese_datasets"
 
 def _get_observations_directory_name():
@@ -51,46 +30,54 @@ def get_observation_file_name(observability_percentage: float):
     return 'obs' + str(observability_percentage) + '.pkl'
 
 
-def get_env_dir(env_name):
-    global IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES, RECOGNIZER_STR
-    if RECOGNIZER_STR == GRAML: return os.path.join(get_storage_framework_dir(), env_name, IS_FRAGMENTED, IS_INFERENCE_SAME_LEN_SEQUENCES, IS_LEARN_SAME_LEN_SEQUENCES)
-    else: return os.path.join(get_storage_framework_dir(), env_name, IS_FRAGMENTED)
+def get_domain_dir(domain_name, recognizer:str):
+    return os.path.join(get_storage_framework_dir(recognizer), domain_name)
 
-def get_observations_dir(env_name):
-    return os.path.join(get_env_dir(env_name=env_name), _get_observations_directory_name())
+def get_env_dir(domain_name, env_name, recognizer:str):
+    return os.path.join(get_domain_dir(domain_name, recognizer), env_name)
 
-def get_agent_model_dir(env_name, model_name, class_name):
-    return os.path.join(get_storage_dir(), _get_models_directory_name(), env_name, model_name, class_name)
+def get_observations_dir(domain_name, env_name, recognizer:str):
+    return os.path.join(get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer), _get_observations_directory_name())
 
-def get_lstm_model_dir(env_name, model_name):
-    return os.path.join(get_env_dir(env_name=env_name), model_name)
+def get_agent_model_dir(domain_name, model_name, class_name):
+    return os.path.join(get_storage_dir(), _get_models_directory_name(), domain_name, model_name, class_name)
 
-def get_models_dir(env_name):
-    return os.path.join(get_env_dir(env_name=env_name), _get_models_directory_name())
+def get_lstm_model_dir(domain_name, env_name, model_name, recognizer:str):
+    return os.path.join(get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer), model_name)
+
+def get_models_dir(domain_name, env_name, recognizer:str):
+    return os.path.join(get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer), _get_models_directory_name())
 
 ### GRAML PATHS ###
 
-def get_siamese_dataset_path(env_name, problem_names):
-    return os.path.join(get_env_dir(env_name=env_name), problem_names, _get_datasets_directory_name())
+def get_siamese_dataset_path(domain_name, env_name, model_name, recognizer:str):
+    return os.path.join(get_lstm_model_dir(domain_name, env_name, model_name, recognizer), _get_siamese_datasets_directory_name())
 
-def get_embeddings_result_path(env_name):
-    return os.path.join(get_env_dir(env_name), "goal_embeddings")
+def get_embeddings_result_path(domain_name, env_name, recognizer:str):
+    return os.path.join(get_env_dir(domain_name, env_name=env_name, recognizer=recognizer), "goal_embeddings")
 
-def get_experiment_results_path(domain, env, task):
-    return os.path.join(get_env_dir(domain), "experiment_results", env, task, "experiment_results")
+def get_embeddings_result_path(domain_name, env_name, recognizer:str):
+    return os.path.join(get_env_dir(domain_name, env_name=env_name, recognizer=recognizer), "goal_embeddings")
 
-def get_plans_result_path(env_name):
-    return os.path.join(get_env_dir(env_name), "plans")
+def get_and_create(path):
+    create_folders_if_necessary(path)
+    return path
 
-def get_policy_sequences_result_path(env_name):
-    return os.path.join(get_env_dir(env_name), "policy_sequences")
+def get_experiment_results_path(domain, env_name, task, recognizer:str):
+    return os.path.join(get_env_dir(domain, env_name=env_name, recognizer=recognizer), "experiment_results", env_name, task, "experiment_results")
+
+def get_plans_result_path(domain_name, env_name, recognizer:str):
+    return os.path.join(get_env_dir(domain_name, env_name=env_name, recognizer=recognizer), "plans")
+
+def get_policy_sequences_result_path(domain_name, env_name, recognizer:str):
+    return os.path.join(get_env_dir(domain_name, env_name, recognizer=recognizer), "policy_sequences")
 
 ### END GRAML PATHS ###
-
+''
 ### GRAQL PATHS ###
 
-def get_graql_experiment_confidence_path(env_name):
-    return os.path.join(get_env_dir(env_name), "experiments")
+def get_gr_as_rl_experiment_confidence_path(domain_name, env_name, recognizer:str):
+    return os.path.join(get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer), "experiments")
 
 ### GRAQL PATHS ###
 
