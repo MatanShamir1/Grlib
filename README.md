@@ -1,6 +1,32 @@
 # GRLib
 GRLib is a python package containing implementations of Goal Recognition (GR) algorithms which use MDPs to represent the decision making process. All agents in those algorithms interact with an environment that's registered in gym API.
 ## Setup:
+If you're on linux, great, If on windows, use git bash for the next commands to work.
+1. Find where your python is installed. If you want to find where's your python3.12, you can run:
+```
+py -3.12 -c "import sys; print(sys.executable)"
+```
+2. Create a new empty venv from that python venv module:
+```
+C:/Users/path/to/Programs/Python/Python312/python.exe -m venv test_env
+```
+3. Activate the environment:
+```
+source test_env/Scripts/activate
+```
+4. There's no equivalent to conda env list to check the global virtual environments status, so you can verify the active one via:
+```
+echo $VIRTUAL_ENV
+```
+5. Install and upgrade basic package management modules:
+```
+/path/to/python.exe -m pip install --upgrade pip setuptools wheel versioneer
+```
+6. Install the package (can add -e for editable mode):
+```
+pip install -e .
+```
+It also installs gr_libs with it.
 1. Ensure you have python 3.11 installed.
 If you have root permissions, simply use:
 ```sh

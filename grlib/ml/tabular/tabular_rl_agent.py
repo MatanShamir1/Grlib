@@ -37,7 +37,7 @@ class TabularRLAgent(RLAgent):
             problem_name=problem_name
         )
         self.env = gym.make(id=problem_name)
-        self.actions = self.env.actions
+        self.actions = self.env.unwrapped.actions
         self.number_of_actions = len(self.actions)
         self._actions_space = self.env.action_space
         self._random = rand

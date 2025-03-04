@@ -1,10 +1,12 @@
 from setuptools import setup, find_packages
+import versioneer
 
 setup(
     name='grlib',  # Replace with your package name
-    version='0.1',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     packages=find_packages(),
-    python_requires="==3.11",
+    python_requires=">=3.11",
     install_requires=[
         'gr_libs',
         'dill',

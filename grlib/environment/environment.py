@@ -119,7 +119,7 @@ class MinigridProperty(EnvProperty):
         env = ImgObsWrapper(env) # Get rid of the 'mission' field
         obs, _ = env.reset() # This now produces an RGB tensor only
 
-        img = env.get_frame()
+        img = env.unwrapped.get_frame()
 
         ####### save image to file
         image_pil = Image.fromarray(np.uint8(img)).convert('RGB')
