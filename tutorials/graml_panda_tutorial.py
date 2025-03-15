@@ -6,9 +6,8 @@ from grlib.environment.utils.utils import domain_to_env_property
 from grlib.metrics.metrics import stochastic_amplified_selection
 from grlib.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
 from grlib.ml.utils.format import random_subset_with_order
-from grlib.recognizer.graml.graml_recognizer import GCGraml
+from grlib import GCGraml
 
-# Consider extracting all these to "default point_maze (or every other domain) variables" module which would simplify things like the problem_list_to_str_tuple function, sizes of inputs, etc.
 recognizer = GCGraml( # TODO make these tutorials into pytests
     domain_name=PANDA,
 	env_name="PandaMyReachDense"

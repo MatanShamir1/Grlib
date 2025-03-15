@@ -3,31 +3,38 @@ GRLib is a python package containing implementations of Goal Recognition (GR) al
 ## Setup:
 If you're on linux, great, If on windows, use git bash for the next commands to work.
 1. Find where your python is installed. If you want to find where's your python3.12, you can run:
-```
+```sh
 py -3.12 -c "import sys; print(sys.executable)"
 ```
 2. Create a new empty venv from that python venv module:
-```
+```sh
 C:/Users/path/to/Programs/Python/Python312/python.exe -m venv test_env
 ```
 3. Activate the environment:
-```
+```sh
 source test_env/Scripts/activate
 ```
 4. There's no equivalent to conda env list to check the global virtual environments status, so you can verify the active one via:
-```
+```sh
 echo $VIRTUAL_ENV
 ```
 5. Install and upgrade basic package management modules:
-```
+```sh
 /path/to/python.exe -m pip install --upgrade pip setuptools wheel versioneer
 ```
-6. Install the package (can add -e for editable mode):
-```
+6. Install the gr_libs package (can add -e for editable mode):
+```sh
+cd /path/to/clone/of/GoalRecognitionLibs
 pip install -e .
 ```
-It also installs gr_libs with it.
-1. Ensure you have python 3.11 installed.
+7. Install grlib package (can add -e for editable mode):
+```sh
+cd /path/to/clone/of/Grlib
+pip install -e .
+```
+
+
+<!-- 1. Ensure you have python 3.11 installed.
 If you have root permissions, simply use:
 ```sh
 mkdir -p ~/.local/python3.11
@@ -59,9 +66,16 @@ conda activate graml_env
 git clone [GoalRecognitionLibs address]
 cd GoalRecognitionLibs
 pip install -e . # using the conda's pip of course
-```
+``` -->
 
-### How to use Grlib
+### Issues & Problems ###
+If you're not a sudo, and you have problems with building python getting such warnings:
+```sh
+WARNING: The Python ctypes extension was not compiled. Missing the libffi lib?
+```
+That means you don't have the necesarry libraries for building python.
+
+### How to use Grlib ###
 Now that you've installed the package, you have additional custom gym environments and you can start creating an ODGR scenario with the algorithm you wish to test.
 The tutorial at tutorials/tutorial.py follows a simple ODGR scnenario. We guide through the initialization and deployment process following an example where GRAML is expected to adapt to new emerging goals in the point_maze gym environment.
 
