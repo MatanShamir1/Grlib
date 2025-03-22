@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 license = "MIT"
-name = "gr_envs"
+name = "grlib"
 dynamic = ["version"]  # Version managed dynamically by setuptools_scm
-description = "Package to receive goal-directed environments"
+description = "Package with goal recognition frameworks baselines"
 authors = [
     {name = "Matan Shamir", email = "matan.shamir@live.biu.ac.il"},
     {name = "Osher Elhadad"},
@@ -15,16 +15,9 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "minigrid",
-    "highway-env",
-    "tensorboardX",
-    "torchvision",
-    "panda_gym",
-    "rl_zoo3",
-    "gymnasium",
-    "gymnasium-robotics",
-    "stable_baselines3[extra]",
-    "sb3_contrib"
+    "gr_libs",
+    "dill",
+    "opencv-python"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -33,10 +26,6 @@ classifiers = [
 
 [tool.setuptools]
 packages = {find = {}}
-
-[project.entry-points]
-# Uncomment if you need gymnasium environment registration
-# "gymnasium.envs" = { __root__ = "gr_envs.minigrid_scripts.__init__:register_minigrid_envs" }
 
 [tool.setuptools_scm]
 version_scheme = "post-release"
