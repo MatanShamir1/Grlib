@@ -1,0 +1,32 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build the package
+        run: python -m build  # Uses pyproject.toml instead of setup.py
+
+      - name: Publish to PyPI
+        env:
+          PYPY_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: python -m twine upload dist/* -u __token__ -p $PYPY_API_TOKEN

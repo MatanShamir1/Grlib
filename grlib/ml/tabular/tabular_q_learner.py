@@ -445,7 +445,7 @@ class TabularQLearner(TabularRLAgent):
     
 if __name__ == "__main__":
     from grlib.metrics.metrics import greedy_selection
-    import gr_libs # to register everything
+    import gr_envs # to register everything
     agent = TabularQLearner(domain_name="minigrid", problem_name="MiniGrid-LavaCrossingS9N2-DynamicGoal-1x7-v0")
     agent.generate_observation(greedy_selection, True, True)
     
