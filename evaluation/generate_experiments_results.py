@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import dill
-from gr_lib.ml.utils.storage import get_experiment_results_path, set_global_storage_configs
+from gr_libs.ml.utils.storage import get_experiment_results_path, set_global_storage_configs
 from scripts.generate_task_specific_statistics_plots import get_figures_dir_path
 
 def gen_graph(graph_name, x_label_str, tasks, panda_env, minigrid_env, parking_env, maze_env, percentage):

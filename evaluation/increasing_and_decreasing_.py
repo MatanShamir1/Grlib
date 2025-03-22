@@ -2,7 +2,7 @@ import os
 import dill
 import numpy as np
 import matplotlib.pyplot as plt
-from gr_lib.ml.utils.storage import get_experiment_results_path, set_global_storage_configs
+from gr_libs.ml.utils.storage import get_experiment_results_path, set_global_storage_configs
 
 if __name__ == "__main__":
 

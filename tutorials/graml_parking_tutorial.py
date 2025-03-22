@@ -1,10 +1,10 @@
 
 from stable_baselines3 import PPO, SAC, TD3
-from gr_lib.environment.environment import EnvProperty, GCEnvProperty, ParkingProperty
-from gr_lib.metrics.metrics import stochastic_amplified_selection
-from gr_lib.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
-from gr_lib.ml.utils.format import random_subset_with_order
-from gr_lib.recognizer.graml.graml_recognizer import ExpertBasedGraml, GCGraml
+from gr_libs.environment.environment import EnvProperty, GCEnvProperty, ParkingProperty
+from gr_libs.metrics.metrics import stochastic_amplified_selection
+from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
+from gr_libs.ml.utils.format import random_subset_with_order
+from gr_libs.recognizer.graml.graml_recognizer import ExpertBasedGraml, GCGraml
 
 # Consider extracting all these to "default point_maze (or every other domain) variables" module which would simplify things like the problem_list_to_str_tuple function, sizes of inputs, etc.
 recognizer = GCGraml(

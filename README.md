@@ -22,12 +22,12 @@ echo $VIRTUAL_ENV
 ```sh
 /path/to/python.exe -m pip install --upgrade pip setuptools wheel versioneer
 ```
-6. Install the gr_libs package (can add -e for editable mode):
+6. Install the gr_libss package (can add -e for editable mode):
 ```sh
 cd /path/to/clone/of/GoalRecognitionLibs
 pip install -e .
 ```
-7. Install gr_lib package (can add -e for editable mode):
+7. Install gr_libs package (can add -e for editable mode):
 ```sh
 cd /path/to/clone/of/Grlib
 pip install -e .
