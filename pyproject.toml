@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools", "setuptools_scm", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+license = "MIT"
+name = "gr_envs"
+dynamic = ["version"]  # Version managed dynamically by setuptools_scm
+description = "Package to receive goal-directed environments"
+authors = [
+    {name = "Matan Shamir", email = "matan.shamir@live.biu.ac.il"},
+    {name = "Osher Elhadad"},
+    {name = "Ben Nageris"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "minigrid",
+    "highway-env",
+    "tensorboardX",
+    "torchvision",
+    "panda_gym",
+    "rl_zoo3",
+    "gymnasium",
+    "gymnasium-robotics",
+    "stable_baselines3[extra]",
+    "sb3_contrib"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
+
+[tool.setuptools]
+packages = {find = {}}
+
+[project.entry-points]
+# Uncomment if you need gymnasium environment registration
+# "gymnasium.envs" = { __root__ = "gr_envs.minigrid_scripts.__init__:register_minigrid_envs" }
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+local_scheme = "node-and-date"
