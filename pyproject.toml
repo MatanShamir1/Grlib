@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 license = "MIT"
-name = "grlib"
+name = "gr_lib"
 dynamic = ["version"]  # Version managed dynamically by setuptools_scm
 description = "Package with goal recognition frameworks baselines"
 authors = [

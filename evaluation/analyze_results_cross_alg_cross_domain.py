@@ -6,7 +6,7 @@ import os
 import dill
 from scipy.interpolate import make_interp_spline
 from scipy.ndimage import gaussian_filter1d
-from grlib.ml.utils.storage import get_experiment_results_path, set_global_storage_configs
+from gr_lib.ml.utils.storage import get_experiment_results_path, set_global_storage_configs
 from scripts.generate_task_specific_statistics_plots import get_figures_dir_path
 
 def smooth_line(x, y, num_points=300):

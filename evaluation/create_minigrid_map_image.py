@@ -1,6 +1,6 @@
 from minigrid.wrappers import RGBImgPartialObsWrapper, ImgObsWrapper
 import numpy as np
-import grlib.ml as ml
+import gr_lib.ml as ml
 from minigrid.core.world_object import Wall
 #from q_table_plot import save_q_table_plot_image
 from gymnasium.envs.registration import register

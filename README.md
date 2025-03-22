@@ -27,7 +27,7 @@ echo $VIRTUAL_ENV
 cd /path/to/clone/of/GoalRecognitionLibs
 pip install -e .
 ```
-7. Install grlib package (can add -e for editable mode):
+7. Install gr_lib package (can add -e for editable mode):
 ```sh
 cd /path/to/clone/of/Grlib
 pip install -e .

@@ -40,7 +40,7 @@ def analyze_and_produce_images(env_name):
 
 if __name__ == "__main__":
 	# preventing circular imports. only needed for running this as main anyway.
-	from grlib.ml.utils.storage import get_models_dir, get_model_dir
+	from gr_lib.ml.utils.storage import get_models_dir, get_model_dir
 	# checks:
 	assert len(sys.argv) == 2, f"Assertion failed: len(sys.argv) is {len(sys.argv)} while it needs to be 2.\n Example: \n\t /usr/bin/python scripts/get_plans_images.py MiniGrid-Walls-13x13-v0"
 	assert os.path.exists(get_models_dir(sys.argv[1])), "plans weren't made for this environment, run graml_main.py with this environment first."

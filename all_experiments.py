@@ -6,7 +6,7 @@ import subprocess
 import concurrent.futures
 import numpy as np
 
-from grlib.ml.utils.storage import get_experiment_results_path
+from gr_lib.ml.utils.storage import get_experiment_results_path
 
 # Define the lists
 # domains = ['minigrid', 'point_maze', 'parking', 'panda']

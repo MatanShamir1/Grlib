@@ -1,12 +1,12 @@
 
 import numpy as np
 from stable_baselines3 import PPO, SAC
-from grlib.environment.environment import PANDA, GCEnvProperty, PandaProperty
-from grlib.environment.utils.utils import domain_to_env_property
-from grlib.metrics.metrics import stochastic_amplified_selection
-from grlib.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
-from grlib.ml.utils.format import random_subset_with_order
-from grlib import GCGraml
+from gr_lib.environment.environment import PANDA, GCEnvProperty, PandaProperty
+from gr_lib.environment.utils.utils import domain_to_env_property
+from gr_lib.metrics.metrics import stochastic_amplified_selection
+from gr_lib.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
+from gr_lib.ml.utils.format import random_subset_with_order
+from gr_lib import GCGraml
 
 recognizer = GCGraml( # TODO make these tutorials into pytests
     domain_name=PANDA,

@@ -1,6 +1,6 @@
 import numpy as np
 from stable_baselines3 import PPO, SAC, TD3
-from grlib.environment.environment import MINIGRID, PARKING, PANDA, POINT_MAZE, QLEARNING, PandaProperty
+from gr_lib.environment.environment import MINIGRID, PARKING, PANDA, POINT_MAZE, QLEARNING, PandaProperty
 
 
 PROBLEMS = {

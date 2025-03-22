@@ -8,15 +8,15 @@ import inspect
 import torch
 import dill
 
-from grlib.ml.utils import get_embeddings_result_path
-from grlib.ml.utils.storage import get_experiment_results_path, set_global_storage_configs, get_graql_experiment_confidence_path
-from grlib.metrics.metrics import measure_average_sequence_distance
+from gr_lib.ml.utils import get_embeddings_result_path
+from gr_lib.ml.utils.storage import get_experiment_results_path, set_global_storage_configs, get_graql_experiment_confidence_path
+from gr_lib.metrics.metrics import measure_average_sequence_distance
 
 def get_tasks_embeddings_dir_path(env_name):
-	return os.path.join("../grlib", get_embeddings_result_path(env_name))
+	return os.path.join("../gr_lib", get_embeddings_result_path(env_name))
 
 def get_figures_dir_path(domain_name, env_name):
-	return os.path.join("../grlib", "figures", domain_name, env_name)
+	return os.path.join("../gr_lib", "figures", domain_name, env_name)
 
 def similarities_vector_to_std_deviation_units_vector(ref_dict: dict, relative_to_largest):
 	"""

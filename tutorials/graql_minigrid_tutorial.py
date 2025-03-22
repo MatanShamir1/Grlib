@@ -1,8 +1,8 @@
-from grlib.environment.environment import QLEARNING
-from grlib.metrics.metrics import stochastic_amplified_selection
-from grlib.ml.tabular.tabular_q_learner import TabularQLearner
-from grlib.ml.utils.format import random_subset_with_order
-from grlib import Graql
+from gr_lib.environment.environment import QLEARNING
+from gr_lib.metrics.metrics import stochastic_amplified_selection
+from gr_lib.ml.tabular.tabular_q_learner import TabularQLearner
+from gr_lib.ml.utils.format import random_subset_with_order
+from gr_lib import Graql
 
 recognizer = Graql(
 	domain_name="minigrid",

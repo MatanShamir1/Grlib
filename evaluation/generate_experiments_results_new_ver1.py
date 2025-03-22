@@ -5,7 +5,7 @@ import numpy as np
 import os
 import dill
 
-from grlib.ml.utils.storage import get_experiment_results_path, set_global_storage_configs
+from gr_lib.ml.utils.storage import get_experiment_results_path, set_global_storage_configs
 from scripts.generate_task_specific_statistics_plots import get_figures_dir_path
 
 if __name__ == "__main__":
