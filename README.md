@@ -121,12 +121,15 @@ python odgr_executor.py --recognizer MCTSBasedGraml --domain minigrid --task L1 
 ```
 
 ## Supported Algorithms
-Successors of algorithms that don't differ in their specifics are added in parentheses after the algorithm name, for example - since GC-DRACO and DRACO share the same column values, they're written in a one line as DRACO(GC).
+
+Successors of algorithms that don't differ in their specifics are added in parentheses after the algorithm name. For example, since GC-DRACO and DRACO share the same column values, they're written on one line as DRACO (GC).
+
 | **Algorithm** | **Supervised** | **Reinforcement Learning** | **Discrete States** | **Continuous States** | **Discrete Actions** | **Continuous Actions** | **Model-Based** | **Model-Free** | **Action-Only** |
-|--------------|--------------|------------------------|------------------|------------------|--------------|--------------|--------------|
+|--------------|--------------|------------------------|------------------|------------------|--------------|--------------|--------------|--------------|--------------|
 | GRAQL       | ❌           | ✅                     | ✅                | ❌                | ✅                | ❌                | ❌           | ✅           | ❌           |
-| DRACO (GC)       | ❌           | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ❌           |
-| GRAML (GC, BG)       | ✅           | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ✅           |
+| DRACO (GC)  | ❌           | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ❌           |
+| GRAML (GC, BG) | ✅        | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ✅           |
+
 
 ## Supported Domains
 
