@@ -9,7 +9,7 @@ dynamic = ["version"]  # Version managed dynamically by setuptools_scm
 description = "Package with goal recognition frameworks baselines"
 authors = [
     {name = "Matan Shamir", email = "matan.shamir@live.biu.ac.il"},
-    {name = "Osher Elhadad"},
+    {name = "Osher Elhadad", email = "osher.elhadad@live.biu.ac.il"},
     {name = "Ben Nageris"}
 ]
 readme = "README.md"
@@ -17,12 +17,24 @@ requires-python = ">=3.11"
 dependencies = [
     "gr_envs",
     "dill",
-    "opencv-python"
+    "opencv-python",
+    "tensorboardX",
+    "torchvision",
+    "rl_zoo3",
+    "stable_baselines3[extra]",
+    "sb3_contrib"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent"
 ]
+
+[project.optional-dependencies]
+# Forward the extras defined in gr_envs.
+minigrid = ["gr_envs[minigrid]"]
+highway = ["gr_envs[highway]"]
+maze = ["gr_envs[maze]"]
+panda = ["gr_envs[panda]"]
 
 [tool.setuptools]
 packages = {find = {}}
