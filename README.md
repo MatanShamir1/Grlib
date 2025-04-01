@@ -1,38 +1,100 @@
 # GRLib
 GRLib is a python package containing implementations of Goal Recognition (GR) algorithms which use MDPs to represent the decision making process. All agents in those algorithms interact with an environment that's registered in gym API.
-## Setup:
-If you're on linux, great, If on windows, use git bash for the next commands to work.
-1. Find where your python is installed. If you want to find where's your python3.12, you can run:
-```sh
-py -3.12 -c "import sys; print(sys.executable)"
-```
-2. Create a new empty venv from that python venv module:
-```sh
-C:/Users/path/to/Programs/Python/Python312/python.exe -m venv test_env
-```
-3. Activate the environment:
-```sh
-source test_env/Scripts/activate
-```
-4. There's no equivalent to conda env list to check the global virtual environments status, so you can verify the active one via:
-```sh
-echo $VIRTUAL_ENV
-```
-5. Install and upgrade basic package management modules:
-```sh
-/path/to/python.exe -m pip install --upgrade pip setuptools wheel versioneer
-```
-6. Install the gr_libss package (can add -e for editable mode):
-```sh
-cd /path/to/clone/of/GoalRecognitionLibs
-pip install -e .
-```
-7. Install gr_libs package (can add -e for editable mode):
-```sh
-cd /path/to/clone/of/Grlib
-pip install -e .
-```
 
+## Extras Installation
+GRLib supports additional extras for integrating both environment-specific dependencies (forwarded from `gr_envs`).
+
+### Environment Extras:
+These extras install the custom environments defined in `gr_envs`.
+
+- **Minigrid Environment:**  
+  ```sh
+  pip install gr_libs[minigrid]
+  ```
+- **Highway Environment (Parking):**  
+  ```sh
+  pip install gr_libs[highway]
+  ```
+- **Maze Environment (Point-Maze):**  
+  ```sh
+  pip install gr_libs[maze]
+  ```
+- **Panda Environment:**  
+  ```sh
+  pip install gr_libs[panda]
+  ```
+
+## Setup:
+You can choose to use either a standard Python virtual environment (venv) or a Conda environment. Follow the instructions below for your preferred option.
+### Using a Virtual Environment (venv)
+If you're on linux, great, If on windows, use git bash for the next commands to work.
+
+1. **Find Your Python Installation:**  
+   To locate your Python 3.12 executable, run:
+   ```sh
+   py -3.12 -c "import sys; print(sys.executable)"
+   ```
+2. **Create a New Virtual Environment:**  
+   Using the path found above, create a new empty venv:
+   ```sh
+   C:/Users/path/to/Programs/Python/Python312/python.exe -m venv test_env
+   ```
+3. **Activate the Virtual Environment:**
+   ```sh
+   source test_env/Scripts/activate
+   ```
+4. **Verify the Active Environment:**  
+   Since there is no direct equivalent to `conda env list`, you can check your active environment via:
+   ```sh
+   echo $VIRTUAL_ENV
+   ```
+5. **Upgrade Basic Package Management Modules:**  
+   Run the following command (replace `/path/to/python.exe` with the actual path):
+   ```sh
+   /path/to/python.exe -m pip install --upgrade pip setuptools wheel versioneer
+   ```
+6. **Install the `GoalRecognitionLibs` Package:**  
+   (For editable installation, add the `-e` flag.)
+   ```sh
+   cd /path/to/clone/of/GoalRecognitionLibs
+   pip install -e .
+   ```
+7. **Install the `gr_libs` Package:**  
+   (For editable installation, add the `-e` flag.)
+   ```sh
+   cd /path/to/clone/of/Grlib
+   pip install -e .
+   ```
+
+### Using Conda
+If you prefer using Conda, follow these steps:
+
+1. **Create a New Conda Environment:**  
+   Replace `3.12` with your desired Python version if necessary.
+   ```sh
+   conda create -n graml_env python=3.12
+   ```
+2. **Activate the Environment:**
+   ```sh
+   conda activate graml_env
+   ```
+3. **Upgrade Pip and Related Packages:**  
+   Although Conda manages many packages, it is still a good idea to upgrade pip, setuptools, wheel, and versioneer:
+   ```sh
+   pip install --upgrade pip setuptools wheel versioneer
+   ```
+4. **Install the `GoalRecognitionLibs` Package:**  
+   (For editable installation, add the `-e` flag.)
+   ```sh
+   cd /path/to/clone/of/GoalRecognitionLibs
+   pip install -e .
+   ```
+5. **Install the `gr_libs` Package:**  
+   (For editable installation, add the `-e` flag.)
+   ```sh
+   cd /path/to/clone/of/Grlib
+   pip install -e .
+   ```
 
 <!-- 1. Ensure you have python 3.11 installed.
 If you have root permissions, simply use:
@@ -155,11 +217,11 @@ python odgr_executor.py --recognizer MCTSBasedGraml --domain minigrid --task L1 
 
 ## Supported Algorithms
 
-| **Name**         | **Supervised**      | **RL**          | **Discrete**     | **Continuous** | **Model-Based**  | **Model-Free** | **Actions Only** |
-| ------------------- | ------------------ | ------------------ | ------------------ | ------------------- | ------------------ | --------------------------------- |
-| GRAQL   | :x: | :heavy_check_mark: | :heavy_check_mark: | :x: | :x: | :heavy_check_mark: | :x: |
-| DRACO   | :x: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :x: | :heavy_check_mark: | :x: |
-| GRAML   | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :x: | :heavy_check_mark: | :heavy_check_mark: |
+| **Name** | **Supervised** | **RL** | **Discrete** | **Continuous** | **Model-Based** | **Model-Free** | **Actions Only** |
+| -------- | -------------- | ------ | ------------ | -------------- | --------------- | -------------- | ---------------- |
+| GRAQL    | :x:            | :heavy_check_mark: | :heavy_check_mark: | :x:            | :x:            | :heavy_check_mark: | :x:            |
+| DRACO    | :x:            | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :x:            | :heavy_check_mark: | :x:            |
+| GRAML    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :x:            | :heavy_check_mark: | :heavy_check_mark: |
 
 ## Supported Domains
 
@@ -175,8 +237,10 @@ Given here is a guide for executing the experiments. There are benchmark domains
 1. analyze_results_cross_alg_cross_domain.py: this script runs with no arguments. it injects information from get_experiment_results_path (for example: dataset\graml\minigrid\continuing\inference_same_seq_len\learn_diff_seq_len\experiment_results\obstacles\L111\experiment_results.pkl), and produces a plot with 4 figures showing the accuracy trend of algorithms on the domains checked one against the other. Currently GRAML is checked against GRAQL or DRACO but it can easily be adjusted from within the script.
 2. generate_task_specific_statistics_plots.py - this script produces, for a specific task execution (results of execution of experiments.py), a summary combined of a figure with sticks with the accuracies and confidence levels of an algorithm on the task on the varying percentages. figures\point_maze\obstacles\graql_point_maze_obstacles_fragmented_stats.png is an example of a path at which the output is dumped. Another product of this script is a confusion matrix with the confidence levels - visualizing the same data, and the output file resides in this path: figures\point_maze\obstacles\graml_point_maze_obstacles_fragmented_inference_same_seq_len_learn_diff_seq_len_goals_conf_mat.png.
 
+<!--
 ### How to add a new environment
 1. bla
 2. blalba
 
 ### How to add a new Learner
+-->
