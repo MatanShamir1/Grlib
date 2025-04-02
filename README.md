@@ -1,5 +1,4 @@
 # GRLib
-
 GRLib is a Python package that implements Goal Recognition (GR) algorithms using Markov Decision Processes (MDPs) to model decision-making processes. These implementations adhere to the Gymnasium API. All agents in these algorithms interact with environments registered to the Gym API as part of the initialization process of the `gr_envs` package, on which GRLib depends. More details on `gr_envs` can be found at: [GR Envs Repository](https://github.com/MatanShamir1/GREnvs).
 
 ## Setup
@@ -9,40 +8,68 @@ GRLib is a Python package that implements Goal Recognition (GR) algorithms using
 `gr_libs` depends on `gr_envs`, which registers a set of Gym environments. Ensure your Python environment is set up with Python >= 3.11.
 
 ### Setting Up a Python Environment (if needed)
-
-1. Create a new virtual environment using the Python `venv` module:
+#### Using Pip
+1. **Find Your Python Installation:**  
+   To locate your Python 3.12 executable, run:
+   ```sh
+   py -3.12 -c "import sys; print(sys.executable)"
+   ```
+2. **Create a New Virtual Environment:**  
+   Using the path found above, create a new empty venv:
    ```sh
    C:/Users/path/to/Programs/Python/Python312/python.exe -m venv test_env
    ```
-2. Activate the virtual environment:
+3. **Activate the Virtual Environment:**
    ```sh
    source test_env/Scripts/activate
    ```
-3. To verify the active virtual environment:
+4. **Verify the Active Environment:**  
+   Since there is no direct equivalent to `conda env list`, you can check your active environment via:
    ```sh
    echo $VIRTUAL_ENV
    ```
 
-### Installation
+#### Using Conda
+If you prefer using Conda, follow these steps:
 
-#### For Regular Users
-
-Install GRLib using `pip`:
-```sh
-pip install gr_libs
-```
-
-#### For Developers
-
-These steps include cloning the repository and installing the package in editable mode to facilitate development.
-
-1. Clone the repository:
+1. **Create a New Conda Environment:**  
+   Replace `3.12` with your desired Python version if necessary.
    ```sh
-   git clone https://github.com/MatanShamir1/GREnvs.git
+   conda create -n new_env python=3.12
    ```
-2. Install the package in editable mode:
+2. **Activate the Environment:**
    ```sh
-   cd /path/to/clone/of/GRLibs
+   conda activate new_env
+   ```
+  
+  
+### Upgrade Basic Package Management Modules:
+   Run the following command (replace `/path/to/python.exe` with the actual path):
+   ```sh
+   /path/to/python.exe -m pip install --upgrade pip setuptools wheel versioneer
+   ```
+### Install the `GoalRecognitionLibs` Package:
+  The extras install the custom environments defined in `gr_envs`.
+  (For editable installation, add the `-e` flag by cloning the repo and cd'ing to it https://github.com/MatanShamir1/GRLib.git)
+  - **Minigrid Environment:**  
+    ```sh
+    pip install gr_libs[minigrid]
+    ```
+  - **Highway Environment (Parking):**  
+    ```sh
+    pip install gr_libs[highway]
+    ```
+  - **Maze Environment (Point-Maze):**  
+    ```sh
+    pip install gr_libs[maze]
+    ```
+  - **Panda Environment:**  
+    ```sh
+    pip install gr_libs[panda]
+    ```
+   (For editable installation, add the `-e` flag.)
+   ```sh
+   cd /path/to/clone/of/GoalRecognitionLibs
    pip install -e .
    ```
 
@@ -130,7 +157,6 @@ Successors of algorithms that don't differ in their specifics are added in paren
 | DRACO (GC)  | ❌           | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ❌           |
 | GRAML (GC, BG) | ✅        | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ✅           |
 
-
 ## Supported Domains
 
 | **Domain**  | **Action Space** | **State Space** |
@@ -155,7 +181,3 @@ The repository provides benchmark domains and scripts for analyzing experimental
    - Example output paths:
      - `figures/point_maze/obstacles/graql_point_maze_obstacles_fragmented_stats.png`
      - `figures/point_maze/obstacles/graml_point_maze_obstacles_conf_mat.png`
-
-## Recognizer Module
-
-For details on the recognizer module and how to extend it, see [Recognizer Documentation](recognizer/recognizer_doc.md).
