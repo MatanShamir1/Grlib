@@ -18,7 +18,7 @@ class Recognizer(ABC):
 	def inference_phase(self, inf_sequence, true_goal, percentage) -> str:
 		pass
 
-class LearningRecognizer(Recognizer): # TODO add a class diagram with the inheritance of all calsses
+class LearningRecognizer(Recognizer):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
@@ -26,7 +26,7 @@ class LearningRecognizer(Recognizer): # TODO add a class diagram with the inheri
 		self.original_train_configs = train_configs
 
 # a recognizer that needs to train agents for every new goal as part of the goal adaptation phase (that's why it needs dynamic train configs)
-class GaAgentTrainerRecognizer(Recognizer): # TODO add a class diagram with the inheritance of all calsses
+class GaAgentTrainerRecognizer(Recognizer):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
@@ -37,7 +37,7 @@ class GaAgentTrainerRecognizer(Recognizer): # TODO add a class diagram with the 
 	def domain_learning_phase(self, base_goals: List[str], train_configs: List):
 		super().domain_learning_phase(base_goals, train_configs)
 
-class GaAdaptingRecognizer(Recognizer): # TODO add a class diagram with the inheritance of all calsses
+class GaAdaptingRecognizer(Recognizer):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 

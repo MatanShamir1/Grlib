@@ -1,11 +1,11 @@
-from gr_libs.environment.environment import QLEARNING
+from gr_libs.environment.environment import MINIGRID, QLEARNING
 from gr_libs.metrics.metrics import stochastic_amplified_selection
 from gr_libs.ml.tabular.tabular_q_learner import TabularQLearner
 from gr_libs.ml.utils.format import random_subset_with_order
 from gr_libs import ExpertBasedGraml
 
 recognizer = ExpertBasedGraml(
-	domain_name="minigrid",
+	domain_name=MINIGRID,
 	env_name="MiniGrid-SimpleCrossingS13N4"
 )
 

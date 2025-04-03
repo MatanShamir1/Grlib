@@ -1,7 +1,8 @@
 
 import numpy as np
 from stable_baselines3 import PPO, SAC
-from gr_libs.environment.environment import PANDA, GCEnvProperty, PandaProperty
+import gr_libs.environment.environment
+from gr_libs.environment.environment import PANDA, EnvProperty, GCEnvProperty, PandaProperty
 from gr_libs.environment.utils.utils import domain_to_env_property
 from gr_libs.metrics.metrics import stochastic_amplified_selection
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
@@ -12,9 +13,13 @@ recognizer = GCGraml( # TODO make these tutorials into pytests
     domain_name=PANDA,
 	env_name="PandaMyReachDense"
 )
-recognizer.domain_learning_phase(base_goals=[np.array([PandaProperty.sample_goal()]) for _ in range(1,30)],
-					             train_configs=[(SAC, 800000)])
-recognizer.goals_adaptation_phase(dynamic_goals=[np.array([[-0.1, -0.1, 0.1]]), np.array([[-0.1, 0.1, 0.1]]), np.array([[0.2, 0.2, 0.1]])])
+recognizer.domain_learning_phase(
+	base_goals=[np.array([PandaProperty.sample_goal()]) for _ in range(1,30)],
+	train_configs=[(SAC, 800000)]
+)
+recognizer.goals_adaptation_phase(
+	dynamic_goals=[np.array([[-0.1, -0.1, 0.1]]), np.array([[-0.1, 0.1, 0.1]]), np.array([[0.2, 0.2, 0.1]])]
+)
 # TD3 is different from recognizer and expert algorithms, which are SAC #
 property_type = domain_to_env_property(PANDA)
 env_property = property_type("PandaMyReachDense")

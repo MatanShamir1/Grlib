@@ -103,7 +103,6 @@ class Graml(LearningRecognizer):
 		self.plans_dict[f"{true_goal}_true"] = true_sequence
 
 		with open(embeddings_path + f'/{true_goal}_{percentage}_plans_dict.pkl', 'wb') as plans_file:
-			# TODO erase AGENT_BASED macros
 			to_dump = {}
 			for goal, obss in self.plans_dict.items():
 				if goal == f"{true_goal}_true":
@@ -243,7 +242,7 @@ class GCGraml(Graml, GaAdaptingRecognizer):
 		if num_timesteps != None: kwargs["num_timesteps"] = num_timesteps
 		gc_agent = self.rl_agent_type(**kwargs)
 		gc_agent.learn()
-		self.agents.append(ContextualAgent(problem_name=self.env_prop.name, problem_goal="general", agent=gc_agent)) # TODO change
+		self.agents.append(ContextualAgent(problem_name=self.env_prop.name, problem_goal="general", agent=gc_agent))
 
 	def generate_sequences_library(self, goal: str) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
 		problem_name = self.env_prop.goal_to_problem_str(goal)

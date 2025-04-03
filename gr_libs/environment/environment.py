@@ -168,8 +168,6 @@ class PandaProperty(GCEnvProperty):
 
         
 class ParkingProperty(GCEnvProperty):
-    # def str_to_goal(self): # TODO not use it, goal is not a part of the env property anymore.
-    #     return self.name.split("-")[-2]
 
     def __init__(self, name):
         super().__init__(name)

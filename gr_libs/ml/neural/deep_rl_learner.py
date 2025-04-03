@@ -13,11 +13,6 @@ if __name__ != "__main__":
 	from gr_libs.ml.utils.format import random_subset_with_order
 from stable_baselines3 import SAC, PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
-from gr_envs.custom_env_wrappers.flat_obs_wrapper import CombineAchievedGoalAndObservationWrapper
-
-# important for registration of envs! do not remove lad
-import gr_envs.maze_scripts.envs.maze
-import gr_envs.highway_env_scripts.envs.parking_env
 from gr_libs.ml.utils import device
 
 # built-in python modules
@@ -32,13 +27,15 @@ def create_vec_env(kwargs):
 	return DummyVecEnv([lambda: env])
 
 def change_goal_to_specific_desired(obs, desired):
-	try:
-		if desired!=None: obs['desired_goal'] = desired
-	except Exception as e:
-		try:
-			if all(desired!=None): obs['desired_goal'] = desired
-		except Exception as e:
-			if all([desiredy!=None for desiredish in desired for desiredy in desiredish]): obs['desired_goal'] = desired
+	if desired is not None:
+		obs['desired_goal'] = desired
+	# try:
+	# 	if desired!=None: obs['desired_goal'] = desired
+	# except Exception as e:
+	# 	try:
+	# 		if all(desired!=None): obs['desired_goal'] = desired
+	# 	except Exception as e:
+	# 		if all([desiredy!=None for desiredish in desired for desiredy in desiredish]): obs['desired_goal'] = desired
 
 
 NETWORK_SETUP = {
@@ -265,6 +262,7 @@ class DeepRLAgent():
 			assert fig_path == None, "You can't specify a vid path when you don't even save the figure."
 		else:
 			assert fig_path != None, "You need to specify a vid path when you save the figure."
+		# The try-except is a bug fix for the env not being reset properly in panda. If someone wants to check why and provide a robust solution they're welcome.
 		try:
 			obs = self.env.reset()
 			change_goal_to_specific_desired(obs, desired)
