@@ -105,7 +105,7 @@ class MinigridProperty(EnvProperty):
         env_id = problem_name.split("-DynamicGoal-")[0] + "-DynamicGoal-" + problem_name.split("-DynamicGoal-")[1]
         result = register(
             id=env_id,
-            entry_point="gr_libss.minigrid_scripts.envs:CustomColorEnv",
+            entry_point="gr_envs.minigrid_scripts.envs:CustomColorEnv",
             kwargs={"size": 13 if 'Simple' in problem_name else 9,
                     "num_crossings": 4 if 'Simple' in problem_name else 3,
                     "goal_pos": self.str_to_goal(problem_name),
