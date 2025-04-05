@@ -1,0 +1,27 @@
+name: Common Test Steps
+
+on:
+  workflow_call:
+
+jobs:
+  test_steps:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/MatanShamir1/gr_test_base:latest  # Docker image with preloaded dataset
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python (inside container)
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install gr_libs with all extras and test tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[minigrid,panda,parking,maze]
+          pip install pytest
+
+      - name: Run tests
+        run: pytest tests/

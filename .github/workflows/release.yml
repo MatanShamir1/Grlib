@@ -6,26 +6,18 @@ on:
       - "v*"
 
 jobs:
-  build-and-publish:
+  test:
+    uses: ./.github/workflows/common_test_steps.yml
+  build:
+    needs: test
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Install build dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install build twine
-
       - name: Build the package
-        run: python -m build  # Uses pyproject.toml instead of setup.py
-
+        run: python -m build
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Publish to PyPI
         env:
           PYPY_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}

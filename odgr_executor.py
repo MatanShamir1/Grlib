@@ -13,7 +13,7 @@ from gr_libs.recognizer.recognizer import GaAgentTrainerRecognizer, LearningReco
 from gr_libs.recognizer.utils import recognizer_str_to_obj
 from gr_libs.ml.utils.storage import create_folders_if_necessary, get_and_create, get_experiment_results_path, get_policy_sequences_result_path
 
-from consts import PROBLEMS
+from gr_libs.problems.consts import PROBLEMS
 
 def validate(args, recognizer_type, task_inputs):
 	if "base" in task_inputs.keys():

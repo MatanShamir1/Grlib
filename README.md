@@ -83,6 +83,25 @@ After installing GRLib, you will have access to custom Gym environments, allowin
 
 Tutorials demonstrating basic ODGR scenarios is available in the sub-package `tutorials`. These tutorials walk through the initialization and deployment process, showcasing how different GR algorithms adapt to emerging goals in various Gym environments.
 
+## Working with an initial dataset of trained agents
+gr_libs also includes a library of trained agents for the various supported environments within the package.
+To get the dataset of trained agents, you can run:
+```sh
+python download_dataset.py
+```
+
+An alternative is to use our docker image, which includes the dataset in it.
+You can:
+1. pull the image:
+```sh
+docker pull ghcr.io/MatanShamir1/gr_test_base:latest
+```
+2. run a container:
+```sh
+docker run -it ghcr.io/MatanShamir1/gr_test_base:latest bash
+```
+3. don't forget to install the package from within the container, go back to 'Setup' for that.
+
 ### Method 1: Writing a Custom Script
 
 1. **Create a recognizer**
@@ -90,6 +109,7 @@ Tutorials demonstrating basic ODGR scenarios is available in the sub-package `tu
    Specify the domain name and specific environment for the recognizer, effectively telling it the domain theory - the collection of states and actions in the environment.
 
    ```python
+   import gr_libs.environment # Triggers gym env registration - you must run it!
    recognizer = Graql(
        domain_name="minigrid",
        env_name="MiniGrid-SimpleCrossingS13N4"

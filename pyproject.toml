@@ -22,7 +22,8 @@ dependencies = [
     "torchvision",
     "rl_zoo3",
     "stable_baselines3[extra]",
-    "sb3_contrib"
+    "sb3_contrib",
+    "pytest"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

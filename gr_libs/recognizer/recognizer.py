@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import List, Type
-
 from gr_libs.environment.environment import EnvProperty, SUPPORTED_DOMAINS
 from gr_libs.environment.utils.utils import domain_to_env_property
 from gr_libs.ml.base.rl_agent import RLAgent

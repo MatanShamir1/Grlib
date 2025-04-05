@@ -5,7 +5,6 @@ import numpy as np
 
 from typing import Callable, Generator, List, Dict, Tuple, Any
 from math import log2
-from numpy.core.fromnumeric import mean
 from scipy.stats import wasserstein_distance
 from gymnasium.spaces.discrete import Discrete
 # import torch
@@ -43,7 +42,7 @@ def kl_divergence_norm_softmax(observations: List[Tuple[State, Any]], agent, act
         qp2_flatten_distribution_list: List[float] = agent.get_actions_probabilities(
             observation=(observation, agent_pos))
         distances.append(kl_divergence(qp1, qp2_flatten_distribution_list))
-    return mean(distances)
+    return np.mean(distances)
 
 
 def amplify(values, alpha=1.0):
