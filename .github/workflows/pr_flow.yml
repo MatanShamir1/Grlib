@@ -1,0 +1,10 @@
+name: PR Test Flow
+
+on:
+  pull_request:
+    branches:
+      - main  # or whichever branch you're targeting for PRs
+
+jobs:
+  run_tests:
+    uses: ./.github/workflows/common_test_steps.yml

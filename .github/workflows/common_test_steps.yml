@@ -7,7 +7,7 @@ jobs:
   test_steps:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/MatanShamir1/gr_test_base:latest  # Docker image with preloaded dataset
+      image: ghcr.io/MatanShamir1/gr_test_base_slim:latest  # Docker image with preloaded dataset
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
