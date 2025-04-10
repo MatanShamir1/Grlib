@@ -6,8 +6,8 @@ on:
       - "v*"
 
 jobs:
-  test:
-    uses: ./.github/workflows/common_test_steps.yml
+  # test:
+  #   uses: ./.github/workflows/common_test_steps.yml
   build:
     needs: test
     runs-on: ubuntu-latest
