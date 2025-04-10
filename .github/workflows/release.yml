@@ -6,19 +6,22 @@ on:
       - "v*"
 
 jobs:
-  test:
-    uses: ./.github/workflows/common_test_steps.yml
-  build:
-    needs: test
+  release:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/matanshamir1/gr_test_base:latest
     steps:
+      - name: Run common test steps
+        uses: ./.github/actions/common-test-steps
+
+      - name: Install build tools
+        run: pip install build twine
+
       - name: Build the package
         run: python -m build
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
+
       - name: Publish to PyPI
         env:
-          PYPY_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-        run: python -m twine upload dist/* -u __token__ -p $PYPY_API_TOKEN
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: python -m twine upload dist/*

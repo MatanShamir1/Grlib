@@ -15,6 +15,13 @@ def get_storage_framework_dir(recognizer: str):
     return os.path.join(get_storage_dir(),recognizer)
 
 def get_storage_dir():
+    # Prefer local directory if it exists (e.g., in GitHub workspace)
+    if os.path.exists("dataset"):
+        return "dataset"
+    # Fall back to pre-mounted directory (e.g., in Docker container)
+    if os.path.exists("/preloaded_data"):
+        return "/preloaded_data"
+    # Default to "dataset" even if it doesn't exist (e.g., will be created)
     return "dataset"
 
 def _get_models_directory_name():
