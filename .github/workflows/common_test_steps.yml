@@ -13,8 +13,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install gr_libs with all extras and test tools
-        env:
-          SETUPTOOLS_SCM_PRETEND_VERSION_FOR_GR_LIBS: "0.0.0"
         run: |
           python -m pip install --upgrade pip
           pip install setuptools_scm
