@@ -1,4 +1,7 @@
-FROM python:3.11-slim
+FROM pytorch/pytorch
+
+# Switch to root
+USER root
 
 # Set workdir
 WORKDIR /app
@@ -14,5 +17,10 @@ COPY dataset.zip .
 RUN unzip dataset.zip && rm dataset.zip
 RUN mv dataset_new /preloaded_data
 
-# Just start with bash by default
-CMD [ "bash" ]
+# Change ownership so jovyan can access
+RUN chown -R ${NB_UID}:${NB_GID} /preloaded_data
+
+# Switch back to default user
+USER ${NB_UID}
+
+CMD ["bash"]
