@@ -1,4 +1,4 @@
-FROM pytorch/pytorch
+FROM python:3.11-slim
 
 # Switch to root
 USER root

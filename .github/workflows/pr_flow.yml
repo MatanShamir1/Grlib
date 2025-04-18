@@ -9,7 +9,7 @@ jobs:
   run_tests:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/matanshamir1/gr_test_base:latest
+      image: ghcr.io/matanshamir1/gr_test_base_slim:latest
       options: --user root
     steps:
       - name: Check out the repository
