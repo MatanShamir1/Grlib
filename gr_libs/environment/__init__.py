@@ -12,7 +12,7 @@ def is_extra_installed(package: str, extra: str) -> bool:
         return False  # The package is not installed
 
 # Check if `gr_libs[minigrid]` was installed
-for env in ["minigrid", "panda", "highway", "point_maze"]:
+for env in ["minigrid", "panda", "highway", "maze"]:
 	if is_extra_installed("gr_libs", f"gr_envs[{env}]"):
 		try:
 			importlib.import_module(f"gr_envs.{env}_scripts.envs")

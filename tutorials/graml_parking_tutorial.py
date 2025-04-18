@@ -5,6 +5,7 @@ from gr_libs.metrics.metrics import stochastic_amplified_selection
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
 from gr_libs.ml.utils.format import random_subset_with_order
 from gr_libs.recognizer.graml.graml_recognizer import ExpertBasedGraml, GCGraml
+import gr_libs.environment.environment
 
 def run_graml_parking_tutorial():
     recognizer = GCGraml(
