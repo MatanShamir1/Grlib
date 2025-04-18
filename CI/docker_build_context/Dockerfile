@@ -7,9 +7,7 @@ USER root
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx libglib2.0-0 git build-essential curl \
-    && pip install --no-cache-dir torch torchvision \
-    && pip install --no-cache-dir opencv-python \
+    libgl1-mesa-glx libglib2.0-0 git build-essential curl unzip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy and unzip the dataset
