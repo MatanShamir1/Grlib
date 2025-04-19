@@ -195,7 +195,7 @@ class MCTSBasedGraml(BGGraml, GaAdaptingRecognizer):
 	def generate_sequences_library(self, goal: str) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
 		problem_name = self.env_prop.goal_to_problem_str(goal)
 		img_path = os.path.join(get_policy_sequences_result_path(self.env_prop.domain_name, recognizer=self.__class__.__name__), problem_name + "_MCTS")
-		return mcts_model.plan(self.env_prop.name, problem_name, goal, save_fig=True, img_path=img_path, env_prop=self.env_prop)
+		return mcts_model.plan(self.env_prop.name, problem_name, goal, save_fig=False, img_path=img_path, env_prop=self.env_prop)
 
 class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
 	def __init__(self, *args, **kwargs):
@@ -214,7 +214,7 @@ class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
 		agent = self.rl_agent_type(**kwargs)
 		agent.learn()
 		fig_path = get_and_create(f"{os.path.abspath(os.path.join(get_policy_sequences_result_path(domain_name=self.env_prop.domain_name, env_name=self.env_prop.name, recognizer=self.__class__.__name__), problem_name))}_bg_sequence")
-		return [agent.generate_observation(action_selection_method=metrics.greedy_selection, random_optimalism=False, save_fig=True, fig_path=fig_path, env_prop=self.env_prop)]
+		return [agent.generate_observation(action_selection_method=metrics.greedy_selection, random_optimalism=False, save_fig=False, fig_path=fig_path, env_prop=self.env_prop)]
 
 	def goals_adaptation_phase(self, dynamic_goals: List[str], dynamic_train_configs):
 		self.dynamic_goals_problems = [self.env_prop.goal_to_problem_str(g) for g in dynamic_goals]
@@ -255,7 +255,7 @@ class GCGraml(Graml, GaAdaptingRecognizer):
 		agent_kwargs = {
 			"action_selection_method": metrics.stochastic_amplified_selection,
 			"random_optimalism": True,
-			"save_fig": True,
+			"save_fig": False,
 			"fig_path": fig_path
 		}
 		if self.env_prop.use_goal_directed_problem(): agent_kwargs["goal_directed_problem"] = problem_name
