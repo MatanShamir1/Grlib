@@ -1,5 +1,5 @@
 from stable_baselines3 import PPO, SAC
-from gr_libs.metrics.metrics import stochastic_amplified_selection
+from gr_libs.metrics import stochastic_amplified_selection, mean_p_value, mean_wasserstein_distance
 from gr_libs import GCDraco
 from gr_libs.environment.utils.utils import domain_to_env_property
 import numpy as np
@@ -12,7 +12,7 @@ def run_gcdraco_panda_tutorial():
     recognizer = GCDraco(
         domain_name=PANDA,
         env_name="PandaMyReachDense",
-        evaluation_function = "mean_wasserstein_distance", # or "mean_p_value"
+        evaluation_function = mean_wasserstein_distance, # or mean_p_value
     )
 
     recognizer.domain_learning_phase(

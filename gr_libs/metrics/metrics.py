@@ -221,14 +221,3 @@ def max(values: List[float]) -> List[float]:
     vals[:] = 0.0
     vals[argmax] = 1.0
     return vals
-
-METRICS = {
-    "mean_wasserstein_distance": mean_wasserstein_distance,
-    "mean_p_value": mean_p_value,
-}
-
-def get_metric_by_name(
-        name: Optional[str],
-        default: Callable[[List[Any], RLAgent, gymnasium.spaces.Box], float] = mean_wasserstein_distance
-) -> Callable[[List[Any], RLAgent, gymnasium.spaces.Box], float]:
-    return METRICS.get(name, default)

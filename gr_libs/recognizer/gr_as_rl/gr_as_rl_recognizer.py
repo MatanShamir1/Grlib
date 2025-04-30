@@ -1,11 +1,11 @@
 from abc import abstractmethod
 import os
 import dill
-from typing import List, Type
+from typing import List, Type, Callable
 import numpy as np
 from gr_libs.environment.environment import EnvProperty, GCEnvProperty
 from gr_libs.environment.utils.utils import domain_to_env_property
-from gr_libs.metrics.metrics import kl_divergence_norm_softmax, get_metric_by_name, mean_wasserstein_distance
+from gr_libs.metrics.metrics import kl_divergence_norm_softmax, mean_wasserstein_distance
 from gr_libs.ml.base import RLAgent
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
 from gr_libs.ml.tabular.tabular_q_learner import TabularQLearner
@@ -67,7 +67,8 @@ class Draco(GRAsRL, GaAgentTrainerRecognizer):
 		assert not self.env_prop.is_state_discrete() and not self.env_prop.is_action_discrete()
 		if self.rl_agent_type is None:
 			self.rl_agent_type = DeepRLAgent
-		self.evaluation_function = get_metric_by_name(kwargs.get("evaluation_function"))
+		self.evaluation_function = kwargs.get("evaluation_function")
+		assert self.evaluation_function is None or type(self.evaluation_function) != Callable
 
 class GCDraco(GRAsRL, LearningRecognizer, GaAdaptingRecognizer): # TODO problem: it gets 2 goal_adaptation phase from parents, one with configs and one without.
 	def __init__(self, *args, **kwargs):
@@ -76,7 +77,8 @@ class GCDraco(GRAsRL, LearningRecognizer, GaAdaptingRecognizer): # TODO problem:
 		self.evaluation_function = mean_wasserstein_distance
 		if self.rl_agent_type is None:
 			self.rl_agent_type = GCDeepRLAgent
-		self.evaluation_function = get_metric_by_name(kwargs.get("evaluation_function"))
+		self.evaluation_function = kwargs.get("evaluation_function")
+		assert self.evaluation_function is None or type(self.evaluation_function) != Callable
 
 	def domain_learning_phase(self, base_goals: List[str], train_configs):
 		super().domain_learning_phase(base_goals, train_configs)
