@@ -5,7 +5,7 @@ from gr_libs.environment.utils.utils import domain_to_env_property
 from gr_libs.ml.base.rl_agent import RLAgent
 
 class Recognizer(ABC):
-	def __init__(self, domain_name: str, env_name:str, collect_statistics=False, rl_agent_type: Type[RLAgent]=None):
+	def __init__(self, domain_name: str, env_name:str, collect_statistics=False, rl_agent_type: Type[RLAgent]=None, **kwargs):
 		assert domain_name in SUPPORTED_DOMAINS
 		self.rl_agent_type = rl_agent_type
 		self.domain_name = domain_name
