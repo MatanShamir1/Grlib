@@ -82,14 +82,14 @@ class Graml(LearningRecognizer):
 							dev_loader=DataLoader(dev_dataset, batch_size=self.env_prop.get_lstm_props().batch_size, shuffle=False, collate_fn=self.collate_func))
 			save_weights(model=self.model, path=self.model_file_path)
 
-	def goals_adaptation_phase(self, dynamic_goals: List[EnvProperty]):
+	def goals_adaptation_phase(self, dynamic_goals: List[EnvProperty], save_fig=False):
 		self.is_first_inf_since_new_goals = True
 		self.current_goals = dynamic_goals
 		# start by training each rl agent on the base goal set
 		self.embeddings_dict = {} # relevant if the embedding of the plan occurs during the goals adaptation phase
 		self.plans_dict = {} # relevant if the embedding of the plan occurs during the inference phase
 		for goal in self.current_goals:
-			obss = self.generate_sequences_library(goal)
+			obss = self.generate_sequences_library(goal, save_fig=save_fig)
 			self.plans_dict[str(goal)] = obss
 
 	def get_goal_plan(self, goal):
@@ -150,7 +150,7 @@ class Graml(LearningRecognizer):
 		return closest_goal
 	
 	@abstractmethod
-	def generate_sequences_library(self, goal: str) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
+	def generate_sequences_library(self, goal: str, save_fig=False) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
 		pass
 
 	# this function duplicates every sequence and creates a consecutive and non-consecutive version of it
@@ -192,10 +192,10 @@ class MCTSBasedGraml(BGGraml, GaAdaptingRecognizer):
 		super().__init__(*args, **kwargs)
 		if self.rl_agent_type==None: self.rl_agent_type = TabularQLearner
 
-	def generate_sequences_library(self, goal: str) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
+	def generate_sequences_library(self, goal: str, save_fig=False) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
 		problem_name = self.env_prop.goal_to_problem_str(goal)
 		img_path = os.path.join(get_policy_sequences_result_path(self.env_prop.domain_name, recognizer=self.__class__.__name__), problem_name + "_MCTS")
-		return mcts_model.plan(self.env_prop.name, problem_name, goal, save_fig=False, img_path=img_path, env_prop=self.env_prop)
+		return mcts_model.plan(self.env_prop.name, problem_name, goal, save_fig=save_fig, img_path=img_path, env_prop=self.env_prop)
 
 class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
 	def __init__(self, *args, **kwargs):
@@ -206,15 +206,23 @@ class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
 			else:
 				self.rl_agent_type = DeepRLAgent
 
-	def generate_sequences_library(self, goal: str) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
+	def generate_sequences_library(self, goal: str, save_fig=False) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
 		problem_name = self.env_prop.goal_to_problem_str(goal)
 		kwargs = {"domain_name":self.domain_name, "problem_name":problem_name}
 		if self.dynamic_train_configs_dict[problem_name][0] != None: kwargs["algorithm"] = self.dynamic_train_configs_dict[problem_name][0]
 		if self.dynamic_train_configs_dict[problem_name][1] != None: kwargs["num_timesteps"] = self.dynamic_train_configs_dict[problem_name][1]
 		agent = self.rl_agent_type(**kwargs)
 		agent.learn()
-		fig_path = get_and_create(f"{os.path.abspath(os.path.join(get_policy_sequences_result_path(domain_name=self.env_prop.domain_name, env_name=self.env_prop.name, recognizer=self.__class__.__name__), problem_name))}_bg_sequence")
-		return [agent.generate_observation(action_selection_method=metrics.greedy_selection, random_optimalism=False, save_fig=False, fig_path=fig_path, env_prop=self.env_prop)]
+		agent_kwargs = {
+			"action_selection_method": metrics.greedy_selection,
+			"random_optimalism": False,
+			"save_fig": save_fig,
+			"env_prop": self.env_prop
+		}
+		if save_fig:
+			fig_path = get_and_create(f"{os.path.abspath(os.path.join(get_policy_sequences_result_path(domain_name=self.env_prop.domain_name, env_name=self.env_prop.name, recognizer=self.__class__.__name__), problem_name))}_bg_sequence")
+			agent_kwargs["fig_path"] = fig_path
+		return [agent.generate_observation(**agent_kwargs)]
 
 	def goals_adaptation_phase(self, dynamic_goals: List[str], dynamic_train_configs):
 		self.dynamic_goals_problems = [self.env_prop.goal_to_problem_str(g) for g in dynamic_goals]
@@ -244,20 +252,21 @@ class GCGraml(Graml, GaAdaptingRecognizer):
 		gc_agent.learn()
 		self.agents.append(ContextualAgent(problem_name=self.env_prop.name, problem_goal="general", agent=gc_agent))
 
-	def generate_sequences_library(self, goal: str) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
+	def generate_sequences_library(self, goal: str, save_fig=False) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
 		problem_name = self.env_prop.goal_to_problem_str(goal)
 		kwargs = {"domain_name":self.domain_name, "problem_name":self.env_prop.name} # problem name is env name in gc case
 		if self.original_train_configs[0][0] != None: kwargs["algorithm"] = self.original_train_configs[0][0]
 		if self.original_train_configs[0][1] != None: kwargs["num_timesteps"] = self.original_train_configs[0][1]
 		agent = self.rl_agent_type(**kwargs)
 		agent.learn()
-		fig_path = get_and_create(f"{os.path.abspath(os.path.join(get_policy_sequences_result_path(domain_name=self.env_prop.domain_name, env_name=self.env_prop.name, recognizer=self.__class__.__name__), problem_name))}_gc_sequence")
 		agent_kwargs = {
 			"action_selection_method": metrics.stochastic_amplified_selection,
 			"random_optimalism": True,
-			"save_fig": False,
-			"fig_path": fig_path
+			"save_fig": save_fig
 		}
+		if save_fig:
+			fig_path = get_and_create(f"{os.path.abspath(os.path.join(get_policy_sequences_result_path(domain_name=self.env_prop.domain_name, env_name=self.env_prop.name, recognizer=self.__class__.__name__), problem_name))}_gc_sequence")
+			agent_kwargs["fig_path"] = fig_path
 		if self.env_prop.use_goal_directed_problem(): agent_kwargs["goal_directed_problem"] = problem_name
 		else: agent_kwargs["goal_directed_goal"] = goal
 		obss = []

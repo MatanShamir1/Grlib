@@ -351,7 +351,7 @@ class TabularQLearner(TabularRLAgent):
     def simplify_observation(self, observation):
         return [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in observation] # list of tuples, each tuple the sample
         
-    def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig = False, fig_path: str=None, env_prop=None):
+    def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig=False, fig_path: str=None, env_prop=None):
         """
         Generate a single observation given a list of agents
 
