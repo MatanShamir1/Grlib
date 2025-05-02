@@ -1,4 +1,5 @@
 from gr_libs.environment.environment import MINIGRID, QLEARNING
+from gr_libs.environment.utils.utils import domain_to_env_property
 from gr_libs.metrics.metrics import stochastic_amplified_selection
 from gr_libs.ml.tabular.tabular_q_learner import TabularQLearner
 from gr_libs.ml.utils.format import random_subset_with_order
@@ -17,8 +18,12 @@ def run_graml_minigrid_tutorial():
         dynamic_goals = [(11,1), (11,11), (1,11)],
         dynamic_train_configs=[(QLEARNING, 100000) for _ in range(3)] # for expert sequence generation.
     )
+
+    property_type = domain_to_env_property(MINIGRID)
+    env_property = property_type("MiniGrid-SimpleCrossingS13N4")
+
     # TD3 is different from recognizer and expert algorithms, which are SAC #
-    actor = TabularQLearner(domain_name="minigrid", problem_name="MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0", algorithm=QLEARNING, num_timesteps=100000)
+    actor = TabularQLearner(domain_name="minigrid", problem_name="MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0", env_prop=env_property, algorithm=QLEARNING, num_timesteps=100000)
     actor.learn()
     # sample is generated stochastically to simulate suboptimal behavior, noise is added to the actions values #
     full_sequence = actor.generate_observation(

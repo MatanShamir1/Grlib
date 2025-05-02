@@ -180,7 +180,7 @@ class BGGraml(Graml):
 		self.original_problems = [self.env_prop.goal_to_problem_str(g) for g in base_goals]
 		# start by training each rl agent on the base goal set
 		for (problem, goal), (algorithm, num_timesteps) in zip(zip(self.original_problems, base_goals), train_configs):
-			kwargs = {"domain_name":self.domain_name, "problem_name":problem}
+			kwargs = {"domain_name":self.domain_name, "problem_name":problem, "env_prop":self.env_prop}
 			if algorithm != None: kwargs["algorithm"] = algorithm
 			if num_timesteps != None: kwargs["num_timesteps"] = num_timesteps
 			agent = self.rl_agent_type(**kwargs)
@@ -208,7 +208,7 @@ class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
 
 	def generate_sequences_library(self, goal: str, save_fig=False) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
 		problem_name = self.env_prop.goal_to_problem_str(goal)
-		kwargs = {"domain_name":self.domain_name, "problem_name":problem_name}
+		kwargs = {"domain_name":self.domain_name, "problem_name":problem_name, "env_prop":self.env_prop}
 		if self.dynamic_train_configs_dict[problem_name][0] != None: kwargs["algorithm"] = self.dynamic_train_configs_dict[problem_name][0]
 		if self.dynamic_train_configs_dict[problem_name][1] != None: kwargs["num_timesteps"] = self.dynamic_train_configs_dict[problem_name][1]
 		agent = self.rl_agent_type(**kwargs)
@@ -216,8 +216,7 @@ class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
 		agent_kwargs = {
 			"action_selection_method": metrics.greedy_selection,
 			"random_optimalism": False,
-			"save_fig": save_fig,
-			"env_prop": self.env_prop
+			"save_fig": save_fig
 		}
 		if save_fig:
 			fig_path = get_and_create(f"{os.path.abspath(os.path.join(get_policy_sequences_result_path(domain_name=self.env_prop.domain_name, env_name=self.env_prop.name, recognizer=self.__class__.__name__), problem_name))}_bg_sequence")
@@ -244,7 +243,7 @@ class GCGraml(Graml, GaAdaptingRecognizer):
 		self.gc_goal_set = base_goals
 		self.original_problems = self.env_prop.name # needed for gr_dataset
 		# start by training each rl agent on the base goal set
-		kwargs = {"domain_name":self.domain_name, "problem_name":self.env_prop.name}
+		kwargs = {"domain_name":self.domain_name, "problem_name":self.env_prop.name, "env_prop":self.env_prop}
 		algorithm, num_timesteps = train_configs[0] # should only be one, was asserted
 		if algorithm != None: kwargs["algorithm"] = algorithm
 		if num_timesteps != None: kwargs["num_timesteps"] = num_timesteps
@@ -254,7 +253,7 @@ class GCGraml(Graml, GaAdaptingRecognizer):
 
 	def generate_sequences_library(self, goal: str, save_fig=False) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
 		problem_name = self.env_prop.goal_to_problem_str(goal)
-		kwargs = {"domain_name":self.domain_name, "problem_name":self.env_prop.name} # problem name is env name in gc case
+		kwargs = {"domain_name":self.domain_name, "problem_name":self.env_prop.name, "env_prop":self.env_prop} # problem name is env name in gc case
 		if self.original_train_configs[0][0] != None: kwargs["algorithm"] = self.original_train_configs[0][0]
 		if self.original_train_configs[0][1] != None: kwargs["num_timesteps"] = self.original_train_configs[0][1]
 		agent = self.rl_agent_type(**kwargs)

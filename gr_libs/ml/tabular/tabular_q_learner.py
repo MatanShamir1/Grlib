@@ -13,7 +13,7 @@ from typing import Any
 from random import Random
 from typing import List, Iterable
 from gymnasium.error import InvalidAction
-from gr_libs.environment.environment import QLEARNING, MinigridProperty
+from gr_libs.environment.environment import QLEARNING, EnvProperty
 from gr_libs.ml.tabular import TabularState
 from gr_libs.ml.tabular.tabular_rl_agent import TabularRLAgent
 from gr_libs.ml.utils import get_agent_model_dir, random_subset_with_order, softmax
@@ -30,6 +30,7 @@ class TabularQLearner(TabularRLAgent):
     def __init__(self,
                  domain_name: str,
                  problem_name: str,
+                 env_prop: EnvProperty,
                  algorithm: str,
                  num_timesteps: int,
                  decaying_eps: bool = True,
@@ -55,6 +56,7 @@ class TabularQLearner(TabularRLAgent):
             learning_rate=learning_rate
         )
         assert algorithm == QLEARNING, f"algorithm {algorithm} is not supported by {self.__class__.__name__}"
+        self.env_prop = env_prop
         self.valid_only = valid_only
         self.check_partial_goals = check_partial_goals
         self.goal_literals_achieved = set()
@@ -351,7 +353,7 @@ class TabularQLearner(TabularRLAgent):
     def simplify_observation(self, observation):
         return [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in observation] # list of tuples, each tuple the sample
         
-    def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig=False, fig_path: str=None, env_prop=None):
+    def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig=False, fig_path: str=None):
         """
         Generate a single observation given a list of agents
 
@@ -413,7 +415,7 @@ class TabularQLearner(TabularRLAgent):
             sequence = [pos for ((state, pos), action) in steps]
             #print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
             print(f"generating sequence image at {fig_path}.")
-            env_prop.create_sequence_image(sequence, fig_path, self.problem_name) # TODO change that assumption, cannot assume this is minigrid env
+            self.env_prop.create_sequence_image(sequence, fig_path, self.problem_name) # TODO change that assumption, cannot assume this is minigrid env
 
         return steps
 
@@ -442,12 +444,4 @@ class TabularQLearner(TabularRLAgent):
         if percentage >= 0.8:
             assert len(result) > 2
         return result
-    
-if __name__ == "__main__":
-    from gr_libs.metrics.metrics import greedy_selection
-    import gr_envs # to register everything
-    agent = TabularQLearner(domain_name="minigrid", problem_name="MiniGrid-LavaCrossingS9N2-DynamicGoal-1x7-v0")
-    agent.generate_observation(greedy_selection, True, True)
-    
-    # python experiments.py --recognizer graml --domain point_maze --task L5 --partial_obs_type continuing --point_maze_env obstacles --collect_stats --inference_same_seq_len
         

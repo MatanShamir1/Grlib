@@ -24,7 +24,8 @@ class GRAsRL(Recognizer):
 		self.active_problems = dynamic_goals_problems
 		for problem_name, config in zip(dynamic_goals_problems, dynamic_train_configs):
 			agent_kwargs = {"domain_name": self.env_prop.domain_name,
-							"problem_name": problem_name}
+							"problem_name": problem_name,
+							"env_prop": self.env_prop}
 			if config[0]: agent_kwargs["algorithm"] = config[0]
 			if config[1]: agent_kwargs["num_timesteps"] = config[1]
 			agent = self.rl_agent_type(**agent_kwargs)
@@ -80,7 +81,8 @@ class GCDraco(GRAsRL, LearningRecognizer, GaAdaptingRecognizer): # TODO problem:
 		agent_kwargs = {"domain_name": self.env_prop.domain_name,
 						"problem_name": self.env_prop.name,
 						"algorithm": self.original_train_configs[0][0],
-						"num_timesteps": self.original_train_configs[0][1]}
+						"num_timesteps": self.original_train_configs[0][1],
+						"env_prop": self.env_prop}
 		agent = self.rl_agent_type(**agent_kwargs)
 		agent.learn()
 		self.agents[self.env_prop.name] = agent

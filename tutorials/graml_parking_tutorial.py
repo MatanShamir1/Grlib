@@ -1,11 +1,11 @@
 
 from stable_baselines3 import PPO, SAC, TD3
 from gr_libs.environment.environment import PARKING, EnvProperty, GCEnvProperty, ParkingProperty
+from gr_libs.environment.utils.utils import domain_to_env_property
 from gr_libs.metrics.metrics import stochastic_amplified_selection
-from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
+from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent
 from gr_libs.ml.utils.format import random_subset_with_order
 from gr_libs.recognizer.graml.graml_recognizer import ExpertBasedGraml, GCGraml
-import gr_libs.environment.environment
 
 def run_graml_parking_tutorial():
     recognizer = GCGraml(
@@ -22,8 +22,11 @@ def run_graml_parking_tutorial():
         # no need for expert sequence generation since GCRL is used
     )
 
+    property_type = domain_to_env_property(PARKING)
+    env_property = property_type("Parking-S-14-PC-")
+
     # TD3 is different from recognizer and expert algorithms, which are SAC #
-    actor = DeepRLAgent(domain_name="parking", problem_name="Parking-S-14-PC--GI-11-v0", algorithm=TD3, num_timesteps=400000)
+    actor = DeepRLAgent(domain_name="parking", problem_name="Parking-S-14-PC--GI-11-v0", env_prop=env_property, algorithm=TD3, num_timesteps=400000)
     actor.learn()
     # sample is generated stochastically to simulate suboptimal behavior, noise is added to the actions values #
     full_sequence = actor.generate_observation(

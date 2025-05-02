@@ -6,6 +6,8 @@ import gymnasium as gym
 import numpy as np
 import cv2
 
+from gr_libs.environment.environment import EnvProperty
+
 HACK_HAPPENED = False
 
 if __name__ != "__main__":
@@ -29,13 +31,6 @@ def create_vec_env(kwargs):
 def change_goal_to_specific_desired(obs, desired):
 	if desired is not None:
 		obs['desired_goal'] = desired
-	# try:
-	# 	if desired!=None: obs['desired_goal'] = desired
-	# except Exception as e:
-	# 	try:
-	# 		if all(desired!=None): obs['desired_goal'] = desired
-	# 	except Exception as e:
-	# 		if all([desiredy!=None for desiredish in desired for desiredy in desiredish]): obs['desired_goal'] = desired
 
 
 NETWORK_SETUP = {
@@ -45,13 +40,14 @@ NETWORK_SETUP = {
 }
 
 class DeepRLAgent():
-	def __init__(self, domain_name: str, problem_name: str, num_timesteps:float, algorithm=SAC, reward_threshold: float=450,
+	def __init__(self, domain_name: str, problem_name: str, num_timesteps:float, env_prop:EnvProperty, algorithm=SAC, reward_threshold: float=450,
 			  	 exploration_rate=None):
 		# Need to change reward threshold to change according to which task the agent is training on, becuase it changes from task to task.
 		kwargs = {"id":problem_name, "render_mode":"rgb_array"}
-		
+
 		self.domain_name = domain_name
 		self.problem_name = problem_name
+		self.env_prop = env_prop
 
 		self._model_directory = get_agent_model_dir(domain_name=self.domain_name, model_name=problem_name, class_name=algorithm.__name__)
 		if os.path.exists(os.path.join(self._model_directory, "saved_model.zip")):
@@ -70,6 +66,19 @@ class DeepRLAgent():
 
 	def save_model(self):
 		self._model.save(self._model_file_path)
+
+	def try_recording_video(self, video_path, desired=None):
+		num_tries = 0
+		while True:
+			if num_tries >= 10:
+				assert False, "agent keeps failing on recording an optimal obs."
+			try:
+				self.record_video(video_path, desired)
+				break
+			except Exception as e:
+				num_tries += 1
+		#print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
+		print(f"generated sequence video at {video_path}.")
 
 	def record_video(self, video_path, desired=None):
 		global HACK_HAPPENED
@@ -112,48 +121,36 @@ class DeepRLAgent():
 
 	#def set_success_done(self, success_done, desired, )
 
+	# TODO move this to the env_property as well!
 	def change_done_by_specific_desired(self, obs, desired, old_success_done):
 		global HACK_HAPPENED
-		try:
-			if desired!=None:
-				HACK_HAPPENED = True
-				if 'Panda' in self.problem_name:
-					assert obs['achieved_goal'].shape == desired.shape
-					d = np.linalg.norm(obs['achieved_goal'] - desired, axis=-1)
-					# print(f"achieved_goal:{achieved_goal}, desired_goal:{desired_goal}, distance:{d}, is finished:{d < self.distance_threshold}")
-					return (d < 0.04)[0]
-				elif 'Parking' in self.problem_name: # shuoldn't be used for now
-					# TODO
-					return self.env.task.is_success()
-			else:
-				return old_success_done
-		except Exception as e:
-			try:
-				if all(desired!=None):
-					HACK_HAPPENED = True
-					if 'Panda' in self.problem_name:
-						assert obs['achieved_goal'].shape == desired.shape
-						d = np.linalg.norm(obs['achieved_goal'] - desired, axis=-1)
-						# print(f"achieved_goal:{achieved_goal}, desired_goal:{desired_goal}, distance:{d}, is finished:{d < self.distance_threshold}")
-						return (d < 0.04)[0]
-					elif 'Parking' in self.problem_name:
-						# TODO add all of this to the environment property. recognizer shouldn't know anything about it.
-						return self.env.task.is_success()
-				else:
-					return old_success_done
-			except Exception as e:
-				if all([desiredy!=None for desiredish in desired for desiredy in desiredish]):
-					HACK_HAPPENED = True
-					if 'Panda' in self.problem_name:
-						assert obs['achieved_goal'].shape == desired.shape
-						d = np.linalg.norm(obs['achieved_goal'] - desired, axis=-1)
-						# print(f"achieved_goal:{achieved_goal}, desired_goal:{desired_goal}, distance:{d}, is finished:{d < self.distance_threshold}")
-						return (d < 0.04)[0]
-					elif 'Parking' in self.problem_name:
-						# TODO
-						return self.env.task.is_success()
-				else:
-					return old_success_done
+
+		# Helper: safely check if desired is "not None"-like
+		def is_desired_exists(d):
+			if d is None:
+				return False
+			if isinstance(d, np.ndarray):
+				return d.size > 0 and not np.isnan(d).all()
+			if isinstance(d, (list, tuple)):
+				return any(is_desired_exists(elem) for elem in d)
+			assert False, f"Unsupported type for desired: {type(d)}"
+
+		if not is_desired_exists(desired):
+			return old_success_done
+
+		HACK_HAPPENED = True
+
+		if 'Panda' in self.problem_name:
+			assert obs['achieved_goal'].shape == desired.shape, \
+				f"Shape mismatch: {obs['achieved_goal'].shape} vs {desired.shape}"
+			d = np.linalg.norm(obs['achieved_goal'] - desired, axis=-1)
+			return (d < 0.04)[0]
+
+		elif 'Parking' in self.problem_name:
+			# Placeholder: should be replaced with proper task success check
+			return self.env.task.is_success()
+
+		return old_success_done  # Fallback
 
 	def load_model(self):
 		self._model = self.algorithm.load(self._model_file_path, env=self.env, device=device)
@@ -181,10 +178,7 @@ class DeepRLAgent():
 						obs, reward, done, infos = env.step(action)
 
 						assert len(reward) == 1, f"length of rewards list is not 1, rewards:{reward}"
-						if "success" in infos[0].keys(): is_success = infos[0]["success"] # make sure the agent actually reached the goal within the max time
-						elif "is_success" in infos[0].keys(): is_success = infos[0]["is_success"] # make sure the agent actually reached the goal within the max time
-						elif "step_task_completions" in infos[0].keys(): is_success = (len(infos[0]["step_task_completions"]) == 1) # bug of dummyVecEnv, it removes the episode_task_completions from the info dict.
-						else: raise NotImplementedError("no other option for any of the environments.")
+						is_success = self.env_prop.is_success(infos)
 						# print(f"(action,is_done,info):({action},{done},{infos})")
 						if is_success:
 							#print(f"breaking due to GG, took {i} steps")
@@ -217,6 +211,15 @@ class DeepRLAgent():
 			print(f"No existing model in {self._model_file_path}, starting learning")
 			self._model.learn(total_timesteps=self.num_timesteps, progress_bar=True) # comment this in a normal env
 			self.save_model()
+
+	def safe_env_reset(self):
+		try:
+			obs = self.env.reset()
+		except Exception as e:
+			kwargs = {"id": self.problem_name, "render_mode": "rgb_array"}
+			self.env = create_vec_env(kwargs)
+			obs = self.env.reset()
+		return obs
 
 	def get_mean_and_std_dev(self, observation):
 		if self.algorithm == SAC:
@@ -251,26 +254,27 @@ class DeepRLAgent():
 	# the function squashes the 2d array of obs and action in a 1d array, concatenating their values together for training.
 	def simplify_observation(self, observation):
 		return [np.concatenate((np.array(obs).reshape(obs.shape[-1]),np.array(action[0]).reshape(action[0].shape[-1]))) for (obs,action) in observation]
+	
+	def add_random_optimalism(self, observations, action, constant_initial_action):
+		if len(observations) > 3:
+			for i in range(0, len(action[0])):
+				action[0][i] += random.uniform(-0.01 * action[0][i], 0.01 * action[0][i])
+		else: # just walk in a specific random direction to enable diverse plans
+			action = np.array(np.array([constant_initial_action]), None)
 
 	def generate_partial_observation(self, action_selection_method, percentage, is_consecutive, save_fig=False, fig_path=None, random_optimalism=True):
 		steps = self.generate_observation(action_selection_method, save_fig=save_fig, random_optimalism=random_optimalism, fig_path=fig_path) # steps are a full observation
 		return random_subset_with_order(steps, (int)(percentage * len(steps)), is_consecutive)
 
-	def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig=False, env_prop=None,
+	def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig=False,
 							 fig_path=None, with_dict=False, desired=None) -> List[Tuple[np.ndarray, np.ndarray]]: # TODO make sure to add a linter to alert when a method doesn't accept or return the type it should
 		if save_fig == False:
 			assert fig_path == None, "You can't specify a vid path when you don't even save the figure."
 		else:
 			assert fig_path != None, "You need to specify a vid path when you save the figure."
 		# The try-except is a bug fix for the env not being reset properly in panda. If someone wants to check why and provide a robust solution they're welcome.
-		try:
-			obs = self.env.reset()
-			change_goal_to_specific_desired(obs, desired)
-		except Exception as e:
-			kwargs = {"id": self.problem_name, "render_mode": "rgb_array"}
-			self.env = create_vec_env(kwargs)
-			obs = self.env.reset()
-			change_goal_to_specific_desired(obs, desired)
+		obs = self.safe_env_reset()
+		change_goal_to_specific_desired(obs, desired)
 		observations = []
 		is_successful_observation_made = False
 		num_of_insuccessful_attempts = 0
@@ -283,21 +287,13 @@ class DeepRLAgent():
 				deterministic = action_selection_method != stochastic_amplified_selection
 				action, _states = self._model.predict(obs, deterministic=deterministic)
 				if random_optimalism: # get the right direction and then start inserting noise to still get a relatively optimal plan
-					if len(observations) > 3:
-						for i in range(0, len(action[0])):
-							action[0][i] += random.uniform(-0.01 * action[0][i], 0.01 * action[0][i])
-					else: # just walk in a specific random direction to enable diverse plans
-						action = np.array(np.array([constant_initial_action]), None)
+					self.add_random_optimalism(obs, action, constant_initial_action)
 				if with_dict: observations.append((obs, action))
 				else: observations.append((obs['observation'], action))
 				obs, reward, done, info = self.env.step(action)
 				change_goal_to_specific_desired(obs, desired)
-				if isinstance(done, np.ndarray): general_done = done[0]
-				else: general_done = done
-				if "success" in info[0].keys(): success_done = info[0]["success"]
-				elif "is_success" in info[0].keys(): success_done = info[0]["is_success"]
-				elif "step_task_completions" in info[0].keys(): success_done = info[0]["step_task_completions"]
-				else: raise NotImplementedError("no other option for any of the environments.")
+				general_done = self.env_prop.is_done(done)
+				success_done = self.env_prop.is_success(info)
 				success_done = self.change_done_by_specific_desired(obs, desired, success_done)
 				if general_done == True and success_done == False:
 					# it could be that the stochasticity inserted into the actions made the agent die/crash. we don't want this observation.
@@ -309,14 +305,8 @@ class DeepRLAgent():
 					else:
 						# try again by breaking inner loop. everything is set up to be like the beginning of the function.
 						is_successful_observation_made = False
-						try:
-							obs = self.env.reset()
-							change_goal_to_specific_desired(obs, desired)
-						except Exception as e:
-							kwargs = {"id": self.problem_name, "render_mode": "rgb_array"}
-							self.env = create_vec_env(kwargs)
-							obs = self.env.reset()
-							change_goal_to_specific_desired(obs, desired)
+						obs = self.safe_env_reset()
+						change_goal_to_specific_desired(obs, desired)
 						observations = [] # we want to re-accumulate the observations from scratch, have another try
 						break
 				elif general_done == False and success_done == False:
@@ -328,32 +318,20 @@ class DeepRLAgent():
 				elif general_done == False and success_done == True:
 					assert HACK_HAPPENED == True # happens only if hack happened
 					break
-		# self.env.close()
+
 		if save_fig:
-			num_tries = 0
-			while True:
-				if num_tries >= 10:
-					assert False, "agent keeps failing on recording an optimal obs."
-				try:
-					self.record_video(fig_path, desired)
-					break
-				except Exception as e:
-					num_tries += 1
-			#print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
-			print(f"generated sequence video at {fig_path}.")
+			self.try_recording_video(fig_path, desired)
+
 		self.env.close()
 		return observations
-
-	# def reset_with_goal_idx(self, goal_idx):
-	# 	self.env.set_options({"goal_idx": goal_idx})
-	# 	return self.env.reset()
 	
 class GCDeepRLAgent(DeepRLAgent):
 	def generate_partial_observation(self, action_selection_method, percentage, is_consecutive, goal_directed_problem=None, goal_directed_goal=None, save_fig=False, fig_path=None, random_optimalism=True):
 		steps = self.generate_observation(action_selection_method, save_fig=save_fig, fig_path=fig_path, random_optimalism=random_optimalism, goal_directed_problem=goal_directed_problem, goal_directed_goal=goal_directed_goal) # steps are a full observation
 		return random_subset_with_order(steps, (int)(percentage * len(steps)), is_consecutive)
 
-	def generate_observation(self, action_selection_method: MethodType, random_optimalism, env_prop=None, goal_directed_problem=None, goal_directed_goal=None,
+	# TODO move the goal_directed_goal and/or goal_directed_problem mechanism to be a property of the env_property, so deep_rl_learner doesn't depend on it and holds this logic so heavily.
+	def generate_observation(self, action_selection_method: MethodType, random_optimalism, goal_directed_problem=None, goal_directed_goal=None,
 								save_fig = False, fig_path=None, with_dict=False):
 		# print(f"hyperparams:{hyperparams}")
 		if goal_directed_problem:
@@ -377,17 +355,4 @@ class GCDeepRLAgent(DeepRLAgent):
 			observations = super().generate_observation(action_selection_method=action_selection_method, random_optimalism=random_optimalism,
 											save_fig=save_fig, fig_path=fig_path, with_dict=with_dict, desired=goal_directed_goal) # TODO tutorial on how to use the deepRLAgent for sequence generation and examination and plotting of the sequence
 		return observations
-		
 
-if __name__ == "__main__":
-	package_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-	print("this is package root:" + package_root)
-	if package_root not in sys.path:
-		sys.path.insert(0, package_root)
-
-	from gr_libs.ml.utils.storage import get_agent_model_dir, set_global_storage_configs
-
-	set_global_storage_configs("graml", "fragmented_partial_obs", "inference_same_length", "learn_diff_length")
-	agent = DeepRLAgent(domain_name="point_maze", problem_name="PointMaze-FourRoomsEnvDense-11x11-Goal-9x1", algorithm=SAC, num_timesteps=200000)
-	agent.learn()
-	agent.record_video("")
