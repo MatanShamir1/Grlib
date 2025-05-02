@@ -1,5 +1,5 @@
 # GRLib
-GRLib is a Python package that implements Goal Recognition (GR) algorithms using Markov Decision Processes (MDPs) to model decision-making processes. These implementations adhere to the Gymnasium API. All agents in these algorithms interact with environments registered to the Gym API as part of the initialization process of the `gr_envs` package, on which GRLib depends. More details on `gr_envs` can be found at: [GR Envs Repository](https://github.com/MatanShamir1/GREnvs).
+GRLib is a Python package that implements Goal Recognition (GR) algorithms using Markov Decision Processes (MDPs) to model decision-making processes. These implementations adhere to the Gymnasium API. All agents in these algorithms interact with environments registered to the Gym API as part of the initialization process of the `gr_envs` package, on which GRLib depends. More details on `gr_envs` can be found at: [GR Envs Repository](https://github.com/MatanShamir1/GREnvs). 
 
 ## Setup
 
@@ -188,7 +188,7 @@ Successors of algorithms that don't differ in their specifics are added in paren
 
 ## Running Experiments
 
-The repository provides benchmark domains and scripts for analyzing experimental results. The `scripts` directory contains tools for processing and visualizing results.
+Besides providing benchmark domains and baseline algorithms, the repo also standardizes experimental analysis. The `scripts` directory contains tools for processing and visualizing results.
 
 1. **`analyze_results_cross_alg_cross_domain.py`**
    - Runs without arguments.
