@@ -141,8 +141,8 @@ def mean_wasserstein_distance(
             wasserstein_distances.append(
                 wasserstein_distance([observation_action], [actor_mean])
             )
-        distances.append(mean(wasserstein_distances))
-    return mean(distances)
+        distances.append(np.mean(wasserstein_distances))
+    return np.mean(distances)
 
 
 def mean_action_distance_continuous(observations: List[Tuple[State, Any]], agent: DeepRLAgent, actions: gymnasium.spaces.Box):
@@ -165,7 +165,7 @@ def mean_action_distance_continuous(observations: List[Tuple[State, Any]], agent
         # distances.append(statistics.mean(total_diff))
         distances.append(total_diff)
     # print(f"distances:{distances}")
-    return mean(distances)
+    return np.mean(distances)
 
 
 def set_agent_goal_observation(observations: List[Any], agent: RLAgent) -> Generator[None, None, None]:
@@ -204,10 +204,10 @@ def mean_p_value(
             z_scores.append(
                 math.fabs(z_score(observation_action, actor_mean, math.pow(2, math.fabs(action_log_std_dev))))
             )
-        mean_distances = mean(z_scores)
+        mean_distances = np.mean(z_scores)
 
         distances.append(mean_distances)
-    return mean(distances)
+    return np.mean(distances)
 
 def normalize(values: List[float]) -> List[float]:
     values /= sum(values)
