@@ -8,10 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/matanshamir1/gr_test_base_slim:latest
+      options: --user root
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v4
-
       - name: Show working dir and contents
         run: |
           pwd
