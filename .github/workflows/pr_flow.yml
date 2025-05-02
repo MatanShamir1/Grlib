@@ -12,8 +12,5 @@ jobs:
       image: ghcr.io/matanshamir1/gr_test_base_slim:latest
       options: --user root
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v4
-
       - name: Run common test steps
         uses: ./.github/actions/common-test-steps
