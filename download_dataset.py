@@ -1,19 +1,19 @@
-import requests
+import gdown
 import zipfile
 import os
 
-def download_and_extract_dataset(google_drive_url, extract_to):
+path = os.path.dirname(os.path.abspath(__file__))
+
+def download_and_extract_dataset(file_id, extract_to):
     os.makedirs(extract_to, exist_ok=True)
-    download_url = google_drive_url + "&export=download"
-    response = requests.get(download_url)
-    response.raise_for_status()
-    with open('dataset.zip', 'wb') as f:
-        f.write(response.content)
-    with zipfile.ZipFile('dataset.zip', 'r') as zip_ref:
+    output = os.path.join(extract_to, "dataset.zip")
+    url = f"https://drive.google.com/uc?id={file_id}"
+    gdown.download(url, output, quiet=False)
+    with zipfile.ZipFile(output, 'r') as zip_ref:
         zip_ref.extractall(extract_to)
-    os.remove('dataset.zip')
+    os.remove(output)
 
 if __name__ == "__main__":
-    google_drive_url = "https://drive.google.com/file/d/1PK1iZONTyiQZBgLErUO88p1YWdL4B9Xn/view?usp=sharing"
-    extract_to = "dataset"
-    download_and_extract_dataset(google_drive_url, extract_to)
+    file_id = "1PK1iZONTyiQZBgLErUO88p1YWdL4B9Xn"
+    extract_to = path
+    download_and_extract_dataset(file_id, extract_to)
