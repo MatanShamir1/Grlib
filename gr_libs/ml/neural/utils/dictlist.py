@@ -22,12 +22,12 @@ class DictList(dict):
     def __setitem__(self, index, d):
         for key, value in d.items():
             dict.__getitem__(self, key)[index] = value
-            
+
     def __reduce__(self):
         # Custom serialization method for dill
         return (DictList, (dict(self),))  # Serialize as (DictList, (dict(self),))
 
     def __setstate__(self, state):
         # Custom deserialization method for dill
-        data, = state
+        (data,) = state
         self.update(data)

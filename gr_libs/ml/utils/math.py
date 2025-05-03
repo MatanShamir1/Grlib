@@ -1,6 +1,7 @@
 import math
 from typing import Callable, Generator, List
 
+
 def softmax(values: List[float]) -> List[float]:
     """Computes softmax probabilities for an array of values
     TODO We should probably use numpy arrays here

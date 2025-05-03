@@ -1,8 +1,11 @@
 import random
 
+
 class Node:
 
-    def __init__(self, identifier, state, action, action_space, reward, terminal, pos, depth):
+    def __init__(
+        self, identifier, state, action, action_space, reward, terminal, pos, depth
+    ):
         self.identifier = identifier
         self.parent_identifier = None
         self.children_identifiers = []
@@ -21,11 +24,12 @@ class Node:
 
     def __str__(self):
         return "{}: (action={}, visits={}, reward={:d}, ratio={:0.4f})".format(
-                                                  self.state,
-                                                  self.action,
-                                                  self.num_visits,
-                                                  int(self.total_simulation_reward),
-                                                  self.performance)
+            self.state,
+            self.action,
+            self.num_visits,
+            int(self.total_simulation_reward),
+            self.performance,
+        )
 
     def untried_action(self):
         action = random.choice(self.untried_actions)

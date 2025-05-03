@@ -1,7 +1,7 @@
 import multiprocessing
 import gymnasium as gym
 
-#multiprocessing.set_start_method("fork")
+# multiprocessing.set_start_method("fork")
 
 
 def worker(conn, env):
@@ -50,7 +50,10 @@ class ParallelEnv(gym.Env):
         obs, reward, terminated, truncated, info = self.envs[0].step(actions[0])
         if terminated or truncated:
             obs, _ = self.envs[0].reset()
-        results = zip(*[(obs, reward, terminated, truncated, info)] + [local.recv() for local in self.locals])
+        results = zip(
+            *[(obs, reward, terminated, truncated, info)]
+            + [local.recv() for local in self.locals]
+        )
         return results
 
     def render(self):

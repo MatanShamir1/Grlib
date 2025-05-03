@@ -1,28 +1,29 @@
-from stable_baselines3 import PPO, SAC
-from gr_libs.metrics import (
-    stochastic_amplified_selection,
-    mean_p_value,
-    mean_wasserstein_distance,
-)
-from gr_libs import GCDraco
-from gr_libs.environment.utils.utils import domain_to_env_property
 import numpy as np
-from gr_libs.environment.environment import PANDA, PandaProperty
-from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent
+from stable_baselines3 import PPO, SAC
+import gr_libs.environment.environment
+from gr_libs.environment.environment import (
+    PANDA,
+    EnvProperty,
+    GCEnvProperty,
+    PandaProperty,
+)
+from gr_libs.environment.utils.utils import domain_to_env_property
+from gr_libs.metrics import mean_wasserstein_distance, mean_p_value
+from gr_libs.metrics.metrics import (
+    stochastic_amplified_selection,
+    mean_action_distance_continuous,
+)
+from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
 from gr_libs.ml.utils.format import random_subset_with_order
-import gr_envs.panda_scripts
+from gr_libs import Draco
+import gr_envs
 
 
-def run_gcdraco_panda_tutorial():
-    recognizer = GCDraco(
+def run_draco_panda_tutorial():
+    recognizer = Draco(
         domain_name=PANDA,
         env_name="PandaMyReachDense",
         evaluation_function=mean_wasserstein_distance,  # or mean_p_value
-    )
-
-    recognizer.domain_learning_phase(
-        base_goals=[np.array([PandaProperty.sample_goal()]) for _ in range(30)],
-        train_configs=[(SAC, 800000)],
     )
 
     recognizer.goals_adaptation_phase(
@@ -30,9 +31,9 @@ def run_gcdraco_panda_tutorial():
             np.array([[-0.1, -0.1, 0.1]]),
             np.array([[-0.1, 0.1, 0.1]]),
             np.array([[0.2, 0.2, 0.1]]),
-        ]
+        ],
+        dynamic_train_configs=[(PPO, 200000), (PPO, 200000), (PPO, 200000)],
     )
-
     # TD3 is different from recognizer and expert algorithms, which are SAC #
     property_type = domain_to_env_property(PANDA)
     env_property = property_type("PandaMyReachDense")
@@ -58,9 +59,9 @@ def run_gcdraco_panda_tutorial():
         partial_sequence, np.array([[-0.1, -0.1, 0.1]]), 0.5
     )
     print(
-        f"closest_goal returned by GCDRACO: {closest_goal}\nactual goal actor aimed towards: [-0.1, -0.1, 0.1]"
+        f"closest_goal returned by DRACO: {closest_goal}\nactual goal actor aimed towards: [-0.1, -0.1, 0.1]"
     )
 
 
 if __name__ == "__main__":
-    run_gcdraco_panda_tutorial()
+    run_draco_panda_tutorial()
