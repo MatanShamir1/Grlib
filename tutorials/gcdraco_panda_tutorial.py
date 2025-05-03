@@ -28,7 +28,7 @@ def run_gcdraco_panda_tutorial():
     property_type = domain_to_env_property(PANDA)
     env_property = property_type("PandaMyReachDense")
     problem_name = env_property.goal_to_problem_str(np.array([[-0.1, -0.1, 0.1]]))
-    actor = DeepRLAgent(domain_name=PANDA, problem_name=problem_name, algorithm=SAC, num_timesteps=400000)
+    actor = DeepRLAgent(domain_name=PANDA, problem_name=problem_name, env_prop=env_property, algorithm=PPO, num_timesteps=400000)
     actor.learn()
     # sample is generated stochastically to simulate suboptimal behavior, noise is added to the actions values #
     full_sequence = actor.generate_observation(
