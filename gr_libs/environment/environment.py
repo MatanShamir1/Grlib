@@ -2,7 +2,8 @@ from abc import abstractmethod
 from collections import namedtuple
 import os
 
-import gymnasium
+import gymnasium as gym
+from stable_baselines3.common.vec_env import DummyVecEnv
 from PIL import Image
 import numpy as np
 from gymnasium.envs.registration import register
@@ -63,17 +64,25 @@ class EnvProperty:
 	def get_lstm_props(self):
 		pass
 
-	#TODO make this abstract and move the implementation to every derived class according to the 'done' in it
-	def is_done(self, done):
-		if isinstance(done, np.ndarray): return done[0]
-		else: return done
+	@abstractmethod
+	def change_done_by_specific_desired(self, obs, desired, old_success_done):
+		pass
 
+	@abstractmethod
+	def is_done(self, done):
+		pass
+
+	@abstractmethod
 	def is_success(self, info):
-		if "success" in info[0].keys(): return info[0]["success"]
-		elif "is_success" in info[0].keys(): return info[0]["is_success"]
-		elif "step_task_completions" in info[0].keys(): return info[0]["step_task_completions"]
-		else: raise NotImplementedError("no other option for any of the environments.")
-		# elif "step_task_completions" in infos[0].keys(): is_success = (len(infos[0]["step_task_completions"]) == 1) # bug of dummyVecEnv, it removes the episode_task_completions from the info dict.
+		pass
+
+	def create_vec_env(self, kwargs):
+		env = gym.make(**kwargs)
+		return DummyVecEnv([lambda: env])
+
+	@abstractmethod
+	def change_goal_to_specific_desired(self, obs, desired):
+		pass
 
 class GCEnvProperty(EnvProperty):
 	@abstractmethod
@@ -126,7 +135,7 @@ class MinigridProperty(EnvProperty):
 					"plan": sequence},
 		)
 		#print(result)
-		env = gymnasium.make(id=env_id)
+		env = gym.make(id=env_id)
 		env = RGBImgPartialObsWrapper(env) # Get pixel observations
 		env = ImgObsWrapper(env) # Get rid of the 'mission' field
 		obs, _ = env.reset() # This now produces an RGB tensor only
@@ -136,6 +145,21 @@ class MinigridProperty(EnvProperty):
 		####### save image to file
 		image_pil = Image.fromarray(np.uint8(img)).convert('RGB')
 		image_pil.save(r"{}.png".format(img_path))
+
+	def change_done_by_specific_desired(self, obs, desired, old_success_done):
+		assert desired is None, "In MinigridProperty, giving a specific 'desired' is not supported."
+		return old_success_done
+	
+	def is_done(self, done):
+		assert isinstance(done, np.ndarray)
+		return done[0]
+	
+	# Not used currently since TabularQLearner doesn't need is_success from the environment
+	def is_success(self, info):
+		raise NotImplementedError("no other option for any of the environments.")
+	
+	def change_goal_to_specific_desired(self, obs, desired):
+		assert desired is None, "In MinigridProperty, giving a specific 'desired' is not supported."
 
 	
 class PandaProperty(GCEnvProperty):
@@ -177,6 +201,30 @@ class PandaProperty(GCEnvProperty):
 		goal_range_low = np.array([-0.40, -0.40, 0.10])
 		goal_range_high = np.array([0.2, 0.2, 0.10])
 		return np.random.uniform(goal_range_low, goal_range_high)
+	
+	def change_done_by_specific_desired(self, obs, desired, old_success_done):
+		if desired is None:
+			return old_success_done
+		assert isinstance(desired, np.ndarray), f"Unsupported type for desired: {type(desired)}"
+		if desired.size > 0 and not np.isnan(desired).all():
+			assert obs['achieved_goal'].shape == desired.shape, \
+				f"Shape mismatch: {obs['achieved_goal'].shape} vs {desired.shape}"
+			d = np.linalg.norm(obs['achieved_goal'] - desired, axis=-1)
+			return (d < 0.04)[0]
+		else:
+			return old_success_done
+		
+	def is_done(self, done):
+		assert isinstance(done, np.ndarray)
+		return done[0]
+	
+	def is_success(self, info):
+		assert "is_success" in info[0].keys()
+		return info[0]["is_success"]
+	
+	def change_goal_to_specific_desired(self, obs, desired):
+		if desired is not None:
+			obs['desired_goal'] = desired
 
 		
 class ParkingProperty(GCEnvProperty):
@@ -202,6 +250,21 @@ class ParkingProperty(GCEnvProperty):
 	
 	def get_lstm_props(self):
 		return LSTMProperties(batch_size=32, input_size=8, hidden_size=8, num_samples=20000)
+	
+	def change_done_by_specific_desired(self, obs, desired, old_success_done):
+		assert desired is None, "In ParkingProperty, giving a specific 'desired' is not supported."
+		return old_success_done
+	
+	def is_done(self, done):
+		assert isinstance(done, np.ndarray)
+		return done[0]
+	
+	def is_success(self, info):
+		assert "is_success" in info[0].keys()
+		return info[0]["is_success"]
+	
+	def change_goal_to_specific_desired(self, obs, desired):
+		assert desired is None, "In ParkingProperty, giving a specific 'desired' is not supported."
 
 
 class PointMazeProperty(EnvProperty):
@@ -235,3 +298,18 @@ class PointMazeProperty(EnvProperty):
 
 	def goal_to_problem_str(self, goal):
 		return self.name + f"-Goal-{goal[0]}x{goal[1]}"
+	
+	def change_done_by_specific_desired(self, obs, desired, old_success_done):
+		assert desired is None, "In PointMazeProperty, giving a specific 'desired' is not supported."
+		return old_success_done
+	
+	def is_done(self, done):
+		assert isinstance(done, np.ndarray)
+		return done[0]
+	
+	def is_success(self, info):
+		assert "success" in info[0].keys()
+		return info[0]["success"]
+	
+	def change_goal_to_specific_desired(self, obs, desired):
+		assert desired is None, "In ParkingProperty, giving a specific 'desired' is not supported."

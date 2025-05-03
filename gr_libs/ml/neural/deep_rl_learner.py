@@ -2,37 +2,24 @@ from collections import OrderedDict
 import gc
 from types import MethodType
 from typing import List, Tuple
-import gymnasium as gym
 import numpy as np
 import cv2
 
 from gr_libs.environment.environment import EnvProperty
 
-HACK_HAPPENED = False
-
 if __name__ != "__main__":
 	from gr_libs.ml.utils.storage import get_agent_model_dir
 	from gr_libs.ml.utils.format import random_subset_with_order
-from stable_baselines3 import SAC, PPO
-from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3 import SAC, PPO, TD3
+from stable_baselines3.common.base_class import BaseAlgorithm
 from gr_libs.ml.utils import device
-
+import gymnasium as gym
 # built-in python modules
 import random
 import os
 import sys
 
-def create_vec_env(kwargs):
-	# create the model, it will not be a pretrained one anyway
-	# env = gym.make(**kwargs)
-	env = gym.make(**kwargs)
-	return DummyVecEnv([lambda: env])
-
-def change_goal_to_specific_desired(obs, desired):
-	if desired is not None:
-		obs['desired_goal'] = desired
-
-
+#TODO do we need this?
 NETWORK_SETUP = {
 	SAC: OrderedDict([('batch_size', 512), ('buffer_size', 100000), ('ent_coef', 'auto'), ('gamma', 0.95), ('learning_rate', 0.001), ('learning_starts', 5000), ('n_timesteps', 50000.0), ('normalize', "{'norm_obs': False, 'norm_reward': False}"), ('policy', 'MultiInputPolicy'), ('policy_kwargs', 'dict(net_arch=[64, 64])'), ('replay_buffer_class', 'HerReplayBuffer'), ('replay_buffer_kwargs', "dict( goal_selection_strategy='future', n_sampled_goal=4 )"), ('normalize_kwargs', {'norm_obs': False, 'norm_reward': False})]),
 	#"tqc": OrderedDict([('batch_size', 256), ('buffer_size', 1000000), ('ent_coef', 'auto'), ('env_wrapper', ['sb3_contrib.common.wrappers.TimeFeatureWrapper']), ('gamma', 0.95), ('learning_rate', 0.001), ('learning_starts', 1000), ('n_timesteps', 25000.0), ('normalize', False), ('policy', 'MultiInputPolicy'), ('policy_kwargs', 'dict(net_arch=[64, 64])'), ('replay_buffer_class', 'HerReplayBuffer'), ('replay_buffer_kwargs', "dict( goal_selection_strategy='future', n_sampled_goal=4 )"), ('normalize_kwargs',{'norm_obs':False,'norm_reward':False})]),
@@ -40,26 +27,39 @@ NETWORK_SETUP = {
 }
 
 class DeepRLAgent():
-	def __init__(self, domain_name: str, problem_name: str, num_timesteps:float, env_prop:EnvProperty, algorithm=SAC, reward_threshold: float=450,
+	def __init__(self, domain_name: str, problem_name: str, num_timesteps:float, env_prop:EnvProperty, algorithm: BaseAlgorithm=SAC, reward_threshold: float=450,
 			  	 exploration_rate=None):
 		# Need to change reward threshold to change according to which task the agent is training on, becuase it changes from task to task.
-		kwargs = {"id":problem_name, "render_mode":"rgb_array"}
+		env_kwargs = {"id":problem_name, "render_mode":"rgb_array"}
+		assert algorithm in [SAC, PPO, TD3]
 
 		self.domain_name = domain_name
 		self.problem_name = problem_name
 		self.env_prop = env_prop
+		self.exploration_rate = exploration_rate
 
 		self._model_directory = get_agent_model_dir(domain_name=self.domain_name, model_name=problem_name, class_name=algorithm.__name__)
+		self.env = self.env_prop.create_vec_env(env_kwargs)
+		self._actions_space = self.env.action_space
+
+		# first_support: SB3 models from RL zoo, with the .zip format.
 		if os.path.exists(os.path.join(self._model_directory, "saved_model.zip")):
-			self.pre_trained_model = True
+			# TODO check if it's ncessary to give these to the model.load if loading from rl zoo
 			self._model_file_path = os.path.join(self._model_directory, "saved_model.zip")
+			self.model_kwargs = {
+				'custom_objects': {
+					"learning_rate": 0.0,
+					"lr_schedule": lambda _: 0.0,
+					"clip_range": lambda _: 0.0
+				},
+				'seed': 0,
+				'buffer_size': 1
+			}
+		# second support: models saved with SB3's model.save, which is saved as a formatted .pth file.
 		else:
-			self.pre_trained_model = False
-			self.env = create_vec_env(kwargs)
-			self._actions_space = self.env.action_space
-			if exploration_rate != None: self._model = algorithm("MultiInputPolicy", self.env, ent_coef=exploration_rate, verbose=1)
-			else: self._model = algorithm("MultiInputPolicy", self.env, verbose=1)
+			self.model_kwargs = {}
 			self._model_file_path = os.path.join(self._model_directory, "saved_model.pth")
+
 		self.algorithm = algorithm
 		self.reward_threshold = reward_threshold
 		self.num_timesteps = num_timesteps
@@ -81,7 +81,6 @@ class DeepRLAgent():
 		print(f"generated sequence video at {video_path}.")
 
 	def record_video(self, video_path, desired=None):
-		global HACK_HAPPENED
 		"""Record a video of the agent's performance."""
 		fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
 		fps = 30.0
@@ -97,111 +96,37 @@ class DeepRLAgent():
 		general_done, success_done = False, False
 		gc.collect()
 		obs = self.env.reset()
-		change_goal_to_specific_desired(obs, desired)
+		self.env_prop.change_goal_to_specific_desired(obs, desired)
 		counter = 0
 		while not (general_done or success_done):
 			counter += 1
 			action, _states = self._model.predict(obs, deterministic=False)
 			obs, rewards, general_done, info = self.env.step(action)
 			if isinstance(general_done, np.ndarray): general_done = general_done[0]
-			change_goal_to_specific_desired(obs, desired)
+			self.env_prop.change_goal_to_specific_desired(obs, desired)
 			if "success" in info[0].keys(): success_done = info[0]["success"] # make sure the agent actually reached the goal within the max time
 			elif "is_success" in info[0].keys(): success_done = info[0]["is_success"] # make sure the agent actually reached the goal within the max time
 			elif "step_task_completions" in info[0].keys(): success_done = (len(info[0]["step_task_completions"]) == 1) # bug of dummyVecEnv, it removes the episode_task_completions from the info dict.
 			else: raise NotImplementedError("no other option for any of the environments.")
 			frame = self.env.render()
-			success_done = self.change_done_by_specific_desired(obs, desired, success_done)
+			success_done = self.env_prop.change_done_by_specific_desired(obs, desired, success_done)
 			video_writer.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 		if general_done == False != success_done == True:
-			assert HACK_HAPPENED
+			assert desired is not None, f"general_done is false but success_done is true, and desired is None. This should never happen, since the \
+					 							 environment will say 'done' is false (general_done) while the observation will be close to the goal (success_done) \
+												 only in case we incorporated a 'desired' when generating the observation."
 		elif general_done == True != success_done == False:
 			raise Exception("general_done is true but success_done is false")
 		self.env.close()
 		video_writer.release()
 
-	#def set_success_done(self, success_done, desired, )
-
-	# TODO move this to the env_property as well!
-	def change_done_by_specific_desired(self, obs, desired, old_success_done):
-		global HACK_HAPPENED
-
-		# Helper: safely check if desired is "not None"-like
-		def is_desired_exists(d):
-			if d is None:
-				return False
-			if isinstance(d, np.ndarray):
-				return d.size > 0 and not np.isnan(d).all()
-			if isinstance(d, (list, tuple)):
-				return any(is_desired_exists(elem) for elem in d)
-			assert False, f"Unsupported type for desired: {type(d)}"
-
-		if not is_desired_exists(desired):
-			return old_success_done
-
-		HACK_HAPPENED = True
-
-		if 'Panda' in self.problem_name:
-			assert obs['achieved_goal'].shape == desired.shape, \
-				f"Shape mismatch: {obs['achieved_goal'].shape} vs {desired.shape}"
-			d = np.linalg.norm(obs['achieved_goal'] - desired, axis=-1)
-			return (d < 0.04)[0]
-
-		elif 'Parking' in self.problem_name:
-			# Placeholder: should be replaced with proper task success check
-			return self.env.task.is_success()
-
-		return old_success_done  # Fallback
-
 	def load_model(self):
-		self._model = self.algorithm.load(self._model_file_path, env=self.env, device=device)
+		self._model = self.algorithm.load(self._model_file_path, env=self.env, device=device, **self.model_kwargs)
 
 	def learn(self):
 		if os.path.exists(self._model_file_path):
 			print(f"Loading pre-existing model in {self._model_file_path}")
-			if self.pre_trained_model:
-				def test(env):
-					obs = env.reset()
-					lstm_states = None
-					episode_start = np.ones((1,), dtype=bool)
-					deterministic = True
-					episode_reward = 0.0
-					ep_len = 0
-					generator = range(5000)
-					for i in generator:
-						# print(f"iteration {i}:{obs=}")
-						action, lstm_states = self._model.predict(
-							obs,  # type: ignore[arg-type]
-							state=lstm_states,
-							episode_start=episode_start,
-							deterministic=deterministic,
-						)
-						obs, reward, done, infos = env.step(action)
-
-						assert len(reward) == 1, f"length of rewards list is not 1, rewards:{reward}"
-						is_success = self.env_prop.is_success(infos)
-						# print(f"(action,is_done,info):({action},{done},{infos})")
-						if is_success:
-							#print(f"breaking due to GG, took {i} steps")
-							break
-						episode_start = done
-
-						episode_reward += reward[0]
-						ep_len += 1
-					env.close()
-				custom_objects = {
-					"learning_rate": 0.0,
-					"lr_schedule": lambda _: 0.0,
-					"clip_range": lambda _: 0.0,
-				}
-				kwargs = {"id": self.problem_name, "render_mode": "rgb_array"}
-				self.env = create_vec_env(kwargs)
-				self._actions_space = self.env.action_space
-				kwargs = {'seed': 0, 'buffer_size': 1}
-
-				self._model = self.algorithm.load(self._model_file_path, env=self.env, custom_objects=custom_objects, device=device, **kwargs)
-				test(self.env)
-			else:
-				self.load_model()
+			self.load_model()
 		else:
 			# Stop training when the model reaches the reward threshold
 			# callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=self.reward_threshold, verbose=1)
@@ -209,6 +134,8 @@ class DeepRLAgent():
 			#                  log_path="./logs/", eval_freq=500, callback_on_new_best=callback_on_best, verbose=1, render=True)
 			# self._model.learn(total_timesteps=self.num_timesteps, progress_bar=True, callback=eval_callback)
 			print(f"No existing model in {self._model_file_path}, starting learning")
+			if self.exploration_rate != None: self._model = self.algorithm("MultiInputPolicy", self.env, ent_coef=self.exploration_rate, verbose=1)
+			else: self._model = self.algorithm("MultiInputPolicy", self.env, verbose=1)
 			self._model.learn(total_timesteps=self.num_timesteps, progress_bar=True) # comment this in a normal env
 			self.save_model()
 
@@ -217,7 +144,7 @@ class DeepRLAgent():
 			obs = self.env.reset()
 		except Exception as e:
 			kwargs = {"id": self.problem_name, "render_mode": "rgb_array"}
-			self.env = create_vec_env(kwargs)
+			self.env = self.env_prop.create_vec_env(kwargs)
 			obs = self.env.reset()
 		return obs
 
@@ -274,7 +201,7 @@ class DeepRLAgent():
 			assert fig_path != None, "You need to specify a vid path when you save the figure."
 		# The try-except is a bug fix for the env not being reset properly in panda. If someone wants to check why and provide a robust solution they're welcome.
 		obs = self.safe_env_reset()
-		change_goal_to_specific_desired(obs, desired)
+		self.env_prop.change_goal_to_specific_desired(obs, desired)
 		observations = []
 		is_successful_observation_made = False
 		num_of_insuccessful_attempts = 0
@@ -291,22 +218,22 @@ class DeepRLAgent():
 				if with_dict: observations.append((obs, action))
 				else: observations.append((obs['observation'], action))
 				obs, reward, done, info = self.env.step(action)
-				change_goal_to_specific_desired(obs, desired)
+				self.env_prop.change_goal_to_specific_desired(obs, desired)
 				general_done = self.env_prop.is_done(done)
 				success_done = self.env_prop.is_success(info)
-				success_done = self.change_done_by_specific_desired(obs, desired, success_done)
+				success_done = self.env_prop.change_done_by_specific_desired(obs, desired, success_done)
 				if general_done == True and success_done == False:
-					# it could be that the stochasticity inserted into the actions made the agent die/crash. we don't want this observation.
+					# it could be that the stochasticity inserted into the actions made the agent die/crash. we don't want this observation: it's an insuccessful attempt.
 					num_of_insuccessful_attempts += 1
 					# print(f"for agent for problem {self.problem_name}, its done {len(observations)} steps, and got to a situation where general_done != success_done, for the {num_of_insuccessful_attempts} time.")
 					if num_of_insuccessful_attempts > 50:
-						# print(f"got more then 10 insuccessful attempts. fuak!")
+						# print(f"got more then 10 insuccessful attempts!")
 						assert general_done == success_done, f"failed on goal: {obs['desired']}" # we want to make sure the episode is done only when the agent has actually succeeded with the task.
 					else:
 						# try again by breaking inner loop. everything is set up to be like the beginning of the function.
 						is_successful_observation_made = False
 						obs = self.safe_env_reset()
-						change_goal_to_specific_desired(obs, desired)
+						self.env_prop.change_goal_to_specific_desired(obs, desired)
 						observations = [] # we want to re-accumulate the observations from scratch, have another try
 						break
 				elif general_done == False and success_done == False:
@@ -316,7 +243,11 @@ class DeepRLAgent():
 						pass # print(f"after {num_of_insuccessful_attempts}, finally I succeeded!")
 					break
 				elif general_done == False and success_done == True:
-					assert HACK_HAPPENED == True # happens only if hack happened
+					# The environment will say 'done' is false (general_done) while the observation will be close to the goal (success_done)
+					# only in case we incorporated a 'desired' when generating the observation.
+					assert desired is not None, f"general_done is false but success_done is true, and desired is None. This should never happen, since the \
+					 							 environment will say 'done' is false (general_done) while the observation will be close to the goal (success_done) \
+												 only in case we incorporated a 'desired' when generating the observation."
 					break
 
 		if save_fig:
@@ -331,26 +262,25 @@ class GCDeepRLAgent(DeepRLAgent):
 		return random_subset_with_order(steps, (int)(percentage * len(steps)), is_consecutive)
 
 	# TODO move the goal_directed_goal and/or goal_directed_problem mechanism to be a property of the env_property, so deep_rl_learner doesn't depend on it and holds this logic so heavily.
+	# Generate observation with goal_directed_goal or goal_directed_problem is only possible for a GC agent, otherwise - the agent can't act optimally to that new goal.
 	def generate_observation(self, action_selection_method: MethodType, random_optimalism, goal_directed_problem=None, goal_directed_goal=None,
 								save_fig = False, fig_path=None, with_dict=False):
-		# print(f"hyperparams:{hyperparams}")
+		if save_fig:
+			assert fig_path != None, "You need to specify a vid path when you save the figure."
+		else:
+			assert fig_path == None
+		# goal_directed_problem employs the GC agent in a new env with a static, predefined goal, and has him generate an observation sequence in it.
 		if goal_directed_problem:
-			if save_fig:
-				assert fig_path != None, "You need to specify a vid path when you save the figure."
-			else:
-				assert fig_path == None
 			assert goal_directed_goal == None, "can't give goal directed goal and also goal directed problem for the sake of sequence generation by a general agent"
 			kwargs = {"id": goal_directed_problem, "render_mode": "rgb_array"}
-			self.env = create_vec_env(kwargs)
+			self.env = self.env_prop.create_vec_env(kwargs)
 			orig_env = self.env
 			observations = super().generate_observation(action_selection_method=action_selection_method, random_optimalism=random_optimalism,
 													 save_fig=save_fig, fig_path=fig_path, with_dict=with_dict)
 			self.env = orig_env
-		else: #goal_directed_goal!=None
-			if save_fig:
-				assert fig_path != None, "You need to specify a vid path when you save the figure."
-			else:
-				assert fig_path == None
+		# goal_directed_goal employs the agent in the same env on which it trained - with goals that change with every episode sampled from the goal space.
+		# but we manually change the 'desired' part of the observation to be the goal_directed_goal and edit the id_success and is_done accordingly.
+		else:
 			assert goal_directed_problem == None, "can't give goal directed goal and also goal directed problem for the sake of sequence generation by a general agent"
 			observations = super().generate_observation(action_selection_method=action_selection_method, random_optimalism=random_optimalism,
 											save_fig=save_fig, fig_path=fig_path, with_dict=with_dict, desired=goal_directed_goal) # TODO tutorial on how to use the deepRLAgent for sequence generation and examination and plotting of the sequence
