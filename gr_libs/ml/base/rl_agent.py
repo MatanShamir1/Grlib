@@ -4,22 +4,24 @@ import numpy as np
 
 State = Any
 
+
 class ContextualAgent:
     def __init__(self, problem_name, problem_goal, agent):
         self.problem_name = problem_name
         self.problem_goal = problem_goal
         self.agent = agent
 
+
 class RLAgent(ABC):
     def __init__(
-            self,
-            episodes: int,
-            decaying_eps: bool,
-            epsilon: float,
-            learning_rate: float,
-            gamma: float,
-            problem_name: str,
-            domain_name: str
+        self,
+        episodes: int,
+        decaying_eps: bool,
+        epsilon: float,
+        learning_rate: float,
+        gamma: float,
+        problem_name: str,
+        domain_name: str,
     ):
         self.episodes = episodes
         self.decaying_eps = decaying_eps
@@ -46,9 +48,10 @@ class RLAgent(ABC):
 
     def update_states_counter(self, observation_str: str):
         if observation_str in self.states_counter:
-            self.states_counter[observation_str] = self.states_counter[observation_str] + 1
+            self.states_counter[observation_str] = (
+                self.states_counter[observation_str] + 1
+            )
         else:
             self.states_counter[observation_str] = 1
         if len(self.states_counter) % 10000 == 0:
             print(f"probably error to many {len(self.states_counter)}")
-

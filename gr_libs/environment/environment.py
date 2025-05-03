@@ -16,300 +16,338 @@ QLEARNING = "QLEARNING"
 
 SUPPORTED_DOMAINS = [MINIGRID, PANDA, PARKING, POINT_MAZE]
 
-LSTMProperties = namedtuple('LSTMProperties', ['input_size', 'hidden_size', 'batch_size', 'num_samples'])
-
+LSTMProperties = namedtuple(
+    "LSTMProperties", ["input_size", "hidden_size", "batch_size", "num_samples"]
+)
 
 
 class EnvProperty:
-	def __init__(self, name):
-		self.name = name
+    def __init__(self, name):
+        self.name = name
 
-	def __str__(self):
-		return f"{self.name}"
+    def __str__(self):
+        return f"{self.name}"
 
-	def __repr__(self):
-		return f"{self.name}"
+    def __repr__(self):
+        return f"{self.name}"
 
-	def __eq__(self, other):
-		return self.name == other.name
+    def __eq__(self, other):
+        return self.name == other.name
 
-	def __ne__(self, other):
-		return not self.__eq__(other)
-	
-	@abstractmethod
-	def str_to_goal(self):
-		pass
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
-	@abstractmethod
-	def gc_adaptable(self):
-		pass
+    @abstractmethod
+    def str_to_goal(self):
+        pass
 
-	@abstractmethod
-	def problem_list_to_str_tuple(self, problems):
-		pass
+    @abstractmethod
+    def gc_adaptable(self):
+        pass
 
-	@abstractmethod
-	def goal_to_problem_str(self, goal):
-		pass
+    @abstractmethod
+    def problem_list_to_str_tuple(self, problems):
+        pass
 
-	@abstractmethod
-	def is_action_discrete(self):
-		pass
+    @abstractmethod
+    def goal_to_problem_str(self, goal):
+        pass
 
-	@abstractmethod
-	def is_state_discrete(self):
-		pass
+    @abstractmethod
+    def is_action_discrete(self):
+        pass
 
-	@abstractmethod
-	def get_lstm_props(self):
-		pass
+    @abstractmethod
+    def is_state_discrete(self):
+        pass
 
-	@abstractmethod
-	def change_done_by_specific_desired(self, obs, desired, old_success_done):
-		pass
+    @abstractmethod
+    def get_lstm_props(self):
+        pass
 
-	@abstractmethod
-	def is_done(self, done):
-		pass
+    @abstractmethod
+    def change_done_by_specific_desired(self, obs, desired, old_success_done):
+        pass
 
-	@abstractmethod
-	def is_success(self, info):
-		pass
+    @abstractmethod
+    def is_done(self, done):
+        pass
 
-	def create_vec_env(self, kwargs):
-		env = gym.make(**kwargs)
-		return DummyVecEnv([lambda: env])
+    @abstractmethod
+    def is_success(self, info):
+        pass
 
-	@abstractmethod
-	def change_goal_to_specific_desired(self, obs, desired):
-		pass
+    def create_vec_env(self, kwargs):
+        env = gym.make(**kwargs)
+        return DummyVecEnv([lambda: env])
+
+    @abstractmethod
+    def change_goal_to_specific_desired(self, obs, desired):
+        pass
+
 
 class GCEnvProperty(EnvProperty):
-	@abstractmethod
-	def use_goal_directed_problem(self):
-		pass
+    @abstractmethod
+    def use_goal_directed_problem(self):
+        pass
 
-	def problem_list_to_str_tuple(self, problems):
-		return "goal_conditioned"
+    def problem_list_to_str_tuple(self, problems):
+        return "goal_conditioned"
+
 
 class MinigridProperty(EnvProperty):
-	def __init__(self, name):
-		super().__init__(name)
-		self.domain_name = "minigrid"
+    def __init__(self, name):
+        super().__init__(name)
+        self.domain_name = "minigrid"
 
-	def goal_to_problem_str(self, goal):
-		return self.name + f"-DynamicGoal-{goal[0]}x{goal[1]}-v0"
+    def goal_to_problem_str(self, goal):
+        return self.name + f"-DynamicGoal-{goal[0]}x{goal[1]}-v0"
 
-	def str_to_goal(self, problem_name):
-		parts = problem_name.split("-")
-		goal_part = [part for part in parts if "x" in part]
-		width, height = goal_part[0].split("x")
-		return (int(width), int(height))
+    def str_to_goal(self, problem_name):
+        parts = problem_name.split("-")
+        goal_part = [part for part in parts if "x" in part]
+        width, height = goal_part[0].split("x")
+        return (int(width), int(height))
 
-	def gc_adaptable(self):
-		return False
-	
-	def problem_list_to_str_tuple(self, problems):
-		return "_".join([f"[{s.split('-')[-2]}]" for s in problems])
-	
-	def is_action_discrete(self):
-		return True
+    def gc_adaptable(self):
+        return False
 
-	def is_state_discrete(self):
-		return True
+    def problem_list_to_str_tuple(self, problems):
+        return "_".join([f"[{s.split('-')[-2]}]" for s in problems])
 
-	def get_lstm_props(self):
-		return LSTMProperties(batch_size=16, input_size=4, hidden_size=8, num_samples=40000)
-	
-	def create_sequence_image(self, sequence, img_path, problem_name):
-		if not os.path.exists(os.path.dirname(img_path)): os.makedirs(os.path.dirname(img_path))
-		env_id = problem_name.split("-DynamicGoal-")[0] + "-DynamicGoal-" + problem_name.split("-DynamicGoal-")[1]
-		result = register(
-			id=env_id,
-			entry_point="gr_envs.minigrid_scripts.envs:CustomColorEnv",
-			kwargs={"size": 13 if 'Simple' in problem_name else 9,
-					"num_crossings": 4 if 'Simple' in problem_name else 3,
-					"goal_pos": self.str_to_goal(problem_name),
-					"obstacle_type": Wall if 'Simple' in problem_name else Lava,
-					"start_pos": (1, 1) if 'Simple' in problem_name else (3, 1),
-					"plan": sequence},
-		)
-		#print(result)
-		env = gym.make(id=env_id)
-		env = RGBImgPartialObsWrapper(env) # Get pixel observations
-		env = ImgObsWrapper(env) # Get rid of the 'mission' field
-		obs, _ = env.reset() # This now produces an RGB tensor only
+    def is_action_discrete(self):
+        return True
 
-		img = env.unwrapped.get_frame()
+    def is_state_discrete(self):
+        return True
 
-		####### save image to file
-		image_pil = Image.fromarray(np.uint8(img)).convert('RGB')
-		image_pil.save(r"{}.png".format(img_path))
+    def get_lstm_props(self):
+        return LSTMProperties(
+            batch_size=16, input_size=4, hidden_size=8, num_samples=40000
+        )
 
-	def change_done_by_specific_desired(self, obs, desired, old_success_done):
-		assert desired is None, "In MinigridProperty, giving a specific 'desired' is not supported."
-		return old_success_done
-	
-	def is_done(self, done):
-		assert isinstance(done, np.ndarray)
-		return done[0]
-	
-	# Not used currently since TabularQLearner doesn't need is_success from the environment
-	def is_success(self, info):
-		raise NotImplementedError("no other option for any of the environments.")
-	
-	def change_goal_to_specific_desired(self, obs, desired):
-		assert desired is None, "In MinigridProperty, giving a specific 'desired' is not supported."
+    def create_sequence_image(self, sequence, img_path, problem_name):
+        if not os.path.exists(os.path.dirname(img_path)):
+            os.makedirs(os.path.dirname(img_path))
+        env_id = (
+            problem_name.split("-DynamicGoal-")[0]
+            + "-DynamicGoal-"
+            + problem_name.split("-DynamicGoal-")[1]
+        )
+        result = register(
+            id=env_id,
+            entry_point="gr_envs.minigrid_scripts.envs:CustomColorEnv",
+            kwargs={
+                "size": 13 if "Simple" in problem_name else 9,
+                "num_crossings": 4 if "Simple" in problem_name else 3,
+                "goal_pos": self.str_to_goal(problem_name),
+                "obstacle_type": Wall if "Simple" in problem_name else Lava,
+                "start_pos": (1, 1) if "Simple" in problem_name else (3, 1),
+                "plan": sequence,
+            },
+        )
+        # print(result)
+        env = gym.make(id=env_id)
+        env = RGBImgPartialObsWrapper(env)  # Get pixel observations
+        env = ImgObsWrapper(env)  # Get rid of the 'mission' field
+        obs, _ = env.reset()  # This now produces an RGB tensor only
 
-	
+        img = env.unwrapped.get_frame()
+
+        ####### save image to file
+        image_pil = Image.fromarray(np.uint8(img)).convert("RGB")
+        image_pil.save(r"{}.png".format(img_path))
+
+    def change_done_by_specific_desired(self, obs, desired, old_success_done):
+        assert (
+            desired is None
+        ), "In MinigridProperty, giving a specific 'desired' is not supported."
+        return old_success_done
+
+    def is_done(self, done):
+        assert isinstance(done, np.ndarray)
+        return done[0]
+
+    # Not used currently since TabularQLearner doesn't need is_success from the environment
+    def is_success(self, info):
+        raise NotImplementedError("no other option for any of the environments.")
+
+    def change_goal_to_specific_desired(self, obs, desired):
+        assert (
+            desired is None
+        ), "In MinigridProperty, giving a specific 'desired' is not supported."
+
+
 class PandaProperty(GCEnvProperty):
-	def __init__(self, name):
-		super().__init__(name)
-		self.domain_name = "panda"
+    def __init__(self, name):
+        super().__init__(name)
+        self.domain_name = "panda"
 
-	def str_to_goal(self, problem_name):
-		try:
-			numeric_part = problem_name.split('PandaMyReachDenseX')[1]
-			components = [component.replace('-v3', '').replace('y', '.').replace('M', '-') for component in numeric_part.split('X')]
-			floats = []
-			for component in components:
-				floats.append(float(component))
-			return np.array([floats], dtype=np.float32)
-		except Exception as e:
-			return "general"
-		
-	def goal_to_problem_str(self, goal):
-		goal_str = 'X'.join([str(float(g)).replace(".", "y").replace("-","M") for g in goal[0]])
-		return f"PandaMyReachDenseX{goal_str}-v3"
+    def str_to_goal(self, problem_name):
+        try:
+            numeric_part = problem_name.split("PandaMyReachDenseX")[1]
+            components = [
+                component.replace("-v3", "").replace("y", ".").replace("M", "-")
+                for component in numeric_part.split("X")
+            ]
+            floats = []
+            for component in components:
+                floats.append(float(component))
+            return np.array([floats], dtype=np.float32)
+        except Exception as e:
+            return "general"
 
-	def gc_adaptable(self):
-		return True
-	
-	def use_goal_directed_problem(self):
-		return False
-	
-	def is_action_discrete(self):
-		return False
+    def goal_to_problem_str(self, goal):
+        goal_str = "X".join(
+            [str(float(g)).replace(".", "y").replace("-", "M") for g in goal[0]]
+        )
+        return f"PandaMyReachDenseX{goal_str}-v3"
 
-	def is_state_discrete(self):
-		return False
+    def gc_adaptable(self):
+        return True
 
-	def get_lstm_props(self):
-		return LSTMProperties(batch_size=32, input_size=9, hidden_size=8, num_samples=20000)
-	
-	def sample_goal():
-		goal_range_low = np.array([-0.40, -0.40, 0.10])
-		goal_range_high = np.array([0.2, 0.2, 0.10])
-		return np.random.uniform(goal_range_low, goal_range_high)
-	
-	def change_done_by_specific_desired(self, obs, desired, old_success_done):
-		if desired is None:
-			return old_success_done
-		assert isinstance(desired, np.ndarray), f"Unsupported type for desired: {type(desired)}"
-		if desired.size > 0 and not np.isnan(desired).all():
-			assert obs['achieved_goal'].shape == desired.shape, \
-				f"Shape mismatch: {obs['achieved_goal'].shape} vs {desired.shape}"
-			d = np.linalg.norm(obs['achieved_goal'] - desired, axis=-1)
-			return (d < 0.04)[0]
-		else:
-			return old_success_done
-		
-	def is_done(self, done):
-		assert isinstance(done, np.ndarray)
-		return done[0]
-	
-	def is_success(self, info):
-		assert "is_success" in info[0].keys()
-		return info[0]["is_success"]
-	
-	def change_goal_to_specific_desired(self, obs, desired):
-		if desired is not None:
-			obs['desired_goal'] = desired
+    def use_goal_directed_problem(self):
+        return False
 
-		
+    def is_action_discrete(self):
+        return False
+
+    def is_state_discrete(self):
+        return False
+
+    def get_lstm_props(self):
+        return LSTMProperties(
+            batch_size=32, input_size=9, hidden_size=8, num_samples=20000
+        )
+
+    def sample_goal():
+        goal_range_low = np.array([-0.40, -0.40, 0.10])
+        goal_range_high = np.array([0.2, 0.2, 0.10])
+        return np.random.uniform(goal_range_low, goal_range_high)
+
+    def change_done_by_specific_desired(self, obs, desired, old_success_done):
+        if desired is None:
+            return old_success_done
+        assert isinstance(
+            desired, np.ndarray
+        ), f"Unsupported type for desired: {type(desired)}"
+        if desired.size > 0 and not np.isnan(desired).all():
+            assert (
+                obs["achieved_goal"].shape == desired.shape
+            ), f"Shape mismatch: {obs['achieved_goal'].shape} vs {desired.shape}"
+            d = np.linalg.norm(obs["achieved_goal"] - desired, axis=-1)
+            return (d < 0.04)[0]
+        else:
+            return old_success_done
+
+    def is_done(self, done):
+        assert isinstance(done, np.ndarray)
+        return done[0]
+
+    def is_success(self, info):
+        assert "is_success" in info[0].keys()
+        return info[0]["is_success"]
+
+    def change_goal_to_specific_desired(self, obs, desired):
+        if desired is not None:
+            obs["desired_goal"] = desired
+
+
 class ParkingProperty(GCEnvProperty):
 
-	def __init__(self, name):
-		super().__init__(name)
-		self.domain_name = "parking"
+    def __init__(self, name):
+        super().__init__(name)
+        self.domain_name = "parking"
 
-	def goal_to_problem_str(self, goal):
-		return self.name.split("-v0")[0] + f"-GI-{goal}-v0"
+    def goal_to_problem_str(self, goal):
+        return self.name.split("-v0")[0] + f"-GI-{goal}-v0"
 
-	def gc_adaptable(self):
-		return True
-	
-	def is_action_discrete(self):
-		return False
+    def gc_adaptable(self):
+        return True
 
-	def is_state_discrete(self):
-		return False
-	
-	def use_goal_directed_problem(self):
-		return True
-	
-	def get_lstm_props(self):
-		return LSTMProperties(batch_size=32, input_size=8, hidden_size=8, num_samples=20000)
-	
-	def change_done_by_specific_desired(self, obs, desired, old_success_done):
-		assert desired is None, "In ParkingProperty, giving a specific 'desired' is not supported."
-		return old_success_done
-	
-	def is_done(self, done):
-		assert isinstance(done, np.ndarray)
-		return done[0]
-	
-	def is_success(self, info):
-		assert "is_success" in info[0].keys()
-		return info[0]["is_success"]
-	
-	def change_goal_to_specific_desired(self, obs, desired):
-		assert desired is None, "In ParkingProperty, giving a specific 'desired' is not supported."
+    def is_action_discrete(self):
+        return False
+
+    def is_state_discrete(self):
+        return False
+
+    def use_goal_directed_problem(self):
+        return True
+
+    def get_lstm_props(self):
+        return LSTMProperties(
+            batch_size=32, input_size=8, hidden_size=8, num_samples=20000
+        )
+
+    def change_done_by_specific_desired(self, obs, desired, old_success_done):
+        assert (
+            desired is None
+        ), "In ParkingProperty, giving a specific 'desired' is not supported."
+        return old_success_done
+
+    def is_done(self, done):
+        assert isinstance(done, np.ndarray)
+        return done[0]
+
+    def is_success(self, info):
+        assert "is_success" in info[0].keys()
+        return info[0]["is_success"]
+
+    def change_goal_to_specific_desired(self, obs, desired):
+        assert (
+            desired is None
+        ), "In ParkingProperty, giving a specific 'desired' is not supported."
 
 
 class PointMazeProperty(EnvProperty):
-	def __init__(self, name):
-		super().__init__(name)
-		self.domain_name = "point_maze"
+    def __init__(self, name):
+        super().__init__(name)
+        self.domain_name = "point_maze"
 
-	def str_to_goal(self):
-		parts = self.name.split("-")
-		# Find the part containing the goal size (usually after "DynamicGoal")
-		sizes_parts = [part for part in parts if "x" in part]
-		goal_part = sizes_parts[1]
-		# Extract width and height from the goal part
-		width, height = goal_part.split("x")
-		return (int(width), int(height))
-	
-	def gc_adaptable(self):
-		return False
+    def str_to_goal(self):
+        parts = self.name.split("-")
+        # Find the part containing the goal size (usually after "DynamicGoal")
+        sizes_parts = [part for part in parts if "x" in part]
+        goal_part = sizes_parts[1]
+        # Extract width and height from the goal part
+        width, height = goal_part.split("x")
+        return (int(width), int(height))
 
-	def problem_list_to_str_tuple(self, problems):
-		return "_".join([f"[{s.split('-')[-1]}]" for s in problems])
+    def gc_adaptable(self):
+        return False
 
-	def is_action_discrete(self):
-		return False
+    def problem_list_to_str_tuple(self, problems):
+        return "_".join([f"[{s.split('-')[-1]}]" for s in problems])
 
-	def is_state_discrete(self):
-		return False
-	
-	def get_lstm_props(self):
-		return LSTMProperties(batch_size=32, input_size=6, hidden_size=8, num_samples=20000)
+    def is_action_discrete(self):
+        return False
 
-	def goal_to_problem_str(self, goal):
-		return self.name + f"-Goal-{goal[0]}x{goal[1]}"
-	
-	def change_done_by_specific_desired(self, obs, desired, old_success_done):
-		assert desired is None, "In PointMazeProperty, giving a specific 'desired' is not supported."
-		return old_success_done
-	
-	def is_done(self, done):
-		assert isinstance(done, np.ndarray)
-		return done[0]
-	
-	def is_success(self, info):
-		assert "success" in info[0].keys()
-		return info[0]["success"]
-	
-	def change_goal_to_specific_desired(self, obs, desired):
-		assert desired is None, "In ParkingProperty, giving a specific 'desired' is not supported."
+    def is_state_discrete(self):
+        return False
+
+    def get_lstm_props(self):
+        return LSTMProperties(
+            batch_size=32, input_size=6, hidden_size=8, num_samples=20000
+        )
+
+    def goal_to_problem_str(self, goal):
+        return self.name + f"-Goal-{goal[0]}x{goal[1]}"
+
+    def change_done_by_specific_desired(self, obs, desired, old_success_done):
+        assert (
+            desired is None
+        ), "In PointMazeProperty, giving a specific 'desired' is not supported."
+        return old_success_done
+
+    def is_done(self, done):
+        assert isinstance(done, np.ndarray)
+        return done[0]
+
+    def is_success(self, info):
+        assert "success" in info[0].keys()
+        return info[0]["success"]
+
+    def change_goal_to_specific_desired(self, obs, desired):
+        assert (
+            desired is None
+        ), "In ParkingProperty, giving a specific 'desired' is not supported."

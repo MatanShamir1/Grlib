@@ -1,21 +1,23 @@
 def vertical_lines(last_node_flags):
     vertical_lines = []
-    vertical_line = '\u2502'
+    vertical_line = "\u2502"
     for last_node_flag in last_node_flags[0:-1]:
         if last_node_flag == False:
-            vertical_lines.append(vertical_line + ' ' * 3)
+            vertical_lines.append(vertical_line + " " * 3)
         else:
             # space between vertical lines
-            vertical_lines.append(' ' * 4)
-    return ''.join(vertical_lines)
+            vertical_lines.append(" " * 4)
+    return "".join(vertical_lines)
+
 
 def horizontal_line(last_node_flags):
-    horizontal_line = '\u251c\u2500\u2500 '
-    horizontal_line_end = '\u2514\u2500\u2500 '
+    horizontal_line = "\u251c\u2500\u2500 "
+    horizontal_line_end = "\u2514\u2500\u2500 "
     if last_node_flags[-1]:
         return horizontal_line_end
     else:
         return horizontal_line
+
 
 class Tree:
 
@@ -39,7 +41,9 @@ class Tree:
         if depth == 0:
             yield "", node
         else:
-            yield vertical_lines(last_node_flags) + horizontal_line(last_node_flags), node
+            yield vertical_lines(last_node_flags) + horizontal_line(
+                last_node_flags
+            ), node
 
         children = [self.nodes[identifier] for identifier in node.children_identifiers]
         last_index = len(children) - 1
@@ -60,7 +64,7 @@ class Tree:
             self.nodes[node.identifier].parent = None
         else:
             self.nodes[parent.identifier].children_identifiers.append(node.identifier)
-            self.nodes[node.identifier].parent_identifier=parent.identifier
+            self.nodes[node.identifier].parent_identifier = parent.identifier
 
     def update_id(self, old_id, new_id):
         assert new_id not in self.nodes.keys()
@@ -78,7 +82,7 @@ class Tree:
         # update the node's children (if there are any?...)
         for child_id in node.children_identifiers:
             self.nodes[child_id].parent_identifier = new_id
-        
+
         self.nodes.pop(old_id)
         self.nodes.update({node.identifier: node})
 

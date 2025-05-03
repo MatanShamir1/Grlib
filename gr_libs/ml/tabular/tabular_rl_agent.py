@@ -15,18 +15,19 @@ class TabularRLAgent(RLAgent):
     recommended as development goes on.
     """
 
-    def __init__(self,
-                 domain_name: str,
-                 problem_name: str,
-                 episodes: int,
-                 decaying_eps: bool,
-                 eps: float,
-                 alpha: float,
-                 decay: float,
-                 gamma: float,
-                 rand: Random,
-                 learning_rate
-                 ):
+    def __init__(
+        self,
+        domain_name: str,
+        problem_name: str,
+        episodes: int,
+        decaying_eps: bool,
+        eps: float,
+        alpha: float,
+        decay: float,
+        gamma: float,
+        rand: Random,
+        learning_rate,
+    ):
         super().__init__(
             episodes=episodes,
             decaying_eps=decaying_eps,
@@ -34,7 +35,7 @@ class TabularRLAgent(RLAgent):
             learning_rate=learning_rate,
             gamma=gamma,
             domain_name=domain_name,
-            problem_name=problem_name
+            problem_name=problem_name,
         )
         self.env = gym.make(id=problem_name)
         self.actions = self.env.unwrapped.actions
@@ -87,11 +88,11 @@ class TabularRLAgent(RLAgent):
     @abstractmethod
     def policy(self, state: State) -> Any:
         """The action for the specified state under the currently learned policy
-           (unlike agent_step, this does not update the policy using state as a sample.
-           Args:
-                state (Any): the state observation from the environment
-           Returns:
-                The action prescribed for that state
+        (unlike agent_step, this does not update the policy using state as a sample.
+        Args:
+             state (Any): the state observation from the environment
+        Returns:
+             The action prescribed for that state
         """
         pass
 
@@ -122,5 +123,5 @@ class TabularRLAgent(RLAgent):
 
         Returns:
             Any: [description]
-        """""
+        """ ""
         return self.softmax_policy(state)

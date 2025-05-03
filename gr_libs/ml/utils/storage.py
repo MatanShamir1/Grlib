@@ -6,13 +6,15 @@ import sys
 
 from .other import device
 
+
 def create_folders_if_necessary(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
 
 def get_storage_framework_dir(recognizer: str):
-    return os.path.join(get_storage_dir(),recognizer)
+    return os.path.join(get_storage_dir(), recognizer)
+
 
 def get_storage_dir():
     # Prefer local directory if it exists (e.g., in GitHub workspace)
@@ -24,69 +26,127 @@ def get_storage_dir():
     # Default to "dataset" even if it doesn't exist (e.g., will be created)
     return "dataset"
 
+
 def _get_models_directory_name():
     return "models"
+
 
 def _get_siamese_datasets_directory_name():
     return "siamese_datasets"
 
+
 def _get_observations_directory_name():
     return "observations"
 
+
 def get_observation_file_name(observability_percentage: float):
-    return 'obs' + str(observability_percentage) + '.pkl'
+    return "obs" + str(observability_percentage) + ".pkl"
 
 
-def get_domain_dir(domain_name, recognizer:str):
+def get_domain_dir(domain_name, recognizer: str):
     return os.path.join(get_storage_framework_dir(recognizer), domain_name)
 
-def get_env_dir(domain_name, env_name, recognizer:str):
+
+def get_env_dir(domain_name, env_name, recognizer: str):
     return os.path.join(get_domain_dir(domain_name, recognizer), env_name)
 
-def get_observations_dir(domain_name, env_name, recognizer:str):
-    return os.path.join(get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer), _get_observations_directory_name())
+
+def get_observations_dir(domain_name, env_name, recognizer: str):
+    return os.path.join(
+        get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer),
+        _get_observations_directory_name(),
+    )
+
 
 def get_agent_model_dir(domain_name, model_name, class_name):
-    return os.path.join(get_storage_dir(), _get_models_directory_name(), domain_name, model_name, class_name)
+    return os.path.join(
+        get_storage_dir(),
+        _get_models_directory_name(),
+        domain_name,
+        model_name,
+        class_name,
+    )
 
-def get_lstm_model_dir(domain_name, env_name, model_name, recognizer:str):
-    return os.path.join(get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer), model_name)
 
-def get_models_dir(domain_name, env_name, recognizer:str):
-    return os.path.join(get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer), _get_models_directory_name())
+def get_lstm_model_dir(domain_name, env_name, model_name, recognizer: str):
+    return os.path.join(
+        get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer),
+        model_name,
+    )
+
+
+def get_models_dir(domain_name, env_name, recognizer: str):
+    return os.path.join(
+        get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer),
+        _get_models_directory_name(),
+    )
+
 
 ### GRAML PATHS ###
 
-def get_siamese_dataset_path(domain_name, env_name, model_name, recognizer:str):
-    return os.path.join(get_lstm_model_dir(domain_name, env_name, model_name, recognizer), _get_siamese_datasets_directory_name())
 
-def get_embeddings_result_path(domain_name, env_name, recognizer:str):
-    return os.path.join(get_env_dir(domain_name, env_name=env_name, recognizer=recognizer), "goal_embeddings")
+def get_siamese_dataset_path(domain_name, env_name, model_name, recognizer: str):
+    return os.path.join(
+        get_lstm_model_dir(domain_name, env_name, model_name, recognizer),
+        _get_siamese_datasets_directory_name(),
+    )
 
-def get_embeddings_result_path(domain_name, env_name, recognizer:str):
-    return os.path.join(get_env_dir(domain_name, env_name=env_name, recognizer=recognizer), "goal_embeddings")
+
+def get_embeddings_result_path(domain_name, env_name, recognizer: str):
+    return os.path.join(
+        get_env_dir(domain_name, env_name=env_name, recognizer=recognizer),
+        "goal_embeddings",
+    )
+
+
+def get_embeddings_result_path(domain_name, env_name, recognizer: str):
+    return os.path.join(
+        get_env_dir(domain_name, env_name=env_name, recognizer=recognizer),
+        "goal_embeddings",
+    )
+
 
 def get_and_create(path):
     create_folders_if_necessary(path)
     return path
 
-def get_experiment_results_path(domain, env_name, task, recognizer:str):
-    return os.path.join(get_env_dir(domain, env_name=env_name, recognizer=recognizer), "experiment_results", env_name, task, "experiment_results")
 
-def get_plans_result_path(domain_name, env_name, recognizer:str):
-    return os.path.join(get_env_dir(domain_name, env_name=env_name, recognizer=recognizer), "plans")
+def get_experiment_results_path(domain, env_name, task, recognizer: str):
+    return os.path.join(
+        get_env_dir(domain, env_name=env_name, recognizer=recognizer),
+        "experiment_results",
+        env_name,
+        task,
+        "experiment_results",
+    )
 
-def get_policy_sequences_result_path(domain_name, env_name, recognizer:str):
-    return os.path.join(get_env_dir(domain_name, env_name, recognizer=recognizer), "policy_sequences")
+
+def get_plans_result_path(domain_name, env_name, recognizer: str):
+    return os.path.join(
+        get_env_dir(domain_name, env_name=env_name, recognizer=recognizer), "plans"
+    )
+
+
+def get_policy_sequences_result_path(domain_name, env_name, recognizer: str):
+    return os.path.join(
+        get_env_dir(domain_name, env_name, recognizer=recognizer), "policy_sequences"
+    )
+
 
 ### END GRAML PATHS ###
-''
+""
 ### GRAQL PATHS ###
 
-def get_gr_as_rl_experiment_confidence_path(domain_name, env_name, recognizer:str):
-    return os.path.join(get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer), "experiments")
+
+def get_gr_as_rl_experiment_confidence_path(domain_name, env_name, recognizer: str):
+    return os.path.join(
+        get_env_dir(domain_name=domain_name, env_name=env_name, recognizer=recognizer),
+        "experiments",
+    )
+
 
 ### GRAQL PATHS ###
+
 
 def get_status_path(model_dir):
     return os.path.join(model_dir, "status.pt")
@@ -120,8 +180,8 @@ def get_txt_logger(model_dir):
         format="%(message)s",
         handlers=[
             logging.FileHandler(filename=path),
-            logging.StreamHandler(sys.stdout)
-        ]
+            logging.StreamHandler(sys.stdout),
+        ],
     )
 
     return logging.getLogger()

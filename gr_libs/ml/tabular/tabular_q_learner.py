@@ -27,22 +27,23 @@ class TabularQLearner(TabularRLAgent):
     MODEL_FILE_NAME = r"tabular_model.txt"
     CONF_FILE = r"conf.pkl"
 
-    def __init__(self,
-                 domain_name: str,
-                 problem_name: str,
-                 env_prop: EnvProperty,
-                 algorithm: str,
-                 num_timesteps: int,
-                 decaying_eps: bool = True,
-                 eps: float = 1.0,
-                 alpha: float = 0.5,
-                 decay: float = 0.000002,
-                 gamma: float = 0.9,
-                 rand: Random = Random(),
-                 learning_rate: float = 0.001,
-                 check_partial_goals: bool = True,
-                 valid_only: bool = False
-                 ):
+    def __init__(
+        self,
+        domain_name: str,
+        problem_name: str,
+        env_prop: EnvProperty,
+        algorithm: str,
+        num_timesteps: int,
+        decaying_eps: bool = True,
+        eps: float = 1.0,
+        alpha: float = 0.5,
+        decay: float = 0.000002,
+        gamma: float = 0.9,
+        rand: Random = Random(),
+        learning_rate: float = 0.001,
+        check_partial_goals: bool = True,
+        valid_only: bool = False,
+    ):
         super().__init__(
             domain_name=domain_name,
             problem_name=problem_name,
@@ -53,15 +54,23 @@ class TabularQLearner(TabularRLAgent):
             decay=decay,
             gamma=gamma,
             rand=rand,
-            learning_rate=learning_rate
+            learning_rate=learning_rate,
         )
-        assert algorithm == QLEARNING, f"algorithm {algorithm} is not supported by {self.__class__.__name__}"
+        assert (
+            algorithm == QLEARNING
+        ), f"algorithm {algorithm} is not supported by {self.__class__.__name__}"
         self.env_prop = env_prop
         self.valid_only = valid_only
         self.check_partial_goals = check_partial_goals
         self.goal_literals_achieved = set()
-        self.model_directory = get_agent_model_dir(domain_name=domain_name, model_name=problem_name, class_name=self.class_name())
-        self.model_file_path = os.path.join(self.model_directory, TabularQLearner.MODEL_FILE_NAME)
+        self.model_directory = get_agent_model_dir(
+            domain_name=domain_name,
+            model_name=problem_name,
+            class_name=self.class_name(),
+        )
+        self.model_file_path = os.path.join(
+            self.model_directory, TabularQLearner.MODEL_FILE_NAME
+        )
         self._conf_file = os.path.join(self.model_directory, TabularQLearner.CONF_FILE)
 
         self._learned_episodes = 0
@@ -75,12 +84,13 @@ class TabularQLearner(TabularRLAgent):
             print(f"Loading pre-existing conf file in {self._conf_file}")
             with open(self._conf_file, "rb") as f:
                 conf = dill.load(file=f)
-            self._learned_episodes = conf['learned_episodes']
+            self._learned_episodes = conf["learned_episodes"]
 
         # hyperparameters
         self.base_eps = eps
         self.patience = 400000
         if self.decaying_eps:
+
             def epsilon():
                 self._c_eps = max((self.episodes - self.step) / self.episodes, 0.01)
                 return self._c_eps
@@ -148,22 +158,22 @@ class TabularQLearner(TabularRLAgent):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        with open(path, 'wb') as f:
+        with open(path, "wb") as f:
             pickle.dump(self.q_table, f)
 
     def load_q_table(self, path: str):
-        with open(path, 'rb') as f:
+        with open(path, "rb") as f:
             table = pickle.load(f)
         self.q_table = table
 
     def add_new_state(self, state: TabularState):
-        self.q_table[str(state)] = [0.] * self.number_of_actions
+        self.q_table[str(state)] = [0.0] * self.number_of_actions
 
     def get_all_q_values(self, state: TabularState) -> List[float]:
         if str(state) in self.q_table:
             return self.q_table[str(state)]
         else:
-            return [0.] * self.number_of_actions
+            return [0.0] * self.number_of_actions
 
     def best_action(self, state: TabularState) -> float:
         if str(state) not in self.q_table:
@@ -231,7 +241,7 @@ class TabularQLearner(TabularRLAgent):
         """
         old_q = self.get_q_value(self.last_state, self.last_action)
 
-        td_error = - old_q
+        td_error = -old_q
 
         new_q = old_q + self.alpha * (reward + td_error)
         self.set_q_value(self.last_state, self.last_action, new_q)
@@ -246,14 +256,18 @@ class TabularQLearner(TabularRLAgent):
         if self._learned_episodes >= self.episodes:
             print("learned episodes is above the requsted episodes")
             return
-        print(f'Using {self.__class__.__name__}')
-        tq = tqdm(range(self.episodes - self._learned_episodes),
-                  postfix=f"States: {len(self.q_table.keys())}. Goals: {done_times}. Eps: {self._c_eps:.3f}. MaxR: {max_r}")
+        print(f"Using {self.__class__.__name__}")
+        tq = tqdm(
+            range(self.episodes - self._learned_episodes),
+            postfix=f"States: {len(self.q_table.keys())}. Goals: {done_times}. Eps: {self._c_eps:.3f}. MaxR: {max_r}",
+        )
         for n in tq:
             self.step = n
             episode_r = 0
             observation, info = self.env.reset()
-            tabular_state = TabularState.gen_tabular_state(environment=self.env, observation=observation)
+            tabular_state = TabularState.gen_tabular_state(
+                environment=self.env, observation=observation
+            )
             action = self.agent_start(state=tabular_state)
 
             self.update_states_counter(observation_str=str(tabular_state))
@@ -266,7 +280,9 @@ class TabularQLearner(TabularRLAgent):
                     done_times += 1
 
                 # standard q-learning algorithm
-                next_tabular_state = TabularState.gen_tabular_state(environment=self.env, observation=observation)
+                next_tabular_state = TabularState.gen_tabular_state(
+                    environment=self.env, observation=observation
+                )
                 self.update_states_counter(observation_str=str(next_tabular_state))
                 action = self.agent_step(reward, next_tabular_state)
                 tstep += 1
@@ -279,13 +295,16 @@ class TabularQLearner(TabularRLAgent):
                 max_r = episode_r
                 # print("New all time high reward:", episode_r)
                 tq.set_postfix_str(
-                    f"States: {len(self.q_table.keys())}. Goals: {done_times}. Eps: {self._c_eps:.3f}. MaxR: {max_r}")
+                    f"States: {len(self.q_table.keys())}. Goals: {done_times}. Eps: {self._c_eps:.3f}. MaxR: {max_r}"
+                )
             if (n + 1) % 100 == 0:
                 tq.set_postfix_str(
-                    f"States: {len(self.q_table.keys())}. Goals: {done_times}. Eps: {self._c_eps:.3f}. MaxR: {max_r}")
+                    f"States: {len(self.q_table.keys())}. Goals: {done_times}. Eps: {self._c_eps:.3f}. MaxR: {max_r}"
+                )
             if (n + 1) % 1000 == 0:
                 tq.set_postfix_str(
-                    f"States: {len(self.q_table.keys())}. Goals: {done_times}. Eps: {self._c_eps:.3f}. MaxR: {max_r}")
+                    f"States: {len(self.q_table.keys())}. Goals: {done_times}. Eps: {self._c_eps:.3f}. MaxR: {max_r}"
+                )
                 if done_times <= 10:
                     patience += 1
                     if patience >= self.patience:
@@ -299,14 +318,18 @@ class TabularQLearner(TabularRLAgent):
                 done_times = 0
             self.goal_literals_achieved.clear()
 
-        print(f"number of unique states found during training:{self.get_number_of_unique_states()}")
+        print(
+            f"number of unique states found during training:{self.get_number_of_unique_states()}"
+        )
         print("finish learning and saving status")
         self.save_models_to_files()
 
     def exploit(self, number_of_steps=20):
         observation, info = self.env.reset()
         for step_number in range(number_of_steps):
-            tabular_state = TabularState.gen_tabular_state(environment=self.env, observation=observation)
+            tabular_state = TabularState.gen_tabular_state(
+                environment=self.env, observation=observation
+            )
             action = self.policy(state=tabular_state)
             observation, reward, terminated, truncated, _ = self.env.step(action)
             done = terminated | truncated
@@ -316,16 +339,18 @@ class TabularQLearner(TabularRLAgent):
 
     def get_actions_probabilities(self, observation):
         obs, agent_pos = observation
-        direction = obs['direction']
+        direction = obs["direction"]
 
         x, y = agent_pos
-        tabular_state = TabularState(agent_x_position=x, agent_y_position=y, agent_direction=direction)
+        tabular_state = TabularState(
+            agent_x_position=x, agent_y_position=y, agent_direction=direction
+        )
         return softmax(self.get_all_q_values(tabular_state))
 
     def get_q_of_specific_cell(self, cell_key):
         cell_q_table = {}
         for i in range(4):
-            key = cell_key + ':' + str(i)
+            key = cell_key + ":" + str(i)
             if key in self.q_table:
                 cell_q_table[key] = self.q_table[key]
         return cell_q_table
@@ -333,15 +358,14 @@ class TabularQLearner(TabularRLAgent):
     def get_all_cells(self):
         cells = set()
         for key in self.q_table.keys():
-            cell = key.split(':')[0]
+            cell = key.split(":")[0]
             cells.add(cell)
         return list(cells)
 
-
     def _save_conf_file(self):
         conf = {
-            'learned_episodes': self._learned_episodes,
-            'states_counter': self.states_counter
+            "learned_episodes": self._learned_episodes,
+            "states_counter": self.states_counter,
         }
         with open(self._conf_file, "wb") as f:
             dill.dump(conf, f)
@@ -349,11 +373,20 @@ class TabularQLearner(TabularRLAgent):
     def save_models_to_files(self):
         self.save_q_table(path=self.model_file_path)
         self._save_conf_file()
-        
+
     def simplify_observation(self, observation):
-        return [(obs['direction'], agent_pos_x, agent_pos_y, action) for ((obs, (agent_pos_x, agent_pos_y)), action) in observation] # list of tuples, each tuple the sample
-        
-    def generate_observation(self, action_selection_method: MethodType, random_optimalism, save_fig=False, fig_path: str=None):
+        return [
+            (obs["direction"], agent_pos_x, agent_pos_y, action)
+            for ((obs, (agent_pos_x, agent_pos_y)), action) in observation
+        ]  # list of tuples, each tuple the sample
+
+    def generate_observation(
+        self,
+        action_selection_method: MethodType,
+        random_optimalism,
+        save_fig=False,
+        fig_path: str = None,
+    ):
         """
         Generate a single observation given a list of agents
 
@@ -365,26 +398,32 @@ class TabularQLearner(TabularRLAgent):
             list: A list of state-action pairs representing the generated observation.
 
         Notes:
-            The function randomly selects an agent from the given list and generates a sequence of state-action pairs 
-            based on the Q-table of the selected agent. The action selection is stochastic, where each action is 
+            The function randomly selects an agent from the given list and generates a sequence of state-action pairs
+            based on the Q-table of the selected agent. The action selection is stochastic, where each action is
             selected based on the probability distribution defined by the Q-values in the Q-table.
 
-            The generated sequence terminates when a maximum number of steps is reached or when the environment 
+            The generated sequence terminates when a maximum number of steps is reached or when the environment
             episode terminates.
         """
         if save_fig == False:
-            assert fig_path == None, "You can't specify a vid path when you don't even save the figure."
+            assert (
+                fig_path == None
+            ), "You can't specify a vid path when you don't even save the figure."
         else:
-            assert fig_path != None, "You must specify a vid path when you save the figure."
+            assert (
+                fig_path != None
+            ), "You must specify a vid path when you save the figure."
         obs, _ = self.env.reset()
         MAX_STEPS = 32
         done = False
         steps = []
         for step_index in range(MAX_STEPS):
             x, y = self.env.unwrapped.agent_pos
-            str_state = "({},{}):{}".format(x, y, obs['direction'])
+            str_state = "({},{}):{}".format(x, y, obs["direction"])
             relevant_actions_idx = 3
-            action_probs = self.q_table[str_state][:relevant_actions_idx] / np.sum(self.q_table[str_state][:relevant_actions_idx])  # Normalize probabilities
+            action_probs = self.q_table[str_state][:relevant_actions_idx] / np.sum(
+                self.q_table[str_state][:relevant_actions_idx]
+            )  # Normalize probabilities
             if step_index == 0 and random_optimalism:
                 # print("in 1st step in generating plan and got random optimalism.")
                 std_dev = np.std(action_probs)
@@ -400,7 +439,8 @@ class TabularQLearner(TabularRLAgent):
                         assert reward >= 0
                         action = 2
                         step_index += 1
-                else: action = action_selection_method(action_probs)
+                else:
+                    action = action_selection_method(action_probs)
             else:
                 action = action_selection_method(action_probs)
             steps.append(((obs, self.env.unwrapped.agent_pos), action))
@@ -410,16 +450,26 @@ class TabularQLearner(TabularRLAgent):
             if done:
                 break
 
-        #assert len(steps) >= 2
+        # assert len(steps) >= 2
         if save_fig:
             sequence = [pos for ((state, pos), action) in steps]
-            #print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
+            # print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
             print(f"generating sequence image at {fig_path}.")
-            self.env_prop.create_sequence_image(sequence, fig_path, self.problem_name) # TODO change that assumption, cannot assume this is minigrid env
+            self.env_prop.create_sequence_image(
+                sequence, fig_path, self.problem_name
+            )  # TODO change that assumption, cannot assume this is minigrid env
 
         return steps
 
-    def generate_partial_observation(self, action_selection_method: MethodType, percentage: float, save_fig = False, is_consecutive = True, random_optimalism=True, fig_path=None):
+    def generate_partial_observation(
+        self,
+        action_selection_method: MethodType,
+        percentage: float,
+        save_fig=False,
+        is_consecutive=True,
+        random_optimalism=True,
+        fig_path=None,
+    ):
         """
         Generate a single observation given a list of agents
 
@@ -431,17 +481,23 @@ class TabularQLearner(TabularRLAgent):
             list: A list of state-action pairs representing the generated observation.
 
         Notes:
-            The function randomly selects an agent from the given list and generates a sequence of state-action pairs 
-            based on the Q-table of the selected agent. The action selection is stochastic, where each action is 
+            The function randomly selects an agent from the given list and generates a sequence of state-action pairs
+            based on the Q-table of the selected agent. The action selection is stochastic, where each action is
             selected based on the probability distribution defined by the Q-values in the Q-table.
 
-            The generated sequence terminates when a maximum number of steps is reached or when the environment 
+            The generated sequence terminates when a maximum number of steps is reached or when the environment
             episode terminates.
         """
 
-        steps = self.generate_observation(action_selection_method=action_selection_method, random_optimalism=random_optimalism, save_fig=save_fig, fig_path=fig_path) # steps are a full observation
-        result = random_subset_with_order(steps, (int)(percentage * len(steps)), is_consecutive)
+        steps = self.generate_observation(
+            action_selection_method=action_selection_method,
+            random_optimalism=random_optimalism,
+            save_fig=save_fig,
+            fig_path=fig_path,
+        )  # steps are a full observation
+        result = random_subset_with_order(
+            steps, (int)(percentage * len(steps)), is_consecutive
+        )
         if percentage >= 0.8:
             assert len(result) > 2
         return result
-        
