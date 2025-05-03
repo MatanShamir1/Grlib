@@ -15,5 +15,5 @@ def download_and_extract_dataset(file_id, extract_to):
 
 if __name__ == "__main__":
     file_id = "1PK1iZONTyiQZBgLErUO88p1YWdL4B9Xn"
-    extract_to = os.path.join(path, "dataset")
+    extract_to = path
     download_and_extract_dataset(file_id, extract_to)
