@@ -148,6 +148,7 @@ class MinigridProperty(EnvProperty):
 
 	def change_done_by_specific_desired(self, obs, desired, old_success_done):
 		assert desired is None, "In MinigridProperty, giving a specific 'desired' is not supported."
+		return old_success_done
 	
 	def is_done(self, done):
 		assert isinstance(done, np.ndarray)
@@ -252,6 +253,7 @@ class ParkingProperty(GCEnvProperty):
 	
 	def change_done_by_specific_desired(self, obs, desired, old_success_done):
 		assert desired is None, "In ParkingProperty, giving a specific 'desired' is not supported."
+		return old_success_done
 	
 	def is_done(self, done):
 		assert isinstance(done, np.ndarray)
@@ -299,6 +301,7 @@ class PointMazeProperty(EnvProperty):
 	
 	def change_done_by_specific_desired(self, obs, desired, old_success_done):
 		assert desired is None, "In PointMazeProperty, giving a specific 'desired' is not supported."
+		return old_success_done
 	
 	def is_done(self, done):
 		assert isinstance(done, np.ndarray)

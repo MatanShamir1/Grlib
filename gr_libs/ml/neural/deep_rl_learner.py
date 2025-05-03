@@ -36,25 +36,29 @@ class DeepRLAgent():
 		self.domain_name = domain_name
 		self.problem_name = problem_name
 		self.env_prop = env_prop
+		self.exploration_rate = exploration_rate
 
 		self._model_directory = get_agent_model_dir(domain_name=self.domain_name, model_name=problem_name, class_name=algorithm.__name__)
-		# first_support: SB3 models from hugging face, with the .zip format.
-		if os.path.exists(os.path.join(self._model_directory, "saved_model.zip")):
-			self._model_file_path = os.path.join(self._model_directory, "saved_model.zip")
-			self.model_custom_objects = {
-				"learning_rate": 0.0,
-				"lr_schedule": lambda _: 0.0,
-				"clip_range": lambda _: 0.0,
-			}
-			self.model_kwargs = {'seed': 0, 'buffer_size': 1}
-		# second support: models saved with SB3's model.save, which is saved as a formatted .pth file.
-		else:
-			if exploration_rate != None: self._model = algorithm("MultiInputPolicy", self.env, ent_coef=exploration_rate, verbose=1)
-			else: self._model = algorithm("MultiInputPolicy", self.env, verbose=1)
-			self._model_file_path = os.path.join(self._model_directory, "saved_model.pth")
-
 		self.env = self.env_prop.create_vec_env(env_kwargs)
 		self._actions_space = self.env.action_space
+
+		# first_support: SB3 models from RL zoo, with the .zip format.
+		if os.path.exists(os.path.join(self._model_directory, "saved_model.zip")):
+			# TODO check if it's ncessary to give these to the model.load if loading from rl zoo
+			self._model_file_path = os.path.join(self._model_directory, "saved_model.zip")
+			self.model_kwargs = {
+				'custom_objects': {
+					"learning_rate": 0.0,
+					"lr_schedule": lambda _: 0.0,
+					"clip_range": lambda _: 0.0
+				},
+				'seed': 0,
+				'buffer_size': 1
+			}
+		# second support: models saved with SB3's model.save, which is saved as a formatted .pth file.
+		else:
+			self.model_kwargs = {}
+			self._model_file_path = os.path.join(self._model_directory, "saved_model.pth")
 
 		self.algorithm = algorithm
 		self.reward_threshold = reward_threshold
@@ -117,37 +121,7 @@ class DeepRLAgent():
 		video_writer.release()
 
 	def load_model(self):
-		def test(env):
-			obs = env.reset()
-			lstm_states = None
-			episode_start = np.ones((1,), dtype=bool)
-			deterministic = True
-			episode_reward = 0.0
-			ep_len = 0
-			generator = range(5000)
-			for i in generator:
-				# print(f"iteration {i}:{obs=}")
-				action, lstm_states = self._model.predict(
-					obs,  # type: ignore[arg-type]
-					state=lstm_states,
-					episode_start=episode_start,
-					deterministic=deterministic,
-				)
-				obs, reward, done, infos = env.step(action)
-
-				assert len(reward) == 1, f"length of rewards list is not 1, rewards:{reward}"
-				is_success = self.env_prop.is_success(infos)
-				# print(f"(action,is_done,info):({action},{done},{infos})")
-				if is_success:
-					#print(f"breaking due to GG, took {i} steps")
-					break
-				episode_start = done
-
-				episode_reward += reward[0]
-				ep_len += 1
-			env.close()
-		self._model = self.algorithm.load(self._model_file_path, env=self.env, custom_objects=self.model_custom_objects, device=device, **self.model_kwargs)
-		test(self.env)
+		self._model = self.algorithm.load(self._model_file_path, env=self.env, device=device, **self.model_kwargs)
 
 	def learn(self):
 		if os.path.exists(self._model_file_path):
@@ -160,6 +134,8 @@ class DeepRLAgent():
 			#                  log_path="./logs/", eval_freq=500, callback_on_new_best=callback_on_best, verbose=1, render=True)
 			# self._model.learn(total_timesteps=self.num_timesteps, progress_bar=True, callback=eval_callback)
 			print(f"No existing model in {self._model_file_path}, starting learning")
+			if self.exploration_rate != None: self._model = self.algorithm("MultiInputPolicy", self.env, ent_coef=self.exploration_rate, verbose=1)
+			else: self._model = self.algorithm("MultiInputPolicy", self.env, verbose=1)
 			self._model.learn(total_timesteps=self.num_timesteps, progress_bar=True) # comment this in a normal env
 			self.save_model()
 
