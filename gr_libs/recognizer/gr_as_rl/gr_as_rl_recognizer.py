@@ -48,18 +48,25 @@ class GRAsRL(Recognizer):
             self.agents[problem_name] = agent
         self.action_space = next(iter(self.agents.values())).env.action_space
 
+    def prepare_inf_sequence(self, problem_name: str, inf_sequence):
+        if not self.env_prop.use_goal_directed_problem():
+            for obs in inf_sequence:
+                obs[0]["desired_goal"] = np.array(
+                    [self.env_prop.str_to_goal(problem_name)],
+                    dtype=obs[0]["desired_goal"].dtype,
+                )
+            return inf_sequence
+        return inf_sequence
+
     def inference_phase(self, inf_sequence, true_goal, percentage) -> str:
         scores = []
         for problem_name in self.active_problems:
             agent = self.choose_agent(problem_name)
             if self.env_prop.gc_adaptable():
-                assert (
-                    self.__class__.__name__ == "GCDraco"
-                ), "This recognizer is not compatible with goal conditioned problems."
                 inf_sequence = self.prepare_inf_sequence(problem_name, inf_sequence)
             score = self.evaluation_function(inf_sequence, agent, self.action_space)
             scores.append(score)
-        # scores = metrics.softmin(np.array(scores))
+
         if self.collect_statistics:
             results_path = get_gr_as_rl_experiment_confidence_path(
                 domain_name=self.env_prop.domain_name,
@@ -93,7 +100,7 @@ class Graql(GRAsRL, GaAgentTrainerRecognizer):
             and self.env_prop.is_state_discrete()
             and self.env_prop.is_action_discrete()
         )
-        if self.rl_agent_type == None:
+        if self.rl_agent_type is None:
             self.rl_agent_type = TabularQLearner
         self.evaluation_function = kl_divergence_norm_softmax
 
@@ -108,10 +115,9 @@ class Draco(GRAsRL, GaAgentTrainerRecognizer):
         if self.rl_agent_type == None:
             self.rl_agent_type = DeepRLAgent
         self.evaluation_function = kwargs.get("evaluation_function")
-        assert (
-            self.evaluation_function is None
-            or type(self.evaluation_function) != Callable
-        )
+        assert callable(
+            self.evaluation_function
+        ), "Evaluation function must be a callable function."
 
 
 class GCDraco(
@@ -127,10 +133,9 @@ class GCDraco(
         if self.rl_agent_type == None:
             self.rl_agent_type = GCDeepRLAgent
         self.evaluation_function = kwargs.get("evaluation_function")
-        assert (
-            self.evaluation_function is None
-            or type(self.evaluation_function) != Callable
-        )
+        assert callable(
+            self.evaluation_function
+        ), "Evaluation function must be a callable function."
 
     def domain_learning_phase(self, base_goals: List[str], train_configs):
         super().domain_learning_phase(base_goals, train_configs)
@@ -155,13 +160,3 @@ class GCDraco(
 
     def choose_agent(self, problem_name: str) -> RLAgent:
         return next(iter(self.agents.values()))
-
-    def prepare_inf_sequence(self, problem_name: str, inf_sequence):
-        if not self.env_prop.use_goal_directed_problem():
-            for obs in inf_sequence:
-                obs[0]["desired_goal"] = np.array(
-                    [self.env_prop.str_to_goal(problem_name)],
-                    dtype=obs[0]["desired_goal"].dtype,
-                )
-            return inf_sequence
-        return inf_sequence
