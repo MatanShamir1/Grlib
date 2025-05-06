@@ -6,7 +6,7 @@ import dill
 from gr_libs.environment.utils.utils import domain_to_env_property
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent
 from gr_libs.recognizer.gr_as_rl.gr_as_rl_recognizer import Draco, GCDraco, Graql
-from gr_libs.recognizer import Graml
+from gr_libs.recognizer.graml.graml_recognizer import Graml
 from gr_libs.metrics.metrics import stochastic_amplified_selection
 from gr_libs.ml.utils.format import random_subset_with_order
 from gr_libs.recognizer.recognizer import GaAgentTrainerRecognizer, LearningRecognizer
@@ -91,6 +91,7 @@ def run_odgr_problem(args):
                 problem_name=problem_name,
                 algorithm=train_config[0],
                 num_timesteps=train_config[1],
+                env_prop=env_property,
             )
             agent.learn()
             fig_path = get_and_create(
@@ -101,7 +102,6 @@ def run_odgr_problem(args):
                 "save_fig": True,
                 "random_optimalism": True,
                 "fig_path": fig_path,
-                "env_prop": env_property,
             }
 
             # need to dump the whole plan for draco because it needs it for inference phase for checking likelihood.

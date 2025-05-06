@@ -9,7 +9,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/matanshamir1/gr_test_base_slim:latest
+      image: ghcr.io/matanshamir1/gr_test_base:latest
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4

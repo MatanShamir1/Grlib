@@ -87,9 +87,10 @@ Tutorials demonstrating basic ODGR scenarios is available in the sub-package `tu
 gr_libs also includes a library of trained agents for the various supported environments within the package.
 To get the dataset of trained agents, you can run:
 ```sh
+pip install gdown
 python download_dataset.py
 ```
-
+Alternatively, you can visit the google-drive links where download_dataset.py points to and manually download the zipped folders, and unzip them into the project directory.
 An alternative is to use our docker image, which includes the dataset in it.
 You can:
 1. pull the image:
@@ -162,9 +163,9 @@ docker run -it ghcr.io/MatanShamir1/gr_test_base:latest bash
 
 The `consts.py` file contains predefined ODGR problem configurations. You can use existing configurations or define new ones.
 
-To execute a single task using the configuration file:
+To execute a single task using the configuration file, you specify a recognizer, a domain, a gym environment within that domain and the task:
 ```sh
-python odgr_executor.py --recognizer MCTSBasedGraml --domain minigrid --task L1 --minigrid_env MinigridSimple
+python odgr_executor.py --recognizer GCGraml --domain parking --task L1 --env_name Parking-S-14-PC-
 ```
 
 ## Supported Algorithms
@@ -201,3 +202,11 @@ The repository provides benchmark domains and scripts for analyzing experimental
    - Example output paths:
      - `figures/point_maze/obstacles/graql_point_maze_obstacles_fragmented_stats.png`
      - `figures/point_maze/obstacles/graml_point_maze_obstacles_conf_mat.png`
+
+## For Developers
+Developers will need to work slightly different: instead of installing the packages, they need to clone the repos and either install them as editables or add their paths to PYTHONPATH so they will function as packages effectively.
+Additional packages to install as a developer:
+```sh
+pip install pre-commit
+pre-commit install
+```
