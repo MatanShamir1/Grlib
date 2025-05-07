@@ -11,16 +11,13 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy and unzip the dataset
-COPY trained_agents.zip .
-COPY gr_cache.zip .
-RUN unzip trained_agents.zip && rm trained_agents.zip
-RUN unzip gr_cache.zip && rm gr_cache.zip
-RUN mv trained_agents /trained_agents
-RUN mv gr_cache /gr_cache
-
-# Change ownership so jovyan can access
-RUN chown -R ${NB_UID}:${NB_GID} /gr_cache
-RUN chown -R ${NB_UID}:${NB_GID} /trained_agents
+COPY trained_agents.zip gr_cache.zip ./
+RUN unzip trained_agents.zip && \
+    unzip gr_cache.zip && \
+    rm trained_agents.zip gr_cache.zip && \
+    mv trained_agents /trained_agents && \
+    mv gr_cache /gr_cache && \
+    chown -R ${NB_UID}:${NB_GID} /trained_agents /gr_cache
 
 # Switch back to default user
 USER ${NB_UID}

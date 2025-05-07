@@ -9,3 +9,4 @@ echo ghp_REST_OF_TOKEN | docker login ghcr.io -u MatanShamir1 --password-stdin
 3. docker build -t ghcr.io/<your-username>/gr_test_base:latest -f CI/docker_build_context/Dockerfile .
 (the -f Dockerfile tells docker which Dockerfile to use and the '.' tells docker what's the build context, or where the zipped folders should live)
 4. docker push ghcr.io/<your-username>/gr_test_base:latest
+5. make sure the image is linked to the repo so it could be used from the flow through packages->gr_test_base->package settings->manage actions access (and even make it public).
