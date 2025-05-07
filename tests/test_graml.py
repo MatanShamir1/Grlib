@@ -1,7 +1,7 @@
-from tutorials.graml_minigrid_tutorial import run_graml_minigrid_tutorial
-from tutorials.graml_panda_tutorial import run_graml_panda_tutorial
-from tutorials.graml_parking_tutorial import run_graml_parking_tutorial
-from tutorials.graml_point_maze_tutorial import run_graml_point_maze_tutorial
+from gr_libs.tutorials.graml_minigrid_tutorial import run_graml_minigrid_tutorial
+from gr_libs.tutorials.graml_panda_tutorial import run_graml_panda_tutorial
+from gr_libs.tutorials.graml_parking_tutorial import run_graml_parking_tutorial
+from gr_libs.tutorials.graml_point_maze_tutorial import run_graml_point_maze_tutorial
 
 
 def test_graml_minigrid_tutorial():

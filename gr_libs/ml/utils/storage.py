@@ -8,12 +8,12 @@ def create_folders_if_necessary(path):
         os.makedirs(path)
 
 
-def get_evaluation_dir():
-    return "evaluation"
+def get_outputs_dir():
+    return "outputs"
 
 
-def get_recognizer_evaluation_dir(recognizer: str):
-    return os.path.join(get_evaluation_dir(), recognizer)
+def get_recognizer_outputs_dir(recognizer: str):
+    return os.path.join(get_outputs_dir(), recognizer)
 
 
 def get_gr_cache_dir():
@@ -50,17 +50,17 @@ def get_observation_file_name(observability_percentage: float):
     return "obs" + str(observability_percentage) + ".pkl"
 
 
-def get_domain_evaluations_dir(domain_name, recognizer: str):
-    return os.path.join(get_recognizer_evaluation_dir(recognizer), domain_name)
+def get_domain_outputs_dir(domain_name, recognizer: str):
+    return os.path.join(get_recognizer_outputs_dir(recognizer), domain_name)
 
 
-def get_env_evaluations_dir(domain_name, env_name, recognizer: str):
-    return os.path.join(get_domain_evaluations_dir(domain_name, recognizer), env_name)
+def get_env_outputs_dir(domain_name, env_name, recognizer: str):
+    return os.path.join(get_domain_outputs_dir(domain_name, recognizer), env_name)
 
 
 def get_observations_dir(domain_name, env_name, recognizer: str):
     return os.path.join(
-        get_env_evaluations_dir(
+        get_env_outputs_dir(
             domain_name=domain_name, env_name=env_name, recognizer=recognizer
         ),
         _get_observations_directory_name(),
@@ -94,7 +94,7 @@ def get_siamese_dataset_path(domain_name, env_name, model_name, recognizer: str)
 
 def get_embeddings_result_path(domain_name, env_name, recognizer: str):
     return os.path.join(
-        get_env_evaluations_dir(domain_name, env_name=env_name, recognizer=recognizer),
+        get_env_outputs_dir(domain_name, env_name=env_name, recognizer=recognizer),
         "goal_embeddings",
     )
 
@@ -106,7 +106,7 @@ def get_and_create(path):
 
 def get_experiment_results_path(domain, env_name, task, recognizer: str):
     return os.path.join(
-        get_env_evaluations_dir(domain, env_name=env_name, recognizer=recognizer),
+        get_env_outputs_dir(domain, env_name=env_name, recognizer=recognizer),
         env_name,
         task,
         "experiment_results",
@@ -115,14 +115,14 @@ def get_experiment_results_path(domain, env_name, task, recognizer: str):
 
 def get_plans_result_path(domain_name, env_name, recognizer: str):
     return os.path.join(
-        get_env_evaluations_dir(domain_name, env_name=env_name, recognizer=recognizer),
+        get_env_outputs_dir(domain_name, env_name=env_name, recognizer=recognizer),
         "plans",
     )
 
 
 def get_policy_sequences_result_path(domain_name, env_name, recognizer: str):
     return os.path.join(
-        get_env_evaluations_dir(domain_name, env_name, recognizer=recognizer),
+        get_env_outputs_dir(domain_name, env_name, recognizer=recognizer),
         "policy_sequences",
     )
 
@@ -134,7 +134,7 @@ def get_policy_sequences_result_path(domain_name, env_name, recognizer: str):
 
 def get_gr_as_rl_experiment_confidence_path(domain_name, env_name, recognizer: str):
     return os.path.join(
-        get_env_evaluations_dir(
+        get_env_outputs_dir(
             domain_name=domain_name, env_name=env_name, recognizer=recognizer
         ),
         "experiments",
