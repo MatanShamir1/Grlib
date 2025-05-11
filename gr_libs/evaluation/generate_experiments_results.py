@@ -8,7 +8,7 @@ from gr_libs.ml.utils.storage import (
     get_experiment_results_path,
     set_global_storage_configs,
 )
-from scripts.generate_task_specific_statistics_plots import get_figures_dir_path
+from evaluation.generate_task_specific_statistics_plots import get_figures_dir_path
 
 
 def gen_graph(

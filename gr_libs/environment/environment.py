@@ -126,6 +126,7 @@ class MinigridProperty(EnvProperty):
             batch_size=16, input_size=4, hidden_size=8, num_samples=40000
         )
 
+    # TODO move the image sequence generation to a different place and make it generic; like a SequenceGenerator class. It will ask the EnvProp about the exact format and so on.
     def create_sequence_image(self, sequence, img_path, problem_name):
         if not os.path.exists(os.path.dirname(img_path)):
             os.makedirs(os.path.dirname(img_path))
@@ -156,7 +157,7 @@ class MinigridProperty(EnvProperty):
 
         ####### save image to file
         image_pil = Image.fromarray(np.uint8(img)).convert("RGB")
-        image_pil.save(r"{}.png".format(img_path))
+        image_pil.save(r"{}.png".format(os.path.join(img_path, "plan_image")))
 
     def change_done_by_specific_desired(self, obs, desired, old_success_done):
         assert (

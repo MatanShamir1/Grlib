@@ -107,7 +107,6 @@ def get_and_create(path):
 def get_experiment_results_path(domain, env_name, task, recognizer: str):
     return os.path.join(
         get_env_outputs_dir(domain, env_name=env_name, recognizer=recognizer),
-        env_name,
         task,
         "experiment_results",
     )
@@ -137,7 +136,7 @@ def get_gr_as_rl_experiment_confidence_path(domain_name, env_name, recognizer: s
         get_env_outputs_dir(
             domain_name=domain_name, env_name=env_name, recognizer=recognizer
         ),
-        "experiments",
+        "confidence",
     )
 
 

@@ -77,6 +77,25 @@ If you prefer using Conda, follow these steps:
 
 For any issues or troubleshooting, please refer to the repository's issue tracker.
 
+## Supported Algorithms
+
+Successors of algorithms that don't differ in their specifics are added in parentheses after the algorithm name. For example, since GC-DRACO and DRACO share the same column values, they're written on one line as DRACO (GC).
+
+| **Algorithm** | **Supervised** | **Reinforcement Learning** | **Discrete States** | **Continuous States** | **Discrete Actions** | **Continuous Actions** | **Model-Based** | **Model-Free** | **Action-Only** |
+|--------------|--------------|------------------------|------------------|------------------|--------------|--------------|--------------|--------------|--------------|
+| GRAQL       | ❌           | ✅                     | ✅                | ❌                | ✅                | ❌                | ❌           | ✅           | ❌           |
+| DRACO (GC)  | ❌           | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ❌           |
+| GRAML (GC, BG) | ✅        | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ✅           |
+
+## Supported Domains
+
+| **Domain**  | **Action Space** | **State Space** |
+|------------|----------------|----------------|
+| Minigrid   | Discrete       | Discrete       |
+| PointMaze  | Continuous     | Continuous     |
+| Parking    | Continuous     | Continuous     |
+| Panda      | Continuous     | Continuous     |
+
 ## Usage Guide
 
 After installing GRLib, you will have access to custom Gym environments, allowing you to set up and execute an Online Dynamic Goal Recognition (ODGR) scenario with the algorithm of your choice.
@@ -163,45 +182,72 @@ docker run -it ghcr.io/MatanShamir1/gr_test_base:latest bash
 
 The `consts.py` file contains predefined ODGR problem configurations. You can use existing configurations or define new ones.
 
-To execute a single task using the configuration file, you specify a recognizer, a domain, a gym environment within that domain and the task:
+To execute an ODGR problem using the configuration file, you specify a recognizer, a domain, a gym environment within that domain and the task:
 ```sh
-python odgr_executor.py --recognizer GCGraml --domain parking --task L1 --env_name Parking-S-14-PC-
+python odgr_executor.py --recognizer ExpertBasedGraml --domain minigrid --task L1 --env_name MiniGrid-SimpleCrossingS13N4
 ```
 
-## Supported Algorithms
+If you also add the flag:
+```sh
+ --collect_stats
+```
+to the cmd, 3 kinds of outputs will be generated from the ODGR problem's execution:
+a. Into:
+```sh
+outputs\\minigrid\MiniGrid-SimpleCrossingS13N4\MiniGrid-SimpleCrossingS13N4\L1\experiment_results
+```
+a .pkl and a .txt summary in a dictionary format will be generated, including the summary of all ODGR executions, including runtime and overall accuracies for all lengths and types of input sequences.
 
-Successors of algorithms that don't differ in their specifics are added in parentheses after the algorithm name. For example, since GC-DRACO and DRACO share the same column values, they're written on one line as DRACO (GC).
+b. Into:
+```sh
+outputs\ExpertBasedGraml\minigrid\MiniGrid-SimpleCrossingS13N4\policy_sequences\MiniGrid-SimpleCrossingS13N4-DynamicGoal-1x11-v0_inference_seq/plan_image.png
+```
+a visulzation of the sequence the agent generated will be dumped, either in a png or an mp4 format, depending on the domain, for debugability.
 
-| **Algorithm** | **Supervised** | **Reinforcement Learning** | **Discrete States** | **Continuous States** | **Discrete Actions** | **Continuous Actions** | **Model-Based** | **Model-Free** | **Action-Only** |
-|--------------|--------------|------------------------|------------------|------------------|--------------|--------------|--------------|--------------|--------------|
-| GRAQL       | ❌           | ✅                     | ✅                | ❌                | ✅                | ❌                | ❌           | ✅           | ❌           |
-| DRACO (GC)  | ❌           | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ❌           |
-| GRAML (GC, BG) | ✅        | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ✅           |
+c. Into:
+either:
+```sh
+outputs\ExpertBasedGraml\minigrid\MiniGrid-SimpleCrossingS13N4\goal_embeddings
+```
+In Graml algorithms, or:
+```sh
+outputs\Graql\minigrid\MiniGrid-SimpleCrossingS13N4\confidence
+```
+In GRAsRL algorithms,
+pickled results from which confidence of the results can be obtained, for offline analysis.
 
-## Supported Domains
+For GRAsRL outputs, for every possible goal, the likelihood of it being the true goal from the input sequence, based on the policy distance metric.
 
-| **Domain**  | **Action Space** | **State Space** |
-|------------|----------------|----------------|
-| Minigrid   | Discrete       | Discrete       |
-| PointMaze  | Continuous     | Continuous     |
-| Parking    | Continuous     | Continuous     |
-| Panda      | Continuous     | Continuous     |
+For GRAML outputs, the embeddings of the sequences are pickled for every goal-directed sequence. Offline, since, since in the embdding space of GRAML's metric model- sequences towards the same sequences are close and vice versa, one could reproduce the most likely goal by measuring the elementwise vector distance of the embeddings, and retrieve a confidence of it.
 
 ## Running Experiments
 
-The repository provides benchmark domains and scripts for analyzing experimental results. The `scripts` directory contains tools for processing and visualizing results.
+In light of the previous section, the user should already know how to scale the experiments using odgr_executor, and they should also understand how to use the 3 types of outputs for offline analysis of the algorithms.
+gr_libs also provides another scaling method to run odgr_executor on multiple domains and environments, for many ODGR problems, as well as python scripts for analysis of these results, to create plots and statistics over the executions.
 
-1. **`analyze_results_cross_alg_cross_domain.py`**
-   - Runs without arguments.
-   - Reads data from `get_experiment_results_path` (e.g., `dataset/graml/minigrid/continuing/.../experiment_results.pkl`).
-   - Generates plots comparing algorithm performance across domains.
+### Scaling odgr_executor runs
+A part of the contribution of this package is standardizing the evaluations of MDP-based GR frameworks.
+consts.py provides a set of ODGR problems on which the framework can be evaluated.
+The 'evaluations' sub-package provides scripts to analyze the results of the all_experiments.py execution, done over the ODGR the problems defined at consts.py.
 
-2. **`generate_task_specific_statistics_plots.py`**
-   - Produces task-specific accuracy and confidence plots.
-   - Generates a confusion matrix displaying confidence levels.
-   - Example output paths:
-     - `figures/point_maze/obstacles/graql_point_maze_obstacles_fragmented_stats.png`
-     - `figures/point_maze/obstacles/graml_point_maze_obstacles_conf_mat.png`
+In order to parallelize executions of odgr_executor.py, you can edit all_experiments.py with your combination of domains, environments and tasks.
+This script use multiprocessing to simultaniously execute many odgr_executor.py python executions as child processes.
+
+It logs failures and successful executions for debugability.
+
+After execution, another level of abstraction for the results is created. For example, when running for Graql in the minigrid domain:
+```sh
+outputs\summaries\detailed_summary_minigrid_Graql.txt
+```
+Will show the accuracies for every ODGR problem, for every percentage and type of input in a table-like .txt format, whike:
+```sh
+outputs\summaries\compiled_summary_minigrid_Graql.txt
+```
+Will show the same results in a more compact summary.
+
+### Using analysis scripts
+The repository provides benchmark domains and scripts for analyzing experimental results. The `evaluation` directory contains tools for processing and visualizing the results from odgr_executor.py and all_experiments.py.
+Please follow the README.md file in the 'evaluation' directory for more details.
 
 ## For Developers
 Developers will need to work slightly different: instead of installing the packages, they need to clone the repos and either install them as editables or add their paths to PYTHONPATH so they will function as packages effectively.

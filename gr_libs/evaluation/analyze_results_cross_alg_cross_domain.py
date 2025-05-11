@@ -6,11 +6,7 @@ import os
 import dill
 from scipy.interpolate import make_interp_spline
 from scipy.ndimage import gaussian_filter1d
-from gr_libs.ml.utils.storage import (
-    get_experiment_results_path,
-    set_global_storage_configs,
-)
-from scripts.generate_task_specific_statistics_plots import get_figures_dir_path
+from gr_libs.ml.utils.storage import get_experiment_results_path
 
 
 def smooth_line(x, y, num_points=300):
@@ -23,55 +19,25 @@ def smooth_line(x, y, num_points=300):
 if __name__ == "__main__":
 
     fragmented_accuracies = {
-        "graml": {
-            "panda": {
-                "gd_agent": {
-                    "0.3": [],  # every list here should have number of tasks accuracies in it, since we done experiments for L111-L555. remember each accuracy is an average of #goals different tasks.
-                    "0.5": [],
-                    "0.7": [],
-                    "0.9": [],
-                    "1": [],
-                },
-                "gc_agent": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-            },
+        "ExpertBasedGraml": {
             "minigrid": {
                 "obstacles": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
                 "lava_crossing": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-            },
-            "point_maze": {
-                "obstacles": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-                "four_rooms": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-            },
-            "parking": {
-                "gd_agent": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-                "gc_agent": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-            },
+            }
         },
-        "graql": {
-            "panda": {
-                "gd_agent": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-                "gc_agent": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-            },
+        "Graql": {
             "minigrid": {
                 "obstacles": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
                 "lava_crossing": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-            },
-            "point_maze": {
-                "obstacles": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-                "four_rooms": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-            },
-            "parking": {
-                "gd_agent": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-                "gc_agent": {"0.3": [], "0.5": [], "0.7": [], "0.9": [], "1": []},
-            },
+            }
         },
     }
 
     continuing_accuracies = copy.deepcopy(fragmented_accuracies)
 
     # domains = ['panda', 'minigrid', 'point_maze', 'parking']
-    domains = ["minigrid", "point_maze", "parking"]
-    tasks = ["L111", "L222", "L333", "L444", "L555"]
+    domains = ["minigrid"]
+    tasks = ["L1", "L2", "L3", "L4", "L5"]
     percentages = ["0.3", "0.5", "1"]
 
     for partial_obs_type, accuracies, is_same_learn in zip(
@@ -80,80 +46,106 @@ if __name__ == "__main__":
         [False, True],
     ):
         for domain in domains:
-            for env in accuracies["graml"][domain].keys():
+            for env in accuracies["ExpertBasedGraml"][domain].keys():
                 for task in tasks:
-                    set_global_storage_configs(
-                        recognizer_str="graml",
-                        is_fragmented=partial_obs_type,
-                        is_inference_same_length_sequences=True,
-                        is_learn_same_length_sequences=is_same_learn,
-                    )
-                    graml_res_file_path = (
-                        f"{get_experiment_results_path(domain, env, task)}.pkl"
-                    )
-                    set_global_storage_configs(
-                        recognizer_str="graql", is_fragmented=partial_obs_type
-                    )
+                    graml_res_file_path = f"{get_experiment_results_path(domain, env, task, 'ExpertBasedGraml')}.pkl"
                     graql_res_file_path = (
-                        f"{get_experiment_results_path(domain, env, task)}.pkl"
+                        f"{get_experiment_results_path(domain, env, task, 'Graql')}.pkl"
                     )
                     if os.path.exists(graml_res_file_path):
                         with open(graml_res_file_path, "rb") as results_file:
                             results = dill.load(results_file)
-                            for percentage in accuracies["graml"][domain][env].keys():
-                                accuracies["graml"][domain][env][percentage].append(
-                                    results[percentage]["accuracy"]
-                                )
+                            for percentage in accuracies["expertbasedgraml"][domain][
+                                env
+                            ].keys():
+                                accuracies["expertbasedgraml"][domain][env][
+                                    percentage
+                                ].append(results[percentage]["accuracy"])
                     else:
                         assert (False, f"no file for {graml_res_file_path}")
                     if os.path.exists(graql_res_file_path):
                         with open(graql_res_file_path, "rb") as results_file:
                             results = dill.load(results_file)
-                            for percentage in accuracies["graml"][domain][env].keys():
-                                accuracies["graql"][domain][env][percentage].append(
+                            for percentage in accuracies["expertbasedgraml"][domain][
+                                env
+                            ].keys():
+                                accuracies["Graql"][domain][env][percentage].append(
                                     results[percentage]["accuracy"]
                                 )
                     else:
                         assert (False, f"no file for {graql_res_file_path}")
 
     plot_styles = {
-        ("graml", "fragmented", 0.3): "g--o",  # Green dashed line with circle markers
-        ("graml", "fragmented", 0.5): "g--s",  # Green dashed line with square markers
         (
-            "graml",
+            "expertbasedgraml",
+            "fragmented",
+            0.3,
+        ): "g--o",  # Green dashed line with circle markers
+        (
+            "expertbasedgraml",
+            "fragmented",
+            0.5,
+        ): "g--s",  # Green dashed line with square markers
+        (
+            "expertbasedgraml",
             "fragmented",
             0.7,
         ): "g--^",  # Green dashed line with triangle-up markers
-        ("graml", "fragmented", 0.9): "g--d",  # Green dashed line with diamond markers
-        ("graml", "fragmented", 1.0): "g--*",  # Green dashed line with star markers
-        ("graml", "continuing", 0.3): "g-o",  # Green solid line with circle markers
-        ("graml", "continuing", 0.5): "g-s",  # Green solid line with square markers
         (
-            "graml",
+            "expertbasedgraml",
+            "fragmented",
+            0.9,
+        ): "g--d",  # Green dashed line with diamond markers
+        (
+            "expertbasedgraml",
+            "fragmented",
+            1.0,
+        ): "g--*",  # Green dashed line with star markers
+        (
+            "expertbasedgraml",
+            "continuing",
+            0.3,
+        ): "g-o",  # Green solid line with circle markers
+        (
+            "expertbasedgraml",
+            "continuing",
+            0.5,
+        ): "g-s",  # Green solid line with square markers
+        (
+            "expertbasedgraml",
             "continuing",
             0.7,
         ): "g-^",  # Green solid line with triangle-up markers
-        ("graml", "continuing", 0.9): "g-d",  # Green solid line with diamond markers
-        ("graml", "continuing", 1.0): "g-*",  # Green solid line with star markers
-        ("graql", "fragmented", 0.3): "b--o",  # Blue dashed line with circle markers
-        ("graql", "fragmented", 0.5): "b--s",  # Blue dashed line with square markers
         (
-            "graql",
+            "expertbasedgraml",
+            "continuing",
+            0.9,
+        ): "g-d",  # Green solid line with diamond markers
+        (
+            "expertbasedgraml",
+            "continuing",
+            1.0,
+        ): "g-*",  # Green solid line with star markers
+        ("Graql", "fragmented", 0.3): "b--o",  # Blue dashed line with circle markers
+        ("Graql", "fragmented", 0.5): "b--s",  # Blue dashed line with square markers
+        (
+            "Graql",
             "fragmented",
             0.7,
         ): "b--^",  # Blue dashed line with triangle-up markers
-        ("graql", "fragmented", 0.9): "b--d",  # Blue dashed line with diamond markers
-        ("graql", "fragmented", 1.0): "b--*",  # Blue dashed line with star markers
-        ("graql", "continuing", 0.3): "b-o",  # Blue solid line with circle markers
-        ("graql", "continuing", 0.5): "b-s",  # Blue solid line with square markers
-        ("graql", "continuing", 0.7): "b-^",  # Blue solid line with triangle-up markers
-        ("graql", "continuing", 0.9): "b-d",  # Blue solid line with diamond markers
-        ("graql", "continuing", 1.0): "b-*",  # Blue solid line with star markers
+        ("Graql", "fragmented", 0.9): "b--d",  # Blue dashed line with diamond markers
+        ("Graql", "fragmented", 1.0): "b--*",  # Blue dashed line with star markers
+        ("Graql", "continuing", 0.3): "b-o",  # Blue solid line with circle markers
+        ("Graql", "continuing", 0.5): "b-s",  # Blue solid line with square markers
+        ("Graql", "continuing", 0.7): "b-^",  # Blue solid line with triangle-up markers
+        ("Graql", "continuing", 0.9): "b-d",  # Blue solid line with diamond markers
+        ("Graql", "continuing", 1.0): "b-*",  # Blue solid line with star markers
     }
 
     def average_accuracies(accuracies, domain):
         avg_acc = {
-            algo: {perc: [] for perc in percentages} for algo in ["graml", "graql"]
+            algo: {perc: [] for perc in percentages}
+            for algo in ["ExpertBasedGraml", "Graql"]
         }
 
         for algo in avg_acc.keys():
@@ -186,7 +178,7 @@ if __name__ == "__main__":
         x_vals = np.arange(1, 6)  # Number of goals
 
         # Create "waves" (shaded regions) for each algorithm
-        for algo in ["graml", "graql"]:
+        for algo in ["ExpertBasedGraml", "Graql"]:
             fragmented_y_vals_by_percentage = []
             continuing_y_vals_by_percentage = []
 

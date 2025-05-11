@@ -99,9 +99,9 @@ def run_odgr_problem(args):
             )
             generate_obs_kwargs = {
                 "action_selection_method": stochastic_amplified_selection,
-                "save_fig": True,
+                "save_fig": args.collect_stats,
                 "random_optimalism": True,
-                "fig_path": fig_path,
+                "fig_path": fig_path if args.collect_stats else None,
             }
 
             # need to dump the whole plan for draco because it needs it for inference phase for checking likelihood.
@@ -186,9 +186,9 @@ def run_odgr_problem(args):
         )
     )
     print(f"generating results into {res_file_path}")
-    with open(f"{res_file_path}.pkl", "wb") as results_file:
+    with open(os.path.join(res_file_path, "res.pkl"), "wb") as results_file:
         dill.dump(results, results_file)
-    with open(f"{res_file_path}.txt", "w") as results_file:
+    with open(os.path.join(res_file_path, "res.txt"), "w") as results_file:
         results_file.write(str(results))
 
 

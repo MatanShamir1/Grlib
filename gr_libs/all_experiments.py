@@ -41,7 +41,7 @@ configs = {
     # }
 }
 # for minigrid: #TODO assert these instead i the beggingning of the code before beginning with the actual threading
-recognizers = ["ExpertBasedGraml"]
+recognizers = ["ExpertBasedGraml", "Graql"]
 # recognizers = ['Graql']
 
 # for point_maze:
@@ -68,14 +68,14 @@ def read_results(res_file_path):
 
 # Every thread worker executes this function.
 def run_experiment(domain, env, task, recognizer, i, generate_new=False):
-    cmd = f"python odgr_executor.py --domain {domain} --recognizer {recognizer} --env_name {env} --task {task} --collect_stats"
+    cmd = f"python gr_libs/odgr_executor.py --domain {domain} --recognizer {recognizer} --env_name {env} --task {task} --collect_stats"
     print(f"Starting execution: {cmd}")
     try:
         res_file_path = get_experiment_results_path(domain, env, task, recognizer)
-        res_file_path_txt = res_file_path + ".txt"
-        i_res_file_path_txt = res_file_path + f"_{i}.txt"
-        res_file_path_pkl = res_file_path + ".pkl"
-        i_res_file_path_pkl = res_file_path + f"_{i}.pkl"
+        res_file_path_txt = os.path.join(res_file_path, "res.txt")
+        i_res_file_path_txt = os.path.join(res_file_path, f"res_{i}.txt")
+        res_file_path_pkl = os.path.join(res_file_path, f"res.pkl")
+        i_res_file_path_pkl = os.path.join(res_file_path, f"res_{i}.pkl")
         if generate_new or (
             not os.path.exists(i_res_file_path_txt)
             or not os.path.exists(i_res_file_path_pkl)
@@ -225,11 +225,17 @@ for key, percentage_dict in compiled_accuracies.items():
             compiled_summary[key][percentage][is_cons] = (avg_accuracy, std_dev)
 
 # Write different summary results to different files
+if not os.path.exists(os.path.join("outputs", "summaries")):
+    os.makedirs(os.path.join("outputs", "summaries"))
 detailed_summary_file_path = os.path.join(
-    "summaries", f"detailed_summary_{''.join(configs.keys())}_{recognizers[0]}.txt"
+    "outputs",
+    "summaries",
+    f"detailed_summary_{''.join(configs.keys())}_{recognizers[0]}.txt",
 )
 compiled_summary_file_path = os.path.join(
-    "summaries", f"compiled_summary_{''.join(configs.keys())}_{recognizers[0]}.txt"
+    "outputs",
+    "summaries",
+    f"compiled_summary_{''.join(configs.keys())}_{recognizers[0]}.txt",
 )
 with open(detailed_summary_file_path, "w") as f:
     for key, percentage_dict in detailed_summary.items():
