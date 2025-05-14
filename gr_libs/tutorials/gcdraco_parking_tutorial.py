@@ -1,15 +1,11 @@
 from stable_baselines3 import PPO, TD3
-from gr_libs.metrics import (
-    stochastic_amplified_selection,
-    mean_p_value,
-    mean_wasserstein_distance,
-)
+
 from gr_libs import GCDraco
-from gr_libs.environment.utils.utils import domain_to_env_property
+from gr_libs.environment._utils.utils import domain_to_env_property
 from gr_libs.environment.environment import PARKING, ParkingProperty
+from gr_libs.metrics import mean_wasserstein_distance, stochastic_amplified_selection
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent
 from gr_libs.ml.utils.format import random_subset_with_order
-import gr_envs
 
 
 def run_gcdraco_parking_tutorial():

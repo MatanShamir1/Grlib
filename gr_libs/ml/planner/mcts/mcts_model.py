@@ -1,14 +1,16 @@
-import os
-import random
-from math import sqrt, log
+""" model that performs mcts to find a plan in discrete state/action environments. """
 
-from tqdm import tqdm
+import os
 import pickle
+import random
+from math import log, sqrt
+
+import gymnasium as gym
+from tqdm import tqdm
 
 from gr_libs.ml.utils.storage import get_agent_model_dir
-from .utils import Node
-from .utils import Tree
-import gymnasium as gym
+
+from ._utils import Node, Tree
 
 PROB = 0.8
 UNIFORM_PROB = 0.1
@@ -18,8 +20,20 @@ dict_action_id_to_str = {0: "turn left", 1: "turn right", 2: "go straight"}
 
 
 def save_figure(steps, env_name, problem_name, img_path, env_prop):
+    """
+    Save a figure representing the sequence of steps taken in a problem.
+
+    Args:
+        steps (list): List of tuples representing the state, position, and action taken at each step.
+        env_name (str): Name of the environment.
+        problem_name (str): Name of the problem.
+        img_path (str): Path to save the generated image.
+        env_prop: Object with methods to create the sequence image.
+
+    Returns:
+        None
+    """
     sequence = [pos for ((state, pos), action) in steps]
-    # print(f"sequence to {self.problem_name} is:\n\t{steps}\ngenerating image at {img_path}.")
     print(f"generating sequence image at {img_path}.")
     env_prop.create_sequence_image(sequence, img_path, problem_name)
 
@@ -27,16 +41,39 @@ def save_figure(steps, env_name, problem_name, img_path, env_prop):
 # TODO add number of expanded nodes and debug by putting breakpoint on the creation of nodes representing (8,4) and checking if they're invalid or something
 
 
-# Explanation on hashing and uncertainty in the acto outcome:
-# We want to detect circles, while not preventing expected behavior. To achieve it, hasing must include previous state, action, and resulting state.
-# Hashing the direction means coming to the same position from different positions gets different id's.
-# Example: the agent might have stood at (2,2), picked action 2 (forward), and accidently turned right, resulting at state ((2,2), right).
-# 		   later, when the agent stood at (2,1), looked right and walked forward, it got to the same state. We would want to enable that, because
-# 		   this is the expected behavior, so these nodes must have unique id's.
-# The situations where circles will indeed be detected, are only if the outcome was the same for the previous state, consistent with the action - whether it was or wasn't expected.
 class MonteCarloTreeSearch:
+    """
+    Monte Carlo Tree Search class for performing search on an environment using a tree data structure.
+
+    Explanation on hashing and uncertainty in the acto outcome:
+    We want to detect circles, while not preventing expected behavior.
+    To achieve it, hasing must include previous state, action, and resulting state.
+    Hashing the direction means coming to the same position from different positions gets different id's.
+    Example: the agent might have stood at (2,2), picked action 2 (forward), and accidently turned right,
+    resulting at state ((2,2), right).
+    later, when the agent stood at (2,1), looked right and walked forward,
+    it got to the same state. We would want to enable that, because
+    this is the expected behavior, so these nodes must have unique id's.
+    The situations where circles will indeed be detected, are only if the outcome was the same for the previous state,
+    consistent with the action - whether it was or wasn't expected.
+
+    Args:
+        env (gym.Env): The environment to perform the search on.
+        tree (Tree): The tree data structure to store the search tree.
+        goal (object): The goal state of the search.
+        use_heuristic (bool, optional): Whether to use a heuristic function during the search. Defaults to True.
+    """
 
     def __init__(self, env, tree, goal, use_heuristic=True):
+        """
+        Initializes the Monte Carlo Tree Search.
+
+        Args:
+            env (gym.Env): The environment to perform the search on.
+            tree (Tree): The tree data structure to store the search tree.
+            goal (object): The goal state of the search.
+            use_heuristic (bool, optional): Whether to use a heuristic function during the search. Defaults to True.
+        """
         self.env = env
         self.tree = tree
         self.action_space = self.env.action_space.n
@@ -81,13 +118,13 @@ class MonteCarloTreeSearch:
         new_node_ptr = new_node_father
         old_node_ptr = old_node
 
-        while new_node_ptr != None:
+        while new_node_ptr is not None:
             new_visits[0] += new_node_ptr.num_visits
             new_visits[1] += 1
             new_node_ptr = self.tree.parent(new_node_ptr)
 
         while (
-            old_node_ptr != None
+            old_node_ptr is not None
         ):  # getting to the old node wasn't necessarily through the current root. check all the way until None, the original root's parent.
             old_visits[0] += old_node_ptr.num_visits
             old_visits[1] += 1
@@ -128,7 +165,7 @@ class MonteCarloTreeSearch:
         while (
             new_identifier in self.tree.nodes.keys()
         ):  # iterate over all circle nodes. important not to hash the parent node id to get the next id, because it will not be the same for all circle nodes.
-            if self.tree.nodes[new_identifier].invalid == False:
+            if self.tree.nodes[new_identifier].invalid is False:
                 valid_id = new_identifier
             new_identifier = hash((666, new_identifier))
         # after this while, the id is for sure unused.
@@ -194,7 +231,7 @@ class MonteCarloTreeSearch:
         while (
             resulting_identifier in self.tree.nodes.keys()
         ):  # iterate over all circle nodes. important not to hash the parent node id to get the next id, because it will not be the same for all circle nodes.
-            if self.tree.nodes[resulting_identifier].invalid == False:
+            if self.tree.nodes[resulting_identifier].invalid is False:
                 valid_id = resulting_identifier
             resulting_identifier = hash((666, resulting_identifier))
         # after this while, the id is for sure unused.
@@ -234,6 +271,7 @@ class MonteCarloTreeSearch:
         if self.use_heuristic:
             # taken from Monte-Carlo Planning for Pathfinding in Real-Time Strategy Games , 2010.
             # need to handle the case of walking into a wall here: the resulting node will be considered invalid and it's reward and performance needs to be 0, but must handle stochasticity
+            pass
             # suggestion to handle stochasticity - consider *all* the children associated with taking action 2 towards a wall as performance 0, even if they accidently led in walking to another direction.
             # which suggests the invalidity needs to be checked not according to the resulting state, rather according to the intended action itself and the environment! remember, you cannot access the "stochastic_action", it is meant to be hidden from you.
             if node.pos[0] == self.goal[0] and node.pos[1] == self.goal[1]:
@@ -382,7 +420,7 @@ class MonteCarloTreeSearch:
     def backpropagation(self, node, value):
         while node != self.tree.parent(self.tree.root):
             assert (
-                node != None
+                node is not None
             )  # if we got to None it means we got to the actual root with the backpropogation instead of to the current root, which means in this path, someone had a differrent parent than it should, probably a double id.
             node.num_visits += 1
             node.total_simulation_reward += value
@@ -411,10 +449,10 @@ class MonteCarloTreeSearch:
             )  # need to add the previous node with the action leading to the next node which is a property of the next node
             prev_node = node
         if save_fig:
-            assert fig_path != None
+            assert fig_path is not None
             save_figure(trace, env_name, problem_name, fig_path, env_prop)
         else:
-            assert fig_path == None
+            assert fig_path is None
         return trace
 
 
@@ -430,6 +468,17 @@ def save_model_and_generate_policy(
 
 
 def plan(env_name, problem_name, goal, save_fig=False, fig_path=None, env_prop=None):
+    """
+    Plan a path using Monte Carlo Tree Search (MCTS) algorithm.
+
+    Args:
+        env_name (str): Name of the environment.
+        problem_name (str): Name of the problem.
+        goal (tuple): Goal state to reach.
+        save_fig (bool): Flag to save the figure of the plan.
+        fig_path (str): Path to save the figure.
+        env_prop: Object with methods to create the sequence image.
+    """
     global newely_expanded
     model_dir = get_agent_model_dir(
         env_name=env_name, model_name=problem_name, class_name="MCTS"
@@ -440,16 +489,14 @@ def plan(env_name, problem_name, goal, save_fig=False, fig_path=None, env_prop=N
         with open(model_file_path, "rb") as file:  # Load the pre-existing model
             try:
                 monteCarloTreeSearch = pickle.load(file)
-            except Exception as e:
+            except Exception:
 
                 class RenameUnpickler(pickle.Unpickler):
                     def find_class(self, module, name):
                         renamed_module = module
                         if module.startswith("ml"):
                             renamed_module = "gr_libs." + renamed_module
-                        return super(RenameUnpickler, self).find_class(
-                            renamed_module, name
-                        )
+                        return super().find_class(renamed_module, name)
 
                 def renamed_load(file_obj):
                     return RenameUnpickler(file_obj).load()
@@ -540,13 +587,3 @@ def plan(env_name, problem_name, goal, save_fig=False, fig_path=None, env_prop=N
     return mcts.generate_full_policy_sequence(
         env_name, problem_name, save_fig, fig_path
     )
-
-
-if __name__ == "__main__":
-    # register(
-    # 	id="MiniGrid-DynamicGoalEmpty-8x8-3x6-v0",
-    # 	entry_point="minigrid.envs:DynamicGoalEmpty",
-    # 	kwargs={"size": 8, "agent_start_pos" : (1, 1), "goal_pos": (3,6) },
-    # )
-    # plan("MiniGrid-DynamicGoalEmpty-8x8-3x6-v0")
-    pass

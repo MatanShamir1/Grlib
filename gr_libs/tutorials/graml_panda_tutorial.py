@@ -1,17 +1,12 @@
 import numpy as np
 from stable_baselines3 import PPO, SAC
-import gr_libs.environment.environment
-from gr_libs.environment.environment import (
-    PANDA,
-    EnvProperty,
-    GCEnvProperty,
-    PandaProperty,
-)
-from gr_libs.environment.utils.utils import domain_to_env_property
-from gr_libs.metrics.metrics import stochastic_amplified_selection
-from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
-from gr_libs.ml.utils.format import random_subset_with_order
+
 from gr_libs import GCGraml
+from gr_libs.environment._utils.utils import domain_to_env_property
+from gr_libs.environment.environment import PANDA, PandaProperty
+from gr_libs.metrics.metrics import stochastic_amplified_selection
+from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent
+from gr_libs.ml.utils.format import random_subset_with_order
 
 
 def run_graml_panda_tutorial():

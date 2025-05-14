@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import List, Type
-from gr_libs.environment.environment import EnvProperty, SUPPORTED_DOMAINS
-from gr_libs.environment.utils.utils import domain_to_env_property
+
+from gr_libs.environment._utils.utils import domain_to_env_property
+from gr_libs.environment.environment import SUPPORTED_DOMAINS
 from gr_libs.ml.base.rl_agent import RLAgent
 
 
@@ -11,7 +11,7 @@ class Recognizer(ABC):
         domain_name: str,
         env_name: str,
         collect_statistics=False,
-        rl_agent_type: Type[RLAgent] = None,
+        rl_agent_type: type[RLAgent] = None,
         **kwargs,
     ):
         assert domain_name in SUPPORTED_DOMAINS
@@ -27,30 +27,79 @@ class Recognizer(ABC):
 
 
 class LearningRecognizer(Recognizer):
+    """
+    A class that represents a learning recognizer.
+
+    Inherits from the Recognizer class.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def domain_learning_phase(self, base_goals: List[str], train_configs: List):
+    def domain_learning_phase(self, base_goals: list[str], train_configs: list):
+        """
+        Perform the domain learning phase.
+
+        Args:
+            base_goals (List[str]): The base goals for the learning phase.
+            train_configs (List): The training configurations.
+
+        """
         self.original_train_configs = train_configs
 
 
 # a recognizer that needs to train agents for every new goal as part of the goal adaptation phase (that's why it needs dynamic train configs)
 class GaAgentTrainerRecognizer(Recognizer):
+    """
+    A class representing a recognizer for GaAgentTrainer.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     @abstractmethod
-    def goals_adaptation_phase(self, dynamic_goals: List[str], dynamic_train_configs):
-        pass
+    def goals_adaptation_phase(self, dynamic_goals: list[str], dynamic_train_configs):
+        """
+        Perform the goals adaptation phase.
 
-    def domain_learning_phase(self, base_goals: List[str], train_configs: List):
+        Args:
+            dynamic_goals (List[str]): The list of dynamic goals.
+            dynamic_train_configs: The dynamic training configurations.
+
+        Returns:
+            None
+        """
+
+    def domain_learning_phase(self, base_goals: list[str], train_configs: list):
+        """
+        Perform the domain learning phase.
+
+        Args:
+            base_goals (List[str]): List of base goals.
+            train_configs (List): List of training configurations.
+
+        Returns:
+            None
+        """
         super().domain_learning_phase(base_goals, train_configs)
 
 
 class GaAdaptingRecognizer(Recognizer):
+    """
+    A recognizer that doesn't require more training given a set of new goals, hence it doesn't receive train configs in the goal adaptation phase.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     @abstractmethod
-    def goals_adaptation_phase(self, dynamic_goals: List[str]):
-        pass
+    def goals_adaptation_phase(self, dynamic_goals: list[str]):
+        """
+        Perform the goals adaptation phase.
+
+        Args:
+            dynamic_goals (List[str]): A list of dynamic goals to be adapted.
+
+        Returns:
+            None
+        """

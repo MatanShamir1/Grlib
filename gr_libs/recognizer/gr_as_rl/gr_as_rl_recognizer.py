@@ -1,14 +1,9 @@
-from abc import abstractmethod
 import os
+
 import dill
-from typing import List, Type, Callable
 import numpy as np
-from gr_libs.environment.environment import EnvProperty, GCEnvProperty
-from gr_libs.environment.utils.utils import domain_to_env_property
-from gr_libs.metrics.metrics import (
-    kl_divergence_norm_softmax,
-    mean_wasserstein_distance,
-)
+
+from gr_libs.metrics.metrics import kl_divergence_norm_softmax
 from gr_libs.ml.base import RLAgent
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
 from gr_libs.ml.tabular.tabular_q_learner import TabularQLearner
@@ -22,11 +17,40 @@ from gr_libs.recognizer.recognizer import (
 
 
 class GRAsRL(Recognizer):
+    """
+    GRAsRL class represents a goal recognition framework that using reinforcement learning.
+    It inherits from the Recognizer class and implements the goal recognition process, including the
+    Goal adaptation and the inference phase. It trains agents for each new goal, which makes it impractical
+    for realtime environments where goals mmight change.
+
+    Attributes:
+        agents (dict): A dictionary that maps problem names to RLAgent instances.
+        active_goals (List[str]): A list of active goals.
+        active_problems (List[str]): A list of active problem names.
+        action_space (gym.Space): The action space of the RLAgent.
+
+    Methods:
+        goals_adaptation_phase: Performs the goals adaptation phase.
+        prepare_inf_sequence: Prepares the inference sequence for goal-directed problems.
+        inference_phase: Performs the inference phase and returns the recognized goal.
+        choose_agent: Returns the RLAgent for a given problem name.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.agents = {}  # consider changing to ContextualAgent
 
-    def goals_adaptation_phase(self, dynamic_goals: List[str], dynamic_train_configs):
+    def goals_adaptation_phase(self, dynamic_goals: list[str], dynamic_train_configs):
+        """
+        Performs the goals adaptation phase.
+
+        Args:
+            dynamic_goals (List[str]): A list of dynamic goals.
+            dynamic_train_configs: The dynamic training configurations.
+
+        Returns:
+            None
+        """
         super().goals_adaptation_phase(dynamic_goals, dynamic_train_configs)
         dynamic_goals_problems = [
             self.env_prop.goal_to_problem_str(goal) for goal in dynamic_goals
@@ -49,6 +73,16 @@ class GRAsRL(Recognizer):
         self.action_space = next(iter(self.agents.values())).env.action_space
 
     def prepare_inf_sequence(self, problem_name: str, inf_sequence):
+        """
+        Prepares the inference sequence for goal-directed problems.
+
+        Args:
+            problem_name (str): The name of the problem.
+            inf_sequence: The inference sequence.
+
+        Returns:
+            The prepared inference sequence.
+        """
         if not self.env_prop.use_goal_directed_problem():
             for obs in inf_sequence:
                 obs[0]["desired_goal"] = np.array(
@@ -59,6 +93,17 @@ class GRAsRL(Recognizer):
         return inf_sequence
 
     def inference_phase(self, inf_sequence, true_goal, percentage) -> str:
+        """
+        Performs the inference phase and returns the recognized goal.
+
+        Args:
+            inf_sequence: The inference sequence.
+            true_goal: The true goal.
+            percentage: The percentage.
+
+        Returns:
+            The recognized goal as a string.
+        """
         scores = []
         for problem_name in self.active_problems:
             agent = self.choose_agent(problem_name)
@@ -89,10 +134,24 @@ class GRAsRL(Recognizer):
         return str(self.active_goals[true_goal_index])
 
     def choose_agent(self, problem_name: str) -> RLAgent:
+        """
+        Returns the RLAgent for a given problem name.
+
+        Args:
+            problem_name (str): The name of the problem.
+
+        Returns:
+            The RLAgent instance.
+        """
         return self.agents[problem_name]
 
 
 class Graql(GRAsRL, GaAgentTrainerRecognizer):
+    """
+    Graql extends the GRAsRL framework and GaAgentTrainerRecognizer, since it trains new agents for every new goal and it adheres
+    to the goal recognition as reinforcement learning framework. It uses a tabular Q-learning agent for discrete state and action spaces.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         assert (
@@ -106,6 +165,25 @@ class Graql(GRAsRL, GaAgentTrainerRecognizer):
 
 
 class Draco(GRAsRL, GaAgentTrainerRecognizer):
+    """
+    Draco class represents a recognizer agent trained using the GRAsRL framework.
+    Like Graql, it trains new agents for every new goal and adheres to the goal recognition as reinforcement learning framework.
+    It uses a deep reinforcement learning agent for continuous state and action spaces.
+
+    Args:
+        *args: Variable length argument list.
+        **kwargs: Arbitrary keyword arguments.
+
+    Attributes:
+        rl_agent_type (type): Type of the reinforcement learning agent.
+        evaluation_function (callable): Function used for evaluation.
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add any additional initialization code here
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         assert (
@@ -120,9 +198,16 @@ class Draco(GRAsRL, GaAgentTrainerRecognizer):
         ), "Evaluation function must be a callable function."
 
 
-class GCDraco(
-    GRAsRL, LearningRecognizer, GaAdaptingRecognizer
-):  # TODO problem: it gets 2 goal_adaptation phase from parents, one with configs and one without.
+class GCDraco(GRAsRL, LearningRecognizer, GaAdaptingRecognizer):
+    """
+    GCDraco recognizer uses goal-conditioned reinforcement learning using the Draco algorithm.
+    It inherits from GRAsRL, LearningRecognizer, and GaAdaptingRecognizer.
+    It is designed for environments with continuous state and action spaces.
+    It uses a goal-conditioned deep reinforcement learning agent for training and inference, which
+    enables it to adapt to new goals during the goal adaptation phase without requiring retraining,
+    making it suitable for dynamic environments.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         assert (
@@ -137,7 +222,7 @@ class GCDraco(
             self.evaluation_function
         ), "Evaluation function must be a callable function."
 
-    def domain_learning_phase(self, base_goals: List[str], train_configs):
+    def domain_learning_phase(self, base_goals: list[str], train_configs):
         super().domain_learning_phase(base_goals, train_configs)
         agent_kwargs = {
             "domain_name": self.env_prop.domain_name,

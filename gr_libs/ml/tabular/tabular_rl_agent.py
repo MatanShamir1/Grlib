@@ -1,11 +1,11 @@
-import gymnasium as gym
 from abc import abstractmethod
-from typing import Collection, Literal, Any
 from random import Random
+from typing import Any
+
+import gymnasium as gym
 import numpy as np
 
-from gr_libs.ml.base import RLAgent
-from gr_libs.ml.base import State
+from gr_libs.ml.base import RLAgent, State
 
 
 class TabularRLAgent(RLAgent):
@@ -28,6 +28,24 @@ class TabularRLAgent(RLAgent):
         rand: Random,
         learning_rate,
     ):
+        """
+        Initializes a TabularRLAgent object.
+
+        Args:
+            domain_name (str): The name of the domain.
+            problem_name (str): The name of the problem.
+            episodes (int): The number of episodes to run.
+            decaying_eps (bool): Whether to use decaying epsilon.
+            eps (float): The initial epsilon value.
+            alpha (float): The learning rate.
+            decay (float): The decay rate for epsilon.
+            gamma (float): The discount factor.
+            rand (Random): The random number generator.
+            learning_rate: The learning rate.
+
+        Returns:
+            None
+        """
         super().__init__(
             episodes=episodes,
             decaying_eps=decaying_eps,
@@ -60,7 +78,6 @@ class TabularRLAgent(RLAgent):
         Returns:
             (int) the first action the agent takes.
         """
-        pass
 
     @abstractmethod
     def agent_step(self, reward: float, state: State) -> Any:
@@ -73,7 +90,6 @@ class TabularRLAgent(RLAgent):
         Returns:
             The action the agent is taking.
         """
-        pass
 
     @abstractmethod
     def agent_end(self, reward: float) -> Any:
@@ -83,7 +99,6 @@ class TabularRLAgent(RLAgent):
             reward (float): the reward the agent received for entering the
                 terminal state.
         """
-        pass
 
     @abstractmethod
     def policy(self, state: State) -> Any:
@@ -94,7 +109,6 @@ class TabularRLAgent(RLAgent):
         Returns:
              The action prescribed for that state
         """
-        pass
 
     @abstractmethod
     def softmax_policy(self, state: State) -> np.array:
@@ -106,7 +120,6 @@ class TabularRLAgent(RLAgent):
         Returns:
             np.array: probability of taking each action in self.actions given a state
         """
-        pass
 
     @abstractmethod
     def learn(self, init_threshold: int = 20):

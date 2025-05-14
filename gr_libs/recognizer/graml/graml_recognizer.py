@@ -1,39 +1,49 @@
-from abc import ABC, abstractmethod
-from collections import namedtuple
+""" Collection of recognizers that use GRAML methods: metric learning for ODGR. """
+
 import os
-from gr_libs.environment.environment import EnvProperty, GCEnvProperty, LSTMProperties
+from abc import abstractmethod
+
+import dill
+import numpy as np
+import torch
+from torch.nn.utils.rnn import pad_sequence
+from torch.utils.data import DataLoader
+
+from gr_libs.environment.environment import EnvProperty
+from gr_libs.metrics import metrics
 from gr_libs.ml import utils
 from gr_libs.ml.base import ContextualAgent
-from typing import List, Tuple
-import numpy as np
-from torch.utils.data import DataLoader
-from torch.nn.utils.rnn import pad_sequence
-import torch
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
 from gr_libs.ml.planner.mcts import mcts_model
-import dill
+from gr_libs.ml.sequential._lstm_model import LstmObservations, train_metric_model
 from gr_libs.ml.tabular.tabular_q_learner import TabularQLearner
-from gr_libs.recognizer.graml.gr_dataset import GRDataset, generate_datasets
-from gr_libs.ml.sequential.lstm_model import LstmObservations, train_metric_model
 from gr_libs.ml.utils.format import random_subset_with_order
 from gr_libs.ml.utils.storage import (
     get_and_create,
-    get_lstm_model_dir,
     get_embeddings_result_path,
+    get_lstm_model_dir,
     get_policy_sequences_result_path,
 )
-from gr_libs.metrics import metrics
+from gr_libs.recognizer.graml._gr_dataset import GRDataset, generate_datasets
 from gr_libs.recognizer.recognizer import (
     GaAdaptingRecognizer,
     GaAgentTrainerRecognizer,
     LearningRecognizer,
-    Recognizer,
-)  # import first, very dependent
+)
 
 ### TODO IMPLEMENT MORE SELECTION METHODS, MAKE SURE action_probs IS AS IT SEEMS: list of action-probability 'es ###
 
 
 def collate_fn(batch):
+    """
+    Collates a batch of data for training or evaluation.
+
+    Args:
+        batch (list): A list of tuples, where each tuple contains the first traces, second traces, and the label indicating whether the goals are the same.
+
+    Returns:
+        tuple: A tuple containing the padded first traces, padded second traces, labels, lengths of first traces, and lengths of second traces.
+    """
     first_traces, second_traces, is_same_goals = zip(*batch)
     # torch.stack takes tensor tuples (fixed size) and stacks them up in a matrix
     first_traces_padded = pad_sequence(
@@ -68,17 +78,52 @@ def save_weights(model: LstmObservations, path):
 
 
 class Graml(LearningRecognizer):
+    """
+    The Graml class is a subclass of LearningRecognizer and represents a recognizer that uses the Graml algorithm for goal recognition.
+    Graml learns a metric over observation sequences, over time: using a GC or a collection of agents, it creates a dataset and learns
+    the metric on it during the domain learning phase. During the goals adaptation phase, it creates or receives a library of sequences for each goal,
+    and maintains embeddings of them for the inference phase. The inference phase uses the learned metric to find the closest goal to a given sequence.
+
+    Attributes:
+        agents (list[ContextualAgent]): A list of contextual agents associated with the recognizer.
+        train_func: The function used for training the metric model.
+        collate_func: The function used for collating data in the training process.
+
+    Methods:
+        train_agents_on_base_goals(base_goals: list[str], train_configs: list): Trains the agents on the given base goals and train configurations.
+        domain_learning_phase(base_goals: list[str], train_configs: list): Performs the domain learning phase of the Graml algorithm.
+        goals_adaptation_phase(dynamic_goals: list[EnvProperty], save_fig=False): Performs the goals adaptation phase of the Graml algorithm.
+        get_goal_plan(goal): Retrieves the plan associated with the given goal.
+        dump_plans(true_sequence, true_goal, percentage): Dumps the plans to a file.
+        create_embeddings_dict(): Creates the embeddings dictionary for the plans.
+        inference_phase(inf_sequence, true_goal, percentage) -> str: Performs the inference phase of the Graml algorithm and returns the closest goal.
+        generate_sequences_library(goal: str, save_fig=False) -> list[list[tuple[np.ndarray, np.ndarray]]]: Generates the sequences library for the given goal.
+        update_sequences_library_inference_phase(inf_sequence) -> list[list[tuple[np.ndarray, np.ndarray]]]: Updates the sequences library during the inference phase.
+    """
+
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the GramlRecognizer object.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        Attributes:
+            agents (list[ContextualAgent]): List of contextual agents.
+            train_func: Training function for the metric model.
+            collate_func: Collate function for data batching.
+        """
         super().__init__(*args, **kwargs)
-        self.agents: List[ContextualAgent] = []
+        self.agents: list[ContextualAgent] = []
         self.train_func = train_metric_model
         self.collate_func = collate_fn
 
     @abstractmethod
-    def train_agents_on_base_goals(self, base_goals: List[str], train_configs: List):
+    def train_agents_on_base_goals(self, base_goals: list[str], train_configs: list):
         pass
 
-    def domain_learning_phase(self, base_goals: List[str], train_configs: List):
+    def domain_learning_phase(self, base_goals: list[str], train_configs: list):
         super().domain_learning_phase(base_goals, train_configs)
         self.train_agents_on_base_goals(base_goals, train_configs)
         # train the network so it will find a metric for the observations of the base agents such that traces of agents to different goals are far from one another
@@ -130,7 +175,7 @@ class Graml(LearningRecognizer):
             )
             save_weights(model=self.model, path=self.model_file_path)
 
-    def goals_adaptation_phase(self, dynamic_goals: List[EnvProperty], save_fig=False):
+    def goals_adaptation_phase(self, dynamic_goals: list[EnvProperty], save_fig=False):
         self.is_first_inf_since_new_goals = True
         self.current_goals = dynamic_goals
         # start by training each rl agent on the base goal set
@@ -245,13 +290,13 @@ class Graml(LearningRecognizer):
     @abstractmethod
     def generate_sequences_library(
         self, goal: str, save_fig=False
-    ) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
+    ) -> list[list[tuple[np.ndarray, np.ndarray]]]:
         pass
 
     # this function duplicates every sequence and creates a consecutive and non-consecutive version of it
     def update_sequences_library_inference_phase(
         self, inf_sequence
-    ) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
+    ) -> list[list[tuple[np.ndarray, np.ndarray]]]:
         new_plans_dict = {}
         for goal, obss in self.plans_dict.items():
             new_obss = []
@@ -281,17 +326,23 @@ class Graml(LearningRecognizer):
 
 
 class BGGraml(Graml):
+    """
+    BGGraml class represents a goal-directed agent for the BGGraml algorithm.
+
+    It extends the Graml class and provides additional methods for training agents on base goals.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def domain_learning_phase(self, base_goals: List[str], train_configs: List):
+    def domain_learning_phase(self, base_goals: list[str], train_configs: list):
         assert len(train_configs) == len(
             base_goals
         ), "There should be train configs for every goal in BGGraml."
         return super().domain_learning_phase(base_goals, train_configs)
 
     # In case we need goal-directed agent for every goal
-    def train_agents_on_base_goals(self, base_goals: List[str], train_configs: List):
+    def train_agents_on_base_goals(self, base_goals: list[str], train_configs: list):
         self.original_problems = [
             self.env_prop.goal_to_problem_str(g) for g in base_goals
         ]
@@ -316,14 +367,40 @@ class BGGraml(Graml):
 
 
 class MCTSBasedGraml(BGGraml, GaAdaptingRecognizer):
+    """
+    MCTSBasedGraml is a class that represents a recognizer based on the MCTS algorithm.
+    It inherits from BGGraml and GaAdaptingRecognizer classes.
+
+    Attributes:
+        rl_agent_type (type): The type of reinforcement learning agent used.
+    """
+
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the GramlRecognizer object.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         super().__init__(*args, **kwargs)
         if self.rl_agent_type == None:
             self.rl_agent_type = TabularQLearner
 
     def generate_sequences_library(
         self, goal: str, save_fig=False
-    ) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
+    ) -> list[list[tuple[np.ndarray, np.ndarray]]]:
+        """
+        Generates a library of sequences for a given goal.
+
+        Args:
+            goal (str): The goal for which to generate sequences.
+            save_fig (bool, optional): Whether to save the generated figure. Defaults to False.
+
+        Returns:
+            list[list[tuple[np.ndarray, np.ndarray]]]: The generated sequences library.
+        """
         problem_name = self.env_prop.goal_to_problem_str(goal)
         img_path = os.path.join(
             get_policy_sequences_result_path(
@@ -342,7 +419,29 @@ class MCTSBasedGraml(BGGraml, GaAdaptingRecognizer):
 
 
 class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
+    """
+    ExpertBasedGraml class represents a Graml recognizer that uses expert knowledge to generate sequences library and adapt goals.
+
+    Args:
+        *args: Variable length argument list.
+        **kwargs: Arbitrary keyword arguments.
+
+    Attributes:
+        rl_agent_type (type): The type of reinforcement learning agent used.
+        env_prop (EnvironmentProperties): The environment properties.
+        dynamic_train_configs_dict (dict): The dynamic training configurations for each problem.
+
+    """
+
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the GRAML Recognizer.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         super().__init__(*args, **kwargs)
         if self.rl_agent_type == None:
             if self.env_prop.is_state_discrete() and self.env_prop.is_action_discrete():
@@ -352,7 +451,18 @@ class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
 
     def generate_sequences_library(
         self, goal: str, save_fig=False
-    ) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
+    ) -> list[list[tuple[np.ndarray, np.ndarray]]]:
+        """
+        Generates a sequences library for a given goal.
+
+        Args:
+            goal (str): The goal for which to generate the sequences library.
+            save_fig (bool, optional): Whether to save the figure. Defaults to False.
+
+        Returns:
+            list[list[tuple[np.ndarray, np.ndarray]]]: The generated sequences library.
+
+        """
         problem_name = self.env_prop.goal_to_problem_str(goal)
         kwargs = {
             "domain_name": self.domain_name,
@@ -377,7 +487,18 @@ class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
             agent_kwargs["fig_path"] = fig_path
         return [agent.generate_observation(**agent_kwargs)]
 
-    def goals_adaptation_phase(self, dynamic_goals: List[str], dynamic_train_configs):
+    def goals_adaptation_phase(self, dynamic_goals: list[str], dynamic_train_configs):
+        """
+        Performs the goals adaptation phase.
+
+        Args:
+            dynamic_goals (list[str]): The dynamic goals.
+            dynamic_train_configs: The dynamic training configurations.
+
+        Returns:
+            The result of the goals adaptation phase.
+
+        """
         self.dynamic_goals_problems = [
             self.env_prop.goal_to_problem_str(g) for g in dynamic_goals
         ]
@@ -391,6 +512,28 @@ class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
 
 
 class GCGraml(Graml, GaAdaptingRecognizer):
+    """
+    GCGraml class represents a recognizer that uses the GCDeepRLAgent for domain learning and sequence generation.
+    It makes its adaptation phase quicker and require less assumptions, but the assumption of a GC agent is still needed and may result
+    in less optimal policies that generate the observations in the synthetic dataset, which could eventually lead to a less optimal metric.
+
+    Args:
+        Graml (class): Base class for Graml recognizers.
+        GaAdaptingRecognizer (class): Base class for GA adapting recognizers.
+
+    Attributes:
+        rl_agent_type (class): The type of RL agent to be used for learning and generation.
+        env_prop (object): The environment properties.
+        agents (list): List of contextual agents.
+
+    Methods:
+        __init__: Initializes the GCGraml recognizer.
+        domain_learning_phase: Performs the domain learning phase.
+        train_agents_on_base_goals: Trains the RL agents on the base goals.
+        generate_sequences_library: Generates sequences library for a specific goal.
+
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.rl_agent_type == None:
@@ -401,14 +544,14 @@ class GCGraml(Graml, GaAdaptingRecognizer):
             and not self.env_prop.is_action_discrete()
         )
 
-    def domain_learning_phase(self, base_goals: List[str], train_configs: List):
+    def domain_learning_phase(self, base_goals: list[str], train_configs: list):
         assert (
             len(train_configs) == 1
         ), "There should be one train config for the sole gc agent in GCGraml."
         return super().domain_learning_phase(base_goals, train_configs)
 
     # In case we need goal-directed agent for every goal
-    def train_agents_on_base_goals(self, base_goals: List[str], train_configs: List):
+    def train_agents_on_base_goals(self, base_goals: list[str], train_configs: list):
         self.gc_goal_set = base_goals
         self.original_problems = self.env_prop.name  # needed for gr_dataset
         # start by training each rl agent on the base goal set
@@ -432,7 +575,7 @@ class GCGraml(Graml, GaAdaptingRecognizer):
 
     def generate_sequences_library(
         self, goal: str, save_fig=False
-    ) -> List[List[Tuple[np.ndarray, np.ndarray]]]:
+    ) -> list[list[tuple[np.ndarray, np.ndarray]]]:
         problem_name = self.env_prop.goal_to_problem_str(goal)
         kwargs = {
             "domain_name": self.domain_name,

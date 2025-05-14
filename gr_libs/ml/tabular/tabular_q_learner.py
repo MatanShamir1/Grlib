@@ -1,18 +1,17 @@
-# Don't import stuff from metrics! it's a higher level module.
+""" implementation of q-learning """
+
 import os.path
 import pickle
-import random
+from collections.abc import Iterable
+from random import Random
 from types import MethodType
+from typing import Any
 
 import dill
-from gymnasium import register
 import numpy as np
-
-from tqdm import tqdm
-from typing import Any
-from random import Random
-from typing import List, Iterable
 from gymnasium.error import InvalidAction
+from tqdm import tqdm
+
 from gr_libs.environment.environment import QLEARNING, EnvProperty
 from gr_libs.ml.tabular import TabularState
 from gr_libs.ml.tabular.tabular_rl_agent import TabularRLAgent
@@ -44,6 +43,25 @@ class TabularQLearner(TabularRLAgent):
         check_partial_goals: bool = True,
         valid_only: bool = False,
     ):
+        """
+        Initialize a TabularQLearner object.
+
+        Args:
+            domain_name (str): The name of the domain.
+            problem_name (str): The name of the problem.
+            env_prop (EnvProperty): The environment properties.
+            algorithm (str): The algorithm to use.
+            num_timesteps (int): The number of timesteps.
+            decaying_eps (bool, optional): Whether to use decaying epsilon. Defaults to True.
+            eps (float, optional): The initial epsilon value. Defaults to 1.0.
+            alpha (float, optional): The learning rate. Defaults to 0.5.
+            decay (float, optional): The decay rate. Defaults to 0.000002.
+            gamma (float, optional): The discount factor. Defaults to 0.9.
+            rand (Random, optional): The random number generator. Defaults to Random().
+            learning_rate (float, optional): The learning rate. Defaults to 0.001.
+            check_partial_goals (bool, optional): Whether to check partial goals. Defaults to True.
+            valid_only (bool, optional): Whether to use valid goals only. Defaults to False.
+        """
         super().__init__(
             domain_name=domain_name,
             problem_name=problem_name,
@@ -169,7 +187,7 @@ class TabularQLearner(TabularRLAgent):
     def add_new_state(self, state: TabularState):
         self.q_table[str(state)] = [0.0] * self.number_of_actions
 
-    def get_all_q_values(self, state: TabularState) -> List[float]:
+    def get_all_q_values(self, state: TabularState) -> list[float]:
         if str(state) in self.q_table:
             return self.q_table[str(state)]
         else:

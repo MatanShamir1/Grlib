@@ -1,6 +1,7 @@
 from stable_baselines3 import SAC, TD3
+
+from gr_libs.environment._utils.utils import domain_to_env_property
 from gr_libs.environment.environment import POINT_MAZE, PointMazeProperty
-from gr_libs.environment.utils.utils import domain_to_env_property
 from gr_libs.metrics.metrics import stochastic_amplified_selection
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent
 from gr_libs.ml.utils.format import random_subset_with_order

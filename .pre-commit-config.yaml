@@ -3,11 +3,46 @@ repos:
     rev: 24.3.0
     hooks:
       - id: black
-  # - repo: https://github.com/pre-commit/mirrors-isort
-  #   rev: v5.10.1
-  #   hooks:
-  #     - id: isort
-  # - repo: https://github.com/pycqa/flake8
+        files: ^gr_libs/
+        args: [--line-length=88]
+
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.10.1
+    hooks:
+      - id: isort
+        args: ["--profile", "black", "--filter-files"]
+        files: ^gr_libs/
+
+  # - repo: https://github.com/PyCQA/flake8
   #   rev: 6.1.0
   #   hooks:
   #     - id: flake8
+  #       additional_dependencies: 
+  #         - flake8-bugbear
+  #         - flake8-comprehensions
+  #         - flake8-builtins          # Added to avoid naming conflicts with built-ins
+  #         - flake8-docstrings        # Added for docstring linting
+  #       files: ^gr_libs/
+  #       exclude: |
+  #         ^gr_libs/.*(__init__\.py)?$   # Ignore init files for unused import checks
+  #         ^gr_libs/.*/_.*\.py$  # This line skips files starting with an underscore
+  #       args: ["--max-line-length=88", "--ignore=D200,E501,D401"]  # Changed from default 79 to match black's line length
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.0
+    hooks:
+      - id: pyupgrade
+        args: ["--py311-plus"]
+        files: ^gr_libs/
+
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v2.2.0
+    hooks:
+      - id: autoflake
+        args: [
+          "--remove-all-unused-imports",
+          "--remove-unused-variables",
+          "--expand-star-imports",    # Added to allow better cleanup of `from ... import *`
+          "--in-place",
+        ]
+        files: ^gr_libs/

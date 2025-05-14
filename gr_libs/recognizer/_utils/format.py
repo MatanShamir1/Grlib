@@ -1,9 +1,9 @@
+from gr_libs.recognizer.gr_as_rl.gr_as_rl_recognizer import Draco, GCDraco, Graql
 from gr_libs.recognizer.graml.graml_recognizer import (
-    GCGraml,
     ExpertBasedGraml,
+    GCGraml,
     MCTSBasedGraml,
 )
-from gr_libs.recognizer.gr_as_rl.gr_as_rl_recognizer import Graql, Draco, GCDraco
 
 
 def recognizer_str_to_obj(recognizer_str: str):

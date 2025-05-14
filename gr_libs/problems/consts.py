@@ -1,14 +1,14 @@
 import numpy as np
 from stable_baselines3 import PPO, SAC, TD3
+
 from gr_libs.environment.environment import (
     MINIGRID,
-    PARKING,
     PANDA,
+    PARKING,
     POINT_MAZE,
     QLEARNING,
     PandaProperty,
 )
-
 
 PROBLEMS = {
     PARKING: {

@@ -102,5 +102,5 @@ class Tree:
     def show(self):
         lines = ""
         for edge, node in self.iter(identifier=None, depth=0, last_node_flags=[]):
-            lines += "{}{}\n".format(edge, node)
+            lines += f"{edge}{node}\n"
         print(lines)

@@ -1,9 +1,22 @@
+"""
+A module GR algorithms can store hard-coded parameters anf functionalities
+that are environment-related.
+"""
+
 import importlib.metadata
 import warnings
 
 
 def is_extra_installed(package: str, extra: str) -> bool:
-    """Check if an extra was installed for a given package."""
+    """Check if an extra was installed for a given package.
+
+    Args:
+        package (str): The name of the package.
+        extra (str): The name of the extra to check.
+
+    Returns:
+        bool: True if the extra is installed, False otherwise.
+    """
     try:
         # Get metadata for the installed package
         dist = importlib.metadata.metadata(package)

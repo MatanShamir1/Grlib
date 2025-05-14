@@ -1,7 +1,5 @@
 import os
 
-from .other import device
-
 
 def create_folders_if_necessary(path):
     if not os.path.exists(path):

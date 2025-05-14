@@ -1,11 +1,11 @@
 import logging
 import sys
+
 from gr_libs.environment.environment import (
     MINIGRID,
     PANDA,
     PARKING,
     POINT_MAZE,
-    EnvProperty,
     MinigridProperty,
     PandaProperty,
     ParkingProperty,

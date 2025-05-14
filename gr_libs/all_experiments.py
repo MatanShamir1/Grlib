@@ -1,9 +1,12 @@
+""" executes odgr_executor parallely on a set of problems defined in consts.py """
+
+import concurrent.futures
 import os
+import subprocess
 import sys
 import threading
+
 import dill
-import subprocess
-import concurrent.futures
 import numpy as np
 
 from gr_libs.ml.utils.storage import get_experiment_results_path
@@ -40,7 +43,9 @@ configs = {
     #     'PandaMyReachDense': ['L1', 'L2', 'L3', 'L4', 'L5']
     # }
 }
-# for minigrid: #TODO assert these instead i the beggingning of the code before beginning with the actual threading
+# for minigrid:
+# TODO assert these instead i the beggingning of the code before beginning
+# with the actual threading
 recognizers = ["ExpertBasedGraml", "Graql"]
 # recognizers = ['Graql']
 
@@ -61,6 +66,15 @@ n = 5  # Number of times to execute each task
 
 # Function to read results from the result file
 def read_results(res_file_path):
+    """
+    Read the results from a result file.
+
+    Args:
+        res_file_path (str): The path to the result file.
+
+    Returns:
+        The results read from the file.
+    """
     with open(res_file_path, "rb") as f:
         results = dill.load(f)
     return results
@@ -68,13 +82,29 @@ def read_results(res_file_path):
 
 # Every thread worker executes this function.
 def run_experiment(domain, env, task, recognizer, i, generate_new=False):
-    cmd = f"python gr_libs/odgr_executor.py --domain {domain} --recognizer {recognizer} --env_name {env} --task {task} --collect_stats"
+    """
+    Run an experiment.
+
+    Args:
+        domain (str): The domain of the experiment.
+        env (str): The environment of the experiment.
+        task (str): The task of the experiment.
+        recognizer (str): The recognizer used in the experiment.
+        i (int): The index of the experiment.
+        generate_new (bool, optional): Whether to generate new results.
+        Defaults to False.
+
+    Returns:
+        tuple: A tuple containing the experiment details and the results.
+    """
+    cmd = f"python gr_libs/odgr_executor.py --domain {domain} --recognizer \
+          {recognizer} --env_name {env} --task {task} --collect_stats"
     print(f"Starting execution: {cmd}")
     try:
         res_file_path = get_experiment_results_path(domain, env, task, recognizer)
         res_file_path_txt = os.path.join(res_file_path, "res.txt")
         i_res_file_path_txt = os.path.join(res_file_path, f"res_{i}.txt")
-        res_file_path_pkl = os.path.join(res_file_path, f"res.pkl")
+        res_file_path_pkl = os.path.join(res_file_path, "res.pkl")
         i_res_file_path_pkl = os.path.join(res_file_path, f"res_{i}.pkl")
         if generate_new or (
             not os.path.exists(i_res_file_path_txt)
@@ -85,10 +115,8 @@ def run_experiment(domain, env, task, recognizer, i, generate_new=False):
             ):
                 i_res_file_path_txt = i_res_file_path_txt.replace(f"_{i}", f"_{i}_new")
                 i_res_file_path_pkl = i_res_file_path_pkl.replace(f"_{i}", f"_{i}_new")
-            # every thread in the current process starts a new process which executes the command. the current thread waits for the subprocess to finish.
             process = subprocess.Popen(cmd, shell=True)
             process.wait()
-            # result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
             if process.returncode != 0:
                 print(f"Execution failed: {cmd}")
                 print(f"Error: {result.stderr}")
@@ -101,7 +129,8 @@ def run_experiment(domain, env, task, recognizer, i, generate_new=False):
                 os.rename(res_file_path_txt, i_res_file_path_txt)
         else:
             print(
-                f"File {i_res_file_path_txt} already exists. Skipping execution of {cmd}"
+                f"File {i_res_file_path_txt} already exists. Skipping execution \
+                 of {cmd}"
             )
         return ((domain, env, task, recognizer), read_results(i_res_file_path_pkl))
     except Exception as e:
@@ -113,8 +142,12 @@ def run_experiment(domain, env, task, recognizer, i, generate_new=False):
 results = {}
 
 # create an executor that manages a pool of threads.
-# Note that any failure in the threads will not stop the main thread from continuing and vice versa, nor will the debugger view the failure if in debug mode.
-# Use prints and if any thread's printing stops suspect failure. If failure happened, use breakpoints before failure and use the watch to see the failure by pasting the problematic piece of code.
+# Note that any failure in the threads will not stop the main thread
+# from continuing and vice versa, nor will the debugger view the
+# failure if in debug mode.
+# Use prints and if any thread's printing stops suspect failure.
+# If failure happened, use breakpoints before failure and use the
+# watch to see the failure by pasting the problematic piece of code.
 with concurrent.futures.ThreadPoolExecutor() as executor:
     futures = []
     for domain, envs in configs.items():
@@ -122,7 +155,6 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
             for task in tasks:
                 for recognizer in recognizers:
                     for i in range(n):
-                        # submit returns a future object that represents the execution of the function by some thread in the pool. the method is added to the list and the executor will run it as soon as it can.
                         futures.append(
                             executor.submit(
                                 run_experiment,
@@ -140,19 +172,15 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
                             )
                         )
 
-    # main thread continues execution after the loop above. Here, it waits for all threads. every time a thread finishes, the main thread reads the results from the future object.
-    # If debugging main thread, note the executor will stop creating new threads and running them since it exists and runs in the main thread.
-    # probably, the main thread gets interrupted by the return of a future and knows to start execution of new threads and then continue main thread execution
     for future in concurrent.futures.as_completed(futures):
-        # the objects returned by the 'result' func are tuples with key being the args inserted to 'submit'.
         if future.result() is None:
             print(
-                f"for future {future}, future.result() is None. Continuing to next future."
+                f"for future {future}, future.result() is None. \
+                 Continuing to next future."
             )
             continue
         key, result = future.result()
         print(f"main thread reading results from future {key}")
-        # list because every experiment is executed n times.
         if key not in results:
             results[key] = []
         results[key].append(result)
@@ -175,7 +203,7 @@ for key, result_list in results.items():
             detailed_summary[key][percentage] = {}
         consecutive_accuracies = [
             result[percentage]["consecutive"]["accuracy"] for result in result_list
-        ]  # accuracies in all different n executions
+        ]
         non_consecutive_accuracies = [
             result[percentage]["non_consecutive"]["accuracy"] for result in result_list
         ]
@@ -249,6 +277,11 @@ with open(detailed_summary_file_path, "w") as f:
 
 with open(compiled_summary_file_path, "w") as f:
     for key, percentage_dict in compiled_summary.items():
+        for percentage, cons_info in percentage_dict.items():
+            for is_cons, (avg_accuracy, std_dev) in cons_info.items():
+                f.write(
+                    f"{key[0]}\t{key[1]}\t{percentage}\t{is_cons}\t{avg_accuracy:.4f}\t{std_dev:.4f}\n"
+                )
         domain, recognizer = key
         f.write(f"{domain}\t{recognizer}\n")
         for percentage, cons_info in percentage_dict.items():

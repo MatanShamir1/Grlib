@@ -1,22 +1,13 @@
 import numpy as np
-from stable_baselines3 import PPO, SAC
-import gr_libs.environment.environment
-from gr_libs.environment.environment import (
-    PANDA,
-    EnvProperty,
-    GCEnvProperty,
-    PandaProperty,
-)
-from gr_libs.environment.utils.utils import domain_to_env_property
-from gr_libs.metrics import mean_wasserstein_distance, mean_p_value
-from gr_libs.metrics.metrics import (
-    stochastic_amplified_selection,
-    mean_action_distance_continuous,
-)
-from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
-from gr_libs.ml.utils.format import random_subset_with_order
+from stable_baselines3 import PPO
+
 from gr_libs import Draco
-import gr_envs
+from gr_libs.environment._utils.utils import domain_to_env_property
+from gr_libs.environment.environment import PANDA
+from gr_libs.metrics import mean_wasserstein_distance
+from gr_libs.metrics.metrics import stochastic_amplified_selection
+from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent
+from gr_libs.ml.utils.format import random_subset_with_order
 
 
 def run_draco_panda_tutorial():
