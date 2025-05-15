@@ -1,0 +1,11 @@
+minigrid	Graql
+		0.3	consecutive	0.4013	0.1983
+		0.3	non_consecutive	0.6640	0.2216
+		0.5	consecutive	0.5164	0.2070
+		0.5	non_consecutive	0.8578	0.1368
+		0.7	consecutive	0.5830	0.2181
+		0.7	non_consecutive	0.8380	0.2081
+		0.9	consecutive	0.7803	0.1763
+		0.9	non_consecutive	0.9159	0.1117
+		1	consecutive	0.9419	0.1287
+		1	non_consecutive	0.9015	0.1543

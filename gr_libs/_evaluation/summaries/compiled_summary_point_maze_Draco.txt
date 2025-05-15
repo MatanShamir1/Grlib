@@ -1,0 +1,11 @@
+point_maze	Draco
+		0.3	consecutive	0.5099	0.2320
+		0.3	non_consecutive	0.8112	0.2116
+		0.5	consecutive	0.7501	0.2020
+		0.5	non_consecutive	0.8434	0.2007
+		0.7	consecutive	0.8201	0.1844
+		0.7	non_consecutive	0.8454	0.1670
+		0.9	consecutive	0.8630	0.1673
+		0.9	non_consecutive	0.8648	0.1548
+		1	consecutive	0.8341	0.1851
+		1	non_consecutive	0.8469	0.1637

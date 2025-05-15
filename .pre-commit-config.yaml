@@ -40,7 +40,7 @@ repos:
     hooks:
       - id: autoflake
         args: [
-          "--remove-all-unused-imports",
+          #"--remove-all-unused-imports", # couldn't except for ones in __init__
           "--remove-unused-variables",
           "--expand-star-imports",    # Added to allow better cleanup of `from ... import *`
           "--in-place",

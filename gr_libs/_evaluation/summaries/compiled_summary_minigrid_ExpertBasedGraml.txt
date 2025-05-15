@@ -1,0 +1,11 @@
+minigrid	ExpertBasedGraml
+		0.3	consecutive	0.2196	0.1925
+		0.3	non_consecutive	0.6338	0.2498
+		0.5	consecutive	0.3499	0.2009
+		0.5	non_consecutive	0.7600	0.1787
+		0.7	consecutive	0.4857	0.2485
+		0.7	non_consecutive	0.7526	0.1760
+		0.9	consecutive	0.7064	0.2071
+		0.9	non_consecutive	0.7275	0.2425
+		1	consecutive	0.7790	0.2351
+		1	non_consecutive	0.7873	0.1832

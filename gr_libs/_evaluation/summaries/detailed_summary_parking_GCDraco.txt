@@ -1,0 +1,55 @@
+parking	Parking-S-14-PC-	L1	GCDraco
+		0.3	consecutive	0.6667	0.0000
+		0.3	non_consecutive	0.6667	0.0000
+		0.5	consecutive	0.6667	0.0000
+		0.5	non_consecutive	0.6667	0.0000
+		0.7	consecutive	0.6667	0.0000
+		0.7	non_consecutive	0.6667	0.0000
+		0.9	consecutive	0.6667	0.0000
+		0.9	non_consecutive	0.6667	0.0000
+		1	consecutive	0.6667	0.0000
+		1	non_consecutive	0.6667	0.0000
+parking	Parking-S-14-PC-	L3	GCDraco
+		0.3	consecutive	0.7500	0.0000
+		0.3	non_consecutive	0.7500	0.0000
+		0.5	consecutive	0.7500	0.0000
+		0.5	non_consecutive	0.7500	0.0000
+		0.7	consecutive	0.7500	0.0000
+		0.7	non_consecutive	0.7500	0.0000
+		0.9	consecutive	0.7500	0.0000
+		0.9	non_consecutive	0.7500	0.0000
+		1	consecutive	0.7500	0.0000
+		1	non_consecutive	0.7500	0.0000
+parking	Parking-S-14-PC-	L2	GCDraco
+		0.3	consecutive	0.5000	0.0000
+		0.3	non_consecutive	0.5000	0.0000
+		0.5	consecutive	0.5000	0.0000
+		0.5	non_consecutive	0.5000	0.0000
+		0.7	consecutive	0.5000	0.0000
+		0.7	non_consecutive	0.5000	0.0000
+		0.9	consecutive	0.5000	0.0000
+		0.9	non_consecutive	0.5000	0.0000
+		1	consecutive	0.5000	0.0000
+		1	non_consecutive	0.5000	0.0000
+parking	Parking-S-14-PC-	L4	GCDraco
+		0.3	consecutive	0.2000	0.0000
+		0.3	non_consecutive	0.2000	0.0000
+		0.5	consecutive	0.2000	0.0000
+		0.5	non_consecutive	0.2000	0.0000
+		0.7	consecutive	0.2000	0.0000
+		0.7	non_consecutive	0.2000	0.0000
+		0.9	consecutive	0.2000	0.0000
+		0.9	non_consecutive	0.2000	0.0000
+		1	consecutive	0.2000	0.0000
+		1	non_consecutive	0.2000	0.0000
+parking	Parking-S-14-PC-	L5	GCDraco
+		0.3	consecutive	0.5714	0.0000
+		0.3	non_consecutive	0.5714	0.0000
+		0.5	consecutive	0.5714	0.0000
+		0.5	non_consecutive	0.5714	0.0000
+		0.7	consecutive	0.5714	0.0000
+		0.7	non_consecutive	0.5714	0.0000
+		0.9	consecutive	0.5714	0.0000
+		0.9	non_consecutive	0.5714	0.0000
+		1	consecutive	0.5714	0.0000
+		1	non_consecutive	0.5714	0.0000

@@ -1,0 +1,11 @@
+panda	GCDraco
+		0.3	consecutive	0.3510	0.1659
+		0.3	non_consecutive	0.8245	0.1614
+		0.5	consecutive	0.5669	0.2078
+		0.5	non_consecutive	0.9066	0.1078
+		0.7	consecutive	0.7980	0.1979
+		0.7	non_consecutive	0.9646	0.0778
+		0.9	consecutive	0.9268	0.1247
+		0.9	non_consecutive	0.9495	0.0931
+		1	consecutive	0.9470	0.1052
+		1	non_consecutive	0.9520	0.0736
