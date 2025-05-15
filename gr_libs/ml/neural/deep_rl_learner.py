@@ -229,14 +229,14 @@ class DeepRLAgent:
                 obs, desired, success_done
             )
             video_writer.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-        if general_done is False != success_done is True:
+        if general_done == False and success_done == True:
             assert (
                 desired is not None
             ), f"general_done is false but success_done is true, and desired is None. \
                 This should never happen, since the environment will say 'done' is false \
                 (general_done) while the observation will be close to the goal (success_done) \
                 only in case we incorporated a 'desired' when generating the observation."
-        elif general_done is True != success_done is False:
+        elif general_done == True and success_done == False:
             raise Exception("general_done is true but success_done is false")
         self.env.close()
         video_writer.release()
@@ -459,10 +459,12 @@ class DeepRLAgent:
                     observations.append((obs["observation"], action))
                 obs, reward, done, info = self.env.step(action)
                 self.env_prop.change_goal_to_specific_desired(obs, desired)
-                general_done = self.env_prop.is_done(done)
+                general_done = bool(self.env_prop.is_done(done))
                 success_done = self.env_prop.is_success(info)
-                success_done = self.env_prop.change_done_by_specific_desired(
-                    obs, desired, success_done
+                success_done = bool(
+                    self.env_prop.change_done_by_specific_desired(
+                        obs, desired, success_done
+                    )
                 )
                 if general_done is True and success_done is False:
                     # it could be that the stochasticity inserted into the actions made the agent die/crash.
@@ -504,6 +506,7 @@ class DeepRLAgent:
                     ), f"general_done is false but success_done is true, and desired is None. This should never happen, since the \
                                       environment will say 'done' is false (general_done) while the observation will be close to the goal (success_done) \
                                      only in case we incorporated a 'desired' when generating the observation."
+                    break
 
         if save_fig:
             self.try_recording_video(fig_path, desired)

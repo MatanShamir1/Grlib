@@ -8,3 +8,7 @@ def test_draco_panda_tutorial():
 
 def test_draco_parking_tutorial():
     run_draco_parking_tutorial()
+
+if __name__ == "__main__":
+    test_draco_panda_tutorial()
+    test_draco_parking_tutorial()
