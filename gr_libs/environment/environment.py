@@ -1,8 +1,10 @@
 """ environment.py """
 
 import os
+import sys
 from abc import abstractmethod
 from collections import namedtuple
+from contextlib import contextmanager
 
 import gymnasium as gym
 import numpy as np
@@ -21,6 +23,23 @@ SUPPORTED_DOMAINS = [MINIGRID, PANDA, PARKING, POINT_MAZE]
 LSTMProperties = namedtuple(
     "LSTMProperties", ["input_size", "hidden_size", "batch_size", "num_samples"]
 )
+
+
+@contextmanager
+def suppress_output():
+    """
+    Context manager to suppress stdout and stderr (including C/C++ prints).
+    """
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        old_stderr = sys.stderr
+        sys.stdout = devnull
+        sys.stderr = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
+            sys.stderr = old_stderr
 
 
 class EnvProperty:
@@ -135,9 +154,10 @@ class EnvProperty:
 
     def create_vec_env(self, kwargs):
         """
-        Create a vectorized environment.
+        Create a vectorized environment, suppressing prints from gym/pybullet/panda-gym.
         """
-        env = gym.make(**kwargs)
+        with suppress_output():
+            env = gym.make(**kwargs)
         return DummyVecEnv([lambda: env])
 
     @abstractmethod

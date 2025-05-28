@@ -5,7 +5,7 @@ from types import MethodType
 import cv2
 import numpy as np
 
-from gr_libs.environment.environment import EnvProperty
+from gr_libs.environment.environment import EnvProperty, suppress_output
 
 if __name__ != "__main__":
     from gr_libs.ml.utils.storage import get_agent_model_dir
@@ -184,12 +184,7 @@ class DeepRLAgent:
         """
         fourcc = cv2.VideoWriter_fourcc("m", "p", "4", "v")
         fps = 30.0
-        # if is_gc:
-        # 	assert goal_idx is not None
-        # 	self.reset_with_goal_idx(goal_idx)
-        # else:
-        # 	assert goal_idx is None
-        self.env.reset()
+        self.safe_env_reset()
         frame_size = (
             self.env.render(mode="rgb_array").shape[1],
             self.env.render(mode="rgb_array").shape[0],
@@ -198,7 +193,7 @@ class DeepRLAgent:
         video_writer = cv2.VideoWriter(video_path, fourcc, fps, frame_size)
         general_done, success_done = False, False
         gc.collect()
-        obs = self.env.reset()
+        obs = self.safe_env_reset()
         self.env_prop.change_goal_to_specific_desired(obs, desired)
         counter = 0
         while not (general_done or success_done):
@@ -209,17 +204,11 @@ class DeepRLAgent:
                 general_done = general_done[0]
             self.env_prop.change_goal_to_specific_desired(obs, desired)
             if "success" in info[0].keys():
-                success_done = info[0][
-                    "success"
-                ]  # make sure the agent actually reached the goal within the max time
+                success_done = info[0]["success"]
             elif "is_success" in info[0].keys():
-                success_done = info[0][
-                    "is_success"
-                ]  # make sure the agent actually reached the goal within the max time
+                success_done = info[0]["is_success"]
             elif "step_task_completions" in info[0].keys():
-                success_done = (
-                    len(info[0]["step_task_completions"]) == 1
-                )  # bug of dummyVecEnv, it removes the episode_task_completions from the info dict.
+                success_done = len(info[0]["step_task_completions"]) == 1
             else:
                 raise NotImplementedError(
                     "no other option for any of the environments."
@@ -270,17 +259,17 @@ class DeepRLAgent:
 
     def safe_env_reset(self):
         """
-        Reset the environment safely.
+        Reset the environment safely, suppressing output.
 
         Returns:
             The initial observation.
         """
         try:
-            obs = self.env.reset()
+            obs = suppress_env_reset(self.env)
         except Exception:
             kwargs = {"id": self.problem_name, "render_mode": "rgb_array"}
             self.env = self.env_prop.create_vec_env(kwargs)
-            obs = self.env.reset()
+            obs = suppress_env_reset(self.env)
         return obs
 
     def get_mean_and_std_dev(self, observation):
@@ -632,3 +621,11 @@ class GCDeepRLAgent(DeepRLAgent):
                 desired=goal_directed_goal,
             )
         return observations
+
+
+def suppress_env_reset(env):
+    """
+    Utility function to suppress prints during env.reset().
+    """
+    with suppress_output():
+        return env.reset()

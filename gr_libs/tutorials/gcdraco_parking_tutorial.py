@@ -15,7 +15,9 @@ def run_gcdraco_parking_tutorial():
         evaluation_function=mean_wasserstein_distance,  # or mean_p_value
     )
 
-    recognizer.domain_learning_phase([i for i in range(1, 21)], [(PPO, 200000)])
+    recognizer.domain_learning_phase(
+        {"gc": {"goals": [i for i in range(1, 21)], "train_configs": [(PPO, 200000)]}}
+    )
     recognizer.goals_adaptation_phase(
         dynamic_goals=["1", "11", "21"]
         # no need for expert sequence generation since GCRL is used

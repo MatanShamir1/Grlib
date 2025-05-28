@@ -12,18 +12,22 @@ def run_graml_minigrid_tutorial():
     )
 
     recognizer.domain_learning_phase(
-        base_goals=[
-            (11, 1),
-            (11, 11),
-            (1, 11),
-            (7, 11),
-            (8, 1),
-            (10, 6),
-            (6, 9),
-            (11, 3),
-            (11, 5),
-        ],
-        train_configs=[(QLEARNING, 100000) for _ in range(9)],
+        {
+            "bg": {
+                "goals": [
+                    (11, 1),
+                    (11, 11),
+                    (1, 11),
+                    (7, 11),
+                    (8, 1),
+                    (10, 6),
+                    (6, 9),
+                    (11, 3),
+                    (11, 5),
+                ],
+                "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+            }
+        }
     )
 
     recognizer.goals_adaptation_phase(

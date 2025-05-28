@@ -14,9 +14,15 @@ PROBLEMS = {
     PARKING: {
         "Parking-S-14-PC-": {
             "L1": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [i for i in range(1, 21)],
-                    "train_configs": [(PPO, 200000)],
+                "base": {
+                    "gc": {
+                        "goals": [i for i in range(1, 21)],
+                        "train_configs": [(PPO, 200000)],
+                    },
+                    "bg": {
+                        "goals": ["1", "4", "8", "14", "21"],
+                        "train_configs": [(SAC, 200000) for _ in range(5)],
+                    },
                 },
                 "G_0": {
                     "goals": ["1", "11", "21"],
@@ -26,9 +32,15 @@ PROBLEMS = {
                 },
             },
             "L2": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [i for i in range(1, 21)],
-                    "train_configs": [(PPO, 200000)],
+                "base": {
+                    "gc": {
+                        "goals": [i for i in range(1, 21)],
+                        "train_configs": [(PPO, 200000)],
+                    },
+                    "bg": {
+                        "goals": ["1", "4", "8", "14", "21"],
+                        "train_configs": [(SAC, 200000) for _ in range(5)],
+                    },
                 },
                 "G_0": {
                     "goals": ["1", "8", "14", "21"],
@@ -36,9 +48,15 @@ PROBLEMS = {
                 },
             },
             "L3": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [i for i in range(1, 21)],
-                    "train_configs": [(PPO, 200000)],
+                "base": {
+                    "gc": {
+                        "goals": [i for i in range(1, 21)],
+                        "train_configs": [(PPO, 200000)],
+                    },
+                    "bg": {
+                        "goals": ["1", "4", "8", "14", "21"],
+                        "train_configs": [(SAC, 200000) for _ in range(5)],
+                    },
                 },
                 "G_0": {
                     "goals": ["1", "8", "11", "18"],
@@ -46,9 +64,15 @@ PROBLEMS = {
                 },
             },
             "L4": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [i for i in range(1, 21)],
-                    "train_configs": [(PPO, 200000)],
+                "base": {
+                    "gc": {
+                        "goals": [i for i in range(1, 21)],
+                        "train_configs": [(PPO, 200000)],
+                    },
+                    "bg": {
+                        "goals": ["1", "4", "8", "14", "21"],
+                        "train_configs": [(SAC, 200000) for _ in range(5)],
+                    },
                 },
                 "G_0": {
                     "goals": ["4", "8", "11", "14", "18"],
@@ -56,13 +80,15 @@ PROBLEMS = {
                 },
             },
             "L5": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [i for i in range(1, 21)],
-                    "train_configs": [(PPO, 200000)],
-                },
-                "G_0": {
-                    "goals": ["1", "4", "8", "11", "14", "18", "21"],
-                    "train_configs": [(SAC, 200000) for _ in range(7)],
+                "base": {
+                    "gc": {
+                        "goals": [i for i in range(1, 21)],
+                        "train_configs": [(PPO, 200000)],
+                    },
+                    "bg": {
+                        "goals": ["1", "4", "8", "11", "14", "18", "21"],
+                        "train_configs": [(SAC, 200000) for _ in range(7)],
+                    },
                 },
             },
         }
@@ -70,11 +96,26 @@ PROBLEMS = {
     PANDA: {
         "PandaMyReachDense": {
             "L1": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        np.array([PandaProperty.sample_goal()]) for _ in range(1, 30)
-                    ],
-                    "train_configs": [(SAC, 800000)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            np.array([PandaProperty.sample_goal()])
+                            for _ in range(1, 30)
+                        ],
+                        "train_configs": [(SAC, 800000)],
+                    },
+                    "bg": {
+                        "goals": [
+                            np.array([[-0.1, -0.1, 0.1]]),
+                            np.array([[-0.1, 0.1, 0.1]]),
+                            np.array([[0.2, 0.2, 0.1]]),
+                        ],
+                        "train_configs": [
+                            (PPO, 200000),
+                            (PPO, 200000),
+                            (PPO, 300000),
+                        ],
+                    },
                 },
                 "G_0": {
                     "goals": [
@@ -86,15 +127,32 @@ PROBLEMS = {
                         (SAC, 00000),
                         (SAC, 200000),
                         (SAC, 300000),
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    ],
                 },
             },
             "L2": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        np.array([PandaProperty.sample_goal()]) for _ in range(1, 30)
-                    ],
-                    "train_configs": [(SAC, 800000)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            np.array([PandaProperty.sample_goal()])
+                            for _ in range(1, 30)
+                        ],
+                        "train_configs": [(SAC, 800000)],
+                    },
+                    "bg": {
+                        "goals": [
+                            np.array([[-0.5, -0.5, 0.1]]),
+                            np.array([[-0.5, 0.2, 0.1]]),
+                            np.array([[-0.1, 0.1, 0.1]]),
+                            np.array([[0.1, -0.1, 0.1]]),
+                        ],
+                        "train_configs": [
+                            (PPO, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                        ],
+                    },
                 },
                 "G_0": {
                     "goals": [
@@ -108,15 +166,29 @@ PROBLEMS = {
                         (SAC, 400000),
                         (SAC, 400000),
                         (SAC, 400000),
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    ],
                 },
             },
             "L3": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        np.array([PandaProperty.sample_goal()]) for _ in range(1, 30)
-                    ],
-                    "train_configs": [(SAC, 800000)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            np.array([PandaProperty.sample_goal()])
+                            for _ in range(1, 30)
+                        ],
+                        "train_configs": [(SAC, 800000)],
+                    },
+                    "bg": {
+                        "goals": [
+                            np.array([[-0.5, -0.5, 0.1]]),
+                            np.array([[-0.1, -0.1, 0.1]]),
+                            np.array([[-0.5, 0.2, 0.1]]),
+                            np.array([[-0.1, 0.1, 0.1]]),
+                            np.array([[0.2, -0.2, 0.1]]),
+                            np.array([[0.2, 0.2, 0.1]]),
+                        ],
+                        "train_configs": [(PPO, 400000) for _ in range(6)],
+                    },
                 },
                 "G_0": {
                     "goals": [
@@ -127,17 +199,36 @@ PROBLEMS = {
                         np.array([[0.2, -0.2, 0.1]]),
                         np.array([[0.2, 0.2, 0.1]]),
                     ],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(6)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(6)],
                 },
             },
             "L4": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        np.array([PandaProperty.sample_goal()]) for _ in range(1, 30)
-                    ],
-                    "train_configs": [(SAC, 800000)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            np.array([PandaProperty.sample_goal()])
+                            for _ in range(1, 30)
+                        ],
+                        "train_configs": [(SAC, 800000)],
+                    },
+                    "bg": {
+                        "goals": [
+                            np.array([[-0.3, -0.3, 0.1]]),
+                            np.array([[-0.1, -0.1, 0.1]]),
+                            np.array([[-0.3, 0.2, 0.1]]),
+                            np.array([[-0.1, 0.1, 0.1]]),
+                            np.array([[0.1, -0.1, 0.1]]),
+                            np.array([[0.2, 0.2, 0.1]]),
+                        ],
+                        "train_configs": [
+                            (SAC, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                        ],
+                    },
                 },
                 "G_0": {
                     "goals": [
@@ -148,17 +239,42 @@ PROBLEMS = {
                         np.array([[0.1, -0.1, 0.1]]),
                         np.array([[0.2, 0.2, 0.1]]),
                     ],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(6)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(6)],
                 },
             },
             "L5": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        np.array([PandaProperty.sample_goal()]) for _ in range(1, 30)
-                    ],
-                    "train_configs": [(SAC, 800000)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            np.array([PandaProperty.sample_goal()])
+                            for _ in range(1, 30)
+                        ],
+                        "train_configs": [(SAC, 800000)],
+                    },
+                    "bg": {
+                        "goals": [
+                            np.array([[-0.5, -0.5, 0.1]]),
+                            np.array([[-0.3, -0.3, 0.1]]),
+                            np.array([[-0.1, -0.1, 0.1]]),
+                            np.array([[-0.5, 0.2, 0.1]]),
+                            np.array([[-0.3, 0.2, 0.1]]),
+                            np.array([[-0.1, 0.1, 0.1]]),
+                            np.array([[0.2, -0.2, 0.1]]),
+                            np.array([[0.1, -0.1, 0.1]]),
+                            np.array([[0.2, 0.2, 0.1]]),
+                        ],
+                        "train_configs": [
+                            (PPO, 400000),
+                            (SAC, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                            (PPO, 400000),
+                        ],
+                    },
                 },
                 "G_0": {
                     "goals": [
@@ -172,9 +288,7 @@ PROBLEMS = {
                         np.array([[0.1, -0.1, 0.1]]),
                         np.array([[0.2, 0.2, 0.1]]),
                     ],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(9)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(9)],
                 },
             },
         }
@@ -182,170 +296,258 @@ PROBLEMS = {
     POINT_MAZE: {
         "PointMaze-FourRoomsEnvDense-11x11": {
             "L1": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        (9, 1),
-                        (9, 9),
-                        (1, 9),
-                        (3, 3),
-                        (3, 4),
-                        (8, 2),
-                        (3, 7),
-                        (2, 8),
-                    ],
-                    "train_configs": [(SAC, 400000) for _ in range(8)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (9, 1),
+                            (9, 9),
+                            (1, 9),
+                            (3, 3),
+                            (3, 4),
+                            (8, 2),
+                            (3, 7),
+                            (2, 8),
+                        ],
+                        "train_configs": [(SAC, 400000) for _ in range(8)],
+                    },
+                    "bg": {
+                        "goals": [(4, 4), (7, 3), (3, 7)],
+                        "train_configs": [(SAC, 400000) for _ in range(3)],
+                    },
                 },
                 "G_0": {
                     "goals": [(4, 4), (7, 3), (3, 7)],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(3)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(3)],
                 },
             },
             "L2": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        (9, 1),
-                        (9, 9),
-                        (1, 9),
-                        (3, 3),
-                        (3, 4),
-                        (8, 2),
-                        (3, 7),
-                        (2, 8),
-                    ],
-                    "train_configs": [(SAC, 400000) for _ in range(8)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (9, 1),
+                            (9, 9),
+                            (1, 9),
+                            (3, 3),
+                            (3, 4),
+                            (8, 2),
+                            (3, 7),
+                            (2, 8),
+                        ],
+                        "train_configs": [(SAC, 400000) for _ in range(8)],
+                    },
+                    "bg": {
+                        "goals": [(4, 4), (7, 3), (3, 7), (8, 2)],
+                        "train_configs": [(SAC, 400000) for _ in range(4)],
+                    },
                 },
                 "G_0": {
                     "goals": [(4, 4), (7, 3), (3, 7), (8, 2)],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(4)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(4)],
                 },
             },
             "L3": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        (9, 1),
-                        (9, 9),
-                        (1, 9),
-                        (3, 3),
-                        (3, 4),
-                        (8, 2),
-                        (3, 7),
-                        (2, 8),
-                    ],
-                    "train_configs": [(SAC, 400000) for _ in range(8)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (9, 1),
+                            (9, 9),
+                            (1, 9),
+                            (3, 3),
+                            (3, 4),
+                            (8, 2),
+                            (3, 7),
+                            (2, 8),
+                        ],
+                        "train_configs": [(SAC, 400000) for _ in range(8)],
+                    },
+                    "bg": {
+                        "goals": [(4, 4), (7, 3), (3, 7), (8, 2), (2, 8)],
+                        "train_configs": [(SAC, 400000) for _ in range(5)],
+                    },
                 },
                 "G_0": {
                     "goals": [(4, 4), (7, 3), (3, 7), (8, 2), (2, 8)],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(5)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(5)],
                 },
             },
             "L4": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        (9, 1),
-                        (9, 9),
-                        (1, 9),
-                        (3, 3),
-                        (3, 4),
-                        (8, 2),
-                        (3, 7),
-                        (2, 8),
-                    ],
-                    "train_configs": [(SAC, 400000) for _ in range(8)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (9, 1),
+                            (9, 9),
+                            (1, 9),
+                            (3, 3),
+                            (3, 4),
+                            (8, 2),
+                            (3, 7),
+                            (2, 8),
+                        ],
+                        "train_configs": [(SAC, 400000) for _ in range(8)],
+                    },
+                    "bg": {
+                        "goals": [(4, 4), (7, 3), (3, 7), (8, 2), (2, 8), (3, 4)],
+                        "train_configs": [(SAC, 400000) for _ in range(6)],
+                    },
                 },
                 "G_0": {
                     "goals": [(4, 4), (7, 3), (3, 7), (8, 2), (2, 8), (3, 4)],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(6)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(6)],
                 },
             },
             "L5": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        (9, 1),
-                        (9, 9),
-                        (1, 9),
-                        (3, 3),
-                        (3, 4),
-                        (8, 2),
-                        (3, 7),
-                        (2, 8),
-                    ],
-                    "train_configs": [(SAC, 400000) for _ in range(8)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (9, 1),
+                            (9, 9),
+                            (1, 9),
+                            (3, 3),
+                            (3, 4),
+                            (8, 2),
+                            (3, 7),
+                            (2, 8),
+                        ],
+                        "train_configs": [(SAC, 400000) for _ in range(8)],
+                    },
+                    "bg": {
+                        "goals": [
+                            (4, 4),
+                            (7, 3),
+                            (3, 7),
+                            (8, 2),
+                            (2, 8),
+                            (3, 4),
+                            (4, 3),
+                        ],
+                        "train_configs": [(SAC, 400000) for _ in range(7)],
+                    },
                 },
                 "G_0": {
                     "goals": [(4, 4), (7, 3), (3, 7), (8, 2), (2, 8), (3, 4), (4, 3)],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(7)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(7)],
                 },
             },
         },
         "PointMaze-ObstaclesEnvDense-11x11": {
             "L1": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [(5, 1), (9, 9), (1, 5), (6, 4), (4, 6), (6, 6), (7, 7)],
-                    "train_configs": [(SAC, 400000) for _ in range(7)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (5, 1),
+                            (9, 9),
+                            (1, 5),
+                            (6, 4),
+                            (4, 6),
+                            (6, 6),
+                            (7, 7),
+                        ],
+                        "train_configs": [(SAC, 400000) for _ in range(7)],
+                    },
+                    "bg": {
+                        "goals": [(5, 5), (7, 4), (4, 7)],
+                        "train_configs": [(SAC, 400000) for _ in range(3)],
+                    },
                 },
                 "G_0": {
                     "goals": [(5, 5), (7, 4), (4, 7)],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(3)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(3)],
                 },
             },
             "L2": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [(5, 1), (9, 9), (1, 5), (6, 4), (4, 6), (6, 6), (7, 7)],
-                    "train_configs": [(SAC, 400000) for _ in range(7)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (5, 1),
+                            (9, 9),
+                            (1, 5),
+                            (6, 4),
+                            (4, 6),
+                            (6, 6),
+                            (7, 7),
+                        ],
+                        "train_configs": [(SAC, 400000) for _ in range(7)],
+                    },
+                    "bg": {
+                        "goals": [(5, 5), (3, 6), (7, 4)],
+                        "train_configs": [(SAC, 400000) for _ in range(3)],
+                    },
                 },
                 "G_0": {
                     "goals": [(5, 5), (3, 6), (7, 4)],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(3)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(3)],
                 },
             },
             "L3": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [(5, 1), (9, 9), (1, 5), (6, 4), (4, 6), (6, 6), (7, 7)],
-                    "train_configs": [(SAC, 400000) for _ in range(7)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (5, 1),
+                            (9, 9),
+                            (1, 5),
+                            (6, 4),
+                            (4, 6),
+                            (6, 6),
+                            (7, 7),
+                        ],
+                        "train_configs": [(SAC, 400000) for _ in range(7)],
+                    },
+                    "bg": {
+                        "goals": [(5, 5), (3, 6), (7, 4), (4, 7)],
+                        "train_configs": [(SAC, 400000) for _ in range(4)],
+                    },
                 },
                 "G_0": {
                     "goals": [(5, 5), (3, 6), (7, 4), (4, 7)],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(4)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(4)],
                 },
             },
             "L4": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [(5, 1), (9, 9), (1, 5), (6, 4), (4, 6), (6, 6), (7, 7)],
-                    "train_configs": [(SAC, 400000) for _ in range(7)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (5, 1),
+                            (9, 9),
+                            (1, 5),
+                            (6, 4),
+                            (4, 6),
+                            (6, 6),
+                            (7, 7),
+                        ],
+                        "train_configs": [(SAC, 400000) for _ in range(7)],
+                    },
+                    "bg": {
+                        "goals": [(3, 6), (6, 3), (7, 4), (4, 7), (8, 8)],
+                        "train_configs": [(SAC, 400000) for _ in range(5)],
+                    },
                 },
                 "G_0": {
                     "goals": [(3, 6), (6, 3), (7, 4), (4, 7), (8, 8)],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(5)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(5)],
                 },
             },
             "L5": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [(5, 1), (9, 9), (1, 5), (6, 4), (4, 6), (6, 6), (7, 7)],
-                    "train_configs": [(SAC, 400000) for _ in range(7)],
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (5, 1),
+                            (9, 9),
+                            (1, 5),
+                            (6, 4),
+                            (4, 6),
+                            (6, 6),
+                            (7, 7),
+                        ],
+                        "train_configs": [(SAC, 400000) for _ in range(7)],
+                    },
+                    "bg": {
+                        "goals": [(5, 5), (3, 6), (6, 3), (7, 4), (4, 7), (8, 8)],
+                        "train_configs": [(SAC, 400000) for _ in range(6)],
+                    },
                 },
                 "G_0": {
                     "goals": [(5, 5), (3, 6), (6, 3), (7, 4), (4, 7), (8, 8)],
-                    "train_configs": [
-                        (SAC, 400000) for _ in range(6)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(SAC, 400000) for _ in range(6)],
                 },
             },
         },
@@ -353,117 +555,137 @@ PROBLEMS = {
     MINIGRID: {
         "MiniGrid-SimpleCrossingS13N4": {
             "L1": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        (11, 1),
-                        (11, 11),
-                        (1, 11),
-                        (7, 11),
-                        (8, 1),
-                        (10, 6),
-                        (6, 9),
-                        (11, 3),
-                        (11, 5),
-                    ],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(9)
-                    ],  # TODO Find a way to prevent the 'none' or simply accept only a Q-learning algorithm and assert everything else
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (11, 1),
+                            (11, 11),
+                            (1, 11),
+                            (7, 11),
+                            (8, 1),
+                            (10, 6),
+                            (6, 9),
+                            (11, 3),
+                            (11, 5),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+                    },
+                    "bg": {
+                        "goals": [(11, 1), (11, 11), (1, 11)],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(3)],
+                    },
                 },
                 "G_0": {
                     "goals": [(11, 1), (11, 11), (1, 11)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(3)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(QLEARNING, 100000) for _ in range(3)],
                 },
             },
             "L2": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        (11, 1),
-                        (11, 11),
-                        (1, 11),
-                        (7, 11),
-                        (8, 1),
-                        (10, 6),
-                        (6, 9),
-                        (11, 3),
-                        (11, 5),
-                    ],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(9)
-                    ],  # TODO Find a way to prevent the 'none' or simply accept only a Q-learning algorithm and assert everything else
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (11, 1),
+                            (11, 11),
+                            (1, 11),
+                            (7, 11),
+                            (8, 1),
+                            (10, 6),
+                            (6, 9),
+                            (11, 3),
+                            (11, 5),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+                    },
+                    "bg": {
+                        "goals": [(11, 1), (11, 11), (1, 11), (5, 9)],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(4)],
+                    },
                 },
                 "G_0": {
                     "goals": [(11, 1), (11, 11), (1, 11), (5, 9)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(4)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(QLEARNING, 100000) for _ in range(4)],
                 },
             },
             "L3": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        (11, 1),
-                        (11, 11),
-                        (1, 11),
-                        (7, 11),
-                        (8, 1),
-                        (10, 6),
-                        (6, 9),
-                        (11, 3),
-                        (11, 5),
-                    ],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(9)
-                    ],  # TODO Find a way to prevent the 'none' or simply accept only a Q-learning algorithm and assert everything else
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (11, 1),
+                            (11, 11),
+                            (1, 11),
+                            (7, 11),
+                            (8, 1),
+                            (10, 6),
+                            (6, 9),
+                            (11, 3),
+                            (11, 5),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+                    },
+                    "bg": {
+                        "goals": [(11, 1), (11, 11), (1, 11), (5, 9), (6, 1)],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(5)],
+                    },
                 },
                 "G_0": {
                     "goals": [(11, 1), (11, 11), (1, 11), (5, 9), (6, 1)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(5)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(QLEARNING, 100000) for _ in range(5)],
                 },
             },
             "L4": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        (11, 1),
-                        (11, 11),
-                        (1, 11),
-                        (7, 11),
-                        (8, 1),
-                        (10, 6),
-                        (6, 9),
-                        (11, 3),
-                        (11, 5),
-                    ],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(9)
-                    ],  # TODO Find a way to prevent the 'none' or simply accept only a Q-learning algorithm and assert everything else
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (11, 1),
+                            (11, 11),
+                            (1, 11),
+                            (7, 11),
+                            (8, 1),
+                            (10, 6),
+                            (6, 9),
+                            (11, 3),
+                            (11, 5),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+                    },
+                    "bg": {
+                        "goals": [(11, 1), (11, 11), (1, 11), (5, 9), (6, 1), (11, 3)],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(6)],
+                    },
                 },
                 "G_0": {
                     "goals": [(11, 1), (11, 11), (1, 11), (5, 9), (6, 1), (11, 3)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(6)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(QLEARNING, 100000) for _ in range(6)],
                 },
             },
             "L5": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [
-                        (11, 1),
-                        (11, 11),
-                        (1, 11),
-                        (7, 11),
-                        (8, 1),
-                        (10, 6),
-                        (6, 9),
-                        (11, 3),
-                        (11, 5),
-                    ],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(9)
-                    ],  # TODO Find a way to prevent the 'none' or simply accept only a Q-learning algorithm and assert everything else
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (11, 1),
+                            (11, 11),
+                            (1, 11),
+                            (7, 11),
+                            (8, 1),
+                            (10, 6),
+                            (6, 9),
+                            (11, 3),
+                            (11, 5),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+                    },
+                    "bg": {
+                        "goals": [
+                            (11, 1),
+                            (11, 11),
+                            (1, 11),
+                            (5, 9),
+                            (6, 1),
+                            (11, 3),
+                            (11, 5),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                    },
                 },
                 "G_0": {
                     "goals": [
@@ -475,81 +697,137 @@ PROBLEMS = {
                         (11, 3),
                         (11, 5),
                     ],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(7)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(QLEARNING, 100000) for _ in range(7)],
                 },
             },
         },
         "MiniGrid-LavaCrossingS9N2": {
             "L1": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [(7, 7), (1, 7), (7, 1), (1, 3), (2, 5), (5, 2), (6, 5)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(7)
-                    ],  # TODO Find a way to prevent the 'none' or simply accept only a Q-learning algorithm and assert everything else
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (7, 7),
+                            (1, 7),
+                            (7, 1),
+                            (1, 3),
+                            (2, 5),
+                            (5, 2),
+                            (6, 5),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                    },
+                    "bg": {
+                        "goals": [(1, 3), (6, 5), (4, 7)],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(3)],
+                    },
                 },
                 "G_0": {
                     "goals": [(1, 3), (6, 5), (4, 7)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(3)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(QLEARNING, 100000) for _ in range(3)],
                 },
             },
             "L2": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [(7, 7), (1, 7), (7, 1), (1, 3), (2, 5), (5, 2), (6, 5)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(7)
-                    ],  # TODO Find a way to prevent the 'none' or simply accept only a Q-learning algorithm and assert everything else
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (7, 7),
+                            (1, 7),
+                            (7, 1),
+                            (1, 3),
+                            (2, 5),
+                            (5, 2),
+                            (6, 5),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                    },
+                    "bg": {
+                        "goals": [(1, 3), (6, 5), (4, 7), (2, 5)],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(4)],
+                    },
                 },
                 "G_0": {
                     "goals": [(1, 3), (6, 5), (4, 7), (2, 5)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(4)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(QLEARNING, 100000) for _ in range(4)],
                 },
             },
             "L3": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [(7, 7), (1, 7), (7, 1), (1, 3), (2, 5), (5, 2), (6, 5)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(7)
-                    ],  # TODO Find a way to prevent the 'none' or simply accept only a Q-learning algorithm and assert everything else
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (7, 7),
+                            (1, 7),
+                            (7, 1),
+                            (1, 3),
+                            (2, 5),
+                            (5, 2),
+                            (6, 5),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                    },
+                    "bg": {
+                        "goals": [(1, 3), (6, 5), (4, 7), (2, 5), (5, 2)],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(5)],
+                    },
                 },
                 "G_0": {
                     "goals": [(1, 3), (6, 5), (4, 7), (2, 5), (5, 2)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(5)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(QLEARNING, 100000) for _ in range(5)],
                 },
             },
             "L4": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [(7, 7), (1, 7), (7, 1), (1, 3), (2, 5), (5, 2), (6, 5)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(7)
-                    ],  # TODO Find a way to prevent the 'none' or simply accept only a Q-learning algorithm and assert everything else
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (7, 7),
+                            (1, 7),
+                            (7, 1),
+                            (1, 3),
+                            (2, 5),
+                            (5, 2),
+                            (6, 5),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                    },
+                    "bg": {
+                        "goals": [(1, 3), (6, 5), (4, 7), (2, 5), (5, 2), (4, 5)],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(6)],
+                    },
                 },
                 "G_0": {
                     "goals": [(1, 3), (6, 5), (4, 7), (2, 5), (5, 2), (4, 5)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(6)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(QLEARNING, 100000) for _ in range(6)],
                 },
             },
             "L5": {
-                "base": {  # only 1 train_config for the GC agent. the goals are samples of possible goals in the env.
-                    "goals": [(7, 7), (1, 7), (7, 1), (1, 3), (2, 5), (5, 2), (6, 5)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(7)
-                    ],  # TODO Find a way to prevent the 'none' or simply accept only a Q-learning algorithm and assert everything else
+                "base": {
+                    "gc": {
+                        "goals": [
+                            (7, 7),
+                            (1, 7),
+                            (7, 1),
+                            (1, 3),
+                            (2, 5),
+                            (5, 2),
+                            (6, 5),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                    },
+                    "bg": {
+                        "goals": [
+                            (1, 3),
+                            (6, 5),
+                            (4, 7),
+                            (2, 5),
+                            (5, 2),
+                            (4, 5),
+                            (1, 1),
+                        ],
+                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                    },
                 },
                 "G_0": {
                     "goals": [(1, 3), (6, 5), (4, 7), (2, 5), (5, 2), (4, 5), (1, 1)],
-                    "train_configs": [
-                        (QLEARNING, 100000) for _ in range(7)
-                    ],  # algorithms that use GC agent to generate sequences don't use this
+                    "train_configs": [(QLEARNING, 100000) for _ in range(7)],
                 },
             },
         },

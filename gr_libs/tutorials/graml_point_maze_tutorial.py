@@ -14,8 +14,21 @@ def run_graml_point_maze_tutorial():
     )
 
     recognizer.domain_learning_phase(
-        [(9, 1), (9, 9), (1, 9), (3, 3), (3, 4), (8, 2), (3, 7), (2, 8)],
-        [(SAC, 200000) for _ in range(8)],
+        {
+            "bg": {
+                "goals": [
+                    (9, 1),
+                    (9, 9),
+                    (1, 9),
+                    (3, 3),
+                    (3, 4),
+                    (8, 2),
+                    (3, 7),
+                    (2, 8),
+                ],
+                "train_configs": [(SAC, 200000) for _ in range(8)],
+            }
+        }
     )
 
     recognizer.goals_adaptation_phase(

@@ -335,11 +335,15 @@ class BGGraml(Graml):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def domain_learning_phase(self, base_goals: list[str], train_configs: list):
-        assert len(train_configs) == len(
-            base_goals
-        ), "There should be train configs for every goal in BGGraml."
-        return super().domain_learning_phase(base_goals, train_configs)
+    def domain_learning_phase(self, problems):
+        # Always use 'bg' for BGGraml
+        base = problems["bg"]
+        base_goals = base["goals"]
+        train_configs = base["train_configs"]
+        assert len(base_goals) == len(
+            train_configs
+        ), "base_goals and train_configs should have the same length"
+        super().domain_learning_phase(base_goals, train_configs)
 
     # In case we need goal-directed agent for every goal
     def train_agents_on_base_goals(self, base_goals: list[str], train_configs: list):
@@ -544,11 +548,15 @@ class GCGraml(Graml, GaAdaptingRecognizer):
             and not self.env_prop.is_action_discrete()
         )
 
-    def domain_learning_phase(self, base_goals: list[str], train_configs: list):
+    def domain_learning_phase(self, problems):
+        # Always use 'gc' for GCGraml
+        base = problems["gc"]
+        base_goals = base["goals"]
+        train_configs = base["train_configs"]
         assert (
             len(train_configs) == 1
-        ), "There should be one train config for the sole gc agent in GCGraml."
-        return super().domain_learning_phase(base_goals, train_configs)
+        ), "GCGraml should only have one train config for the base goals, it uses a single agent"
+        super().domain_learning_phase(base_goals, train_configs)
 
     # In case we need goal-directed agent for every goal
     def train_agents_on_base_goals(self, base_goals: list[str], train_configs: list):

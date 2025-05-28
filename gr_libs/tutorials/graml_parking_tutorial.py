@@ -11,7 +11,9 @@ from gr_libs.recognizer.graml.graml_recognizer import GCGraml
 def run_graml_parking_tutorial():
     recognizer = GCGraml(domain_name=PARKING, env_name="Parking-S-14-PC-")
 
-    recognizer.domain_learning_phase([i for i in range(1, 21)], [(PPO, 200000)])
+    recognizer.domain_learning_phase(
+        {"gc": {"goals": [i for i in range(1, 21)], "train_configs": [(PPO, 200000)]}}
+    )
     recognizer.goals_adaptation_phase(
         dynamic_goals=["1", "11", "21"]
         # no need for expert sequence generation since GCRL is used

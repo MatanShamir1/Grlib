@@ -193,6 +193,10 @@ class Draco(GRAsRL, GaAgentTrainerRecognizer):
         if self.rl_agent_type == None:
             self.rl_agent_type = DeepRLAgent
         self.evaluation_function = kwargs.get("evaluation_function")
+        if self.evaluation_function is None:
+            from gr_libs.metrics.metrics import mean_wasserstein_distance
+
+            self.evaluation_function = mean_wasserstein_distance
         assert callable(
             self.evaluation_function
         ), "Evaluation function must be a callable function."
@@ -218,11 +222,18 @@ class GCDraco(GRAsRL, LearningRecognizer, GaAdaptingRecognizer):
         if self.rl_agent_type == None:
             self.rl_agent_type = GCDeepRLAgent
         self.evaluation_function = kwargs.get("evaluation_function")
+        if self.evaluation_function is None:
+            from gr_libs.metrics.metrics import mean_wasserstein_distance
+
+            self.evaluation_function = mean_wasserstein_distance
         assert callable(
             self.evaluation_function
         ), "Evaluation function must be a callable function."
 
-    def domain_learning_phase(self, base_goals: list[str], train_configs):
+    def domain_learning_phase(self, problems):
+        base = problems["gc"]
+        base_goals = base["goals"]
+        train_configs = base["train_configs"]
         super().domain_learning_phase(base_goals, train_configs)
         agent_kwargs = {
             "domain_name": self.env_prop.domain_name,
