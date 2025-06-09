@@ -1,4 +1,5 @@
 import os
+import copy
 
 import dill
 import numpy as np
@@ -8,11 +9,16 @@ from gr_libs.ml.base import RLAgent
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
 from gr_libs.ml.tabular.tabular_q_learner import TabularQLearner
 from gr_libs.ml.utils.storage import get_gr_as_rl_experiment_confidence_path
+from gymnasium.envs.registration import register, registry
 from gr_libs.recognizer.recognizer import (
     GaAdaptingRecognizer,
     GaAgentTrainerRecognizer,
     LearningRecognizer,
     Recognizer,
+)
+from gr_libs.ml.consts import (
+    FINETUNE_LR,
+    FINETUNE_TIMESTEPS,
 )
 
 
@@ -245,3 +251,74 @@ class GCDraco(GRAsRL, LearningRecognizer, GaAdaptingRecognizer):
 
     def choose_agent(self, problem_name: str) -> RLAgent:
         return next(iter(self.agents.values()))
+
+
+class GCAura(GRAsRL, LearningRecognizer, GaAdaptingRecognizer):
+    """
+    GCAura: goal-conditioned RL with urgent refinement.
+    Trains base GC policy over a goal_subspace, then per-goal fine-tunes if needed.
+    Dynamically registers a new "-Aura" gym env wrapping the base env with goal sub space handling.
+    """
+
+    def __init__(
+        self, domain_name: str, env_name: str, *args, goal_subspace=None, **kwargs
+    ):
+        # Dynamically register a new Aura env id
+        base_id = env_name
+        # aura_id = f"{base_id}-Aura"
+        if base_id not in registry.keys():
+            register(
+                id=base_id,
+                entry_point=kwargs.get("gc_entry_point", "gymnasium_robotics.envs.maze.point_maze:PointMazeEnv"),
+                kwargs={**kwargs.get("gc_kwargs", {})},
+                max_episode_steps=kwargs.get("gc_max_steps", 900),
+            )
+        # update env_name to use the new Aura id
+        super().__init__(domain_name, base_id, *args, **kwargs)
+
+        if self.rl_agent_type is None:
+            self.rl_agent_type = GCDeepRLAgent
+        self.evaluation_function = kwargs.get("evaluation_function")
+        self.goal_subspace = goal_subspace
+        assert self.env_prop.gc_adaptable(), "Env must support GC adaptation"
+
+    def domain_learning_phase(self, base_goals, train_configs):
+        # Train base agent on goal_subspace
+        super().domain_learning_phase(base_goals, train_configs)
+        agent_kwargs = {
+            "domain_name": self.env_prop.domain_name,
+            "problem_name": self.env_prop.name,
+            "algorithm": self.original_train_configs[0][0],
+            "num_timesteps": self.original_train_configs[0][1],
+            "env_prop": self.env_prop,
+        }
+        agent = self.rl_agent_type(**agent_kwargs)
+        agent.learn()
+        self.agents[self.env_prop.name] = agent
+        self.base_agent = self.agents[self.env_prop.name]
+        self.action_space = agent.env.action_space
+
+    def goals_adaptation_phase(self, dynamic_goals, adaptation_configs):
+        self.active_goals = dynamic_goals
+        self.active_problems = [
+            self.env_prop.goal_to_problem_str(g) for g in dynamic_goals
+        ]
+
+        for goal, config in zip(dynamic_goals, adaptation_configs):
+            prob = self.env_prop.goal_to_problem_str(goal)
+            if self.env_prop.is_within_goal_subspace(goal):
+                # reuse base policy
+                self.agents[prob] = self.base_agent
+            else:
+                # clone + fine-tune outside-goal
+                ft = copy.deepcopy(self.base_agent)
+                ft.fine_tune(
+                    goal,
+                    num_timesteps=config[1] if len(config) > 1 else FINETUNE_TIMESTEPS,
+                    learning_rate=config[2] if len(config) > 2 else FINETUNE_LR,
+                )
+                self.agents[prob] = ft
+
+    def choose_agent(self, problem_name: str) -> RLAgent:
+        # return the per-problem agent (base or fine-tuned)
+        return self.agents[problem_name]

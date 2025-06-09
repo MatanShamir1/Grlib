@@ -1,6 +1,11 @@
 """gr_libs: Baselines for goal recognition executions on gym environments."""
 
-from gr_libs.recognizer.gr_as_rl.gr_as_rl_recognizer import Draco, GCDraco, Graql
+from gr_libs.recognizer.gr_as_rl.gr_as_rl_recognizer import (
+    Draco,
+    GCDraco,
+    Graql,
+    GCAura,
+)
 from gr_libs.recognizer.graml.graml_recognizer import ExpertBasedGraml, GCGraml
 
 try:

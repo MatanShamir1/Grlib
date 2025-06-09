@@ -1,6 +1,7 @@
 import gc
 from collections import OrderedDict
 from types import MethodType
+from typing import Any
 
 import cv2
 import numpy as np
@@ -21,6 +22,11 @@ from stable_baselines3 import PPO, SAC, TD3
 from stable_baselines3.common.base_class import BaseAlgorithm
 
 from gr_libs.ml.utils import device
+
+from gr_libs.ml.consts import (
+    FINETUNE_LR,
+    FINETUNE_TIMESTEPS,
+)
 
 # TODO do we need this?
 NETWORK_SETUP = {
@@ -632,3 +638,30 @@ class GCDeepRLAgent(DeepRLAgent):
                 desired=goal_directed_goal,
             )
         return observations
+
+    def fine_tune(
+        self,
+        goal: Any,
+        num_timesteps: int = FINETUNE_TIMESTEPS,
+        learning_rate: float | None = FINETUNE_LR,
+    ) -> None:
+        """
+        Fine-tune this goal-conditioned agent on a single specified goal.
+        Overrides optimizer LR if provided, resets the env to the goal, and continues training.
+        """
+        # 1. Override learning rate
+        if learning_rate is not None:
+            for pg in self._model.optimizer.param_groups:
+                pg["lr"] = learning_rate
+
+        # 2. Reset env and force specific goal
+        obs = self.safe_env_reset()
+        self.env_prop.change_goal_to_specific_desired(obs, goal)
+
+        # 3. Continue training without resetting the global timestep counter
+        self._model.learn(
+            total_timesteps=num_timesteps,
+            reset_num_timesteps=False,
+            progress_bar=True,
+        )
+        self.save_model()
