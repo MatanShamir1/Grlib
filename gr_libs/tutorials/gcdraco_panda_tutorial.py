@@ -17,8 +17,12 @@ def run_gcdraco_panda_tutorial():
     )
 
     recognizer.domain_learning_phase(
-        base_goals=[np.array([PandaProperty.sample_goal()]) for _ in range(30)],
-        train_configs=[(SAC, 800000)],
+        {
+            "gc": {
+                "goals": [np.array([PandaProperty.sample_goal()]) for _ in range(30)],
+                "train_configs": [(SAC, 800000)],
+            }
+        }
     )
 
     recognizer.goals_adaptation_phase(

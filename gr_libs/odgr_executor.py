@@ -4,7 +4,7 @@ import time
 
 import dill
 
-from gr_libs.environment.utils.utils import domain_to_env_property
+from gr_libs.environment._utils.utils import domain_to_env_property
 from gr_libs.metrics.metrics import stochastic_amplified_selection
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent
 from gr_libs.ml.utils.format import random_subset_with_order
@@ -14,10 +14,10 @@ from gr_libs.ml.utils.storage import (
     get_policy_sequences_result_path,
 )
 from gr_libs.problems.consts import PROBLEMS
+from gr_libs.recognizer._utils import recognizer_str_to_obj
 from gr_libs.recognizer.gr_as_rl.gr_as_rl_recognizer import Draco, GCDraco
 from gr_libs.recognizer.graml.graml_recognizer import Graml
 from gr_libs.recognizer.recognizer import GaAgentTrainerRecognizer, LearningRecognizer
-from gr_libs.recognizer.utils import recognizer_str_to_obj
 
 
 def validate(args, recognizer_type, task_inputs):
@@ -52,9 +52,7 @@ def run_odgr_problem(args):
             dlp_time = 0
             if issubclass(recognizer_type, LearningRecognizer):
                 start_dlp_time = time.time()
-                recognizer.domain_learning_phase(
-                    base_goals=value["goals"], train_configs=value["train_configs"]
-                )
+                recognizer.domain_learning_phase(value)
                 dlp_time = time.time() - start_dlp_time
         elif key.startswith("G_"):
             start_ga_time = time.time()
@@ -184,10 +182,17 @@ def run_odgr_problem(args):
             recognizer=args.recognizer,
         )
     )
-    print(f"generating results into {res_file_path}")
-    with open(os.path.join(res_file_path, "res.pkl"), "wb") as results_file:
+    if args.experiment_num is not None:
+        res_txt = os.path.join(res_file_path, f"res_{args.experiment_num}.txt")
+        res_pkl = os.path.join(res_file_path, f"res_{args.experiment_num}.pkl")
+    else:
+        res_txt = os.path.join(res_file_path, "res.txt")
+        res_pkl = os.path.join(res_file_path, "res.pkl")
+
+    print(f"generating results into {res_txt} and {res_pkl}")
+    with open(res_pkl, "wb") as results_file:
         dill.dump(results, results_file)
-    with open(os.path.join(res_file_path, "res.txt"), "w") as results_file:
+    with open(res_txt, "w") as results_file:
         results_file.write(str(results))
 
 
@@ -225,23 +230,7 @@ def parse_args():
     )
     required_group.add_argument(
         "--task",
-        choices=[
-            "L1",
-            "L2",
-            "L3",
-            "L4",
-            "L5",
-            "L11",
-            "L22",
-            "L33",
-            "L44",
-            "L55",
-            "L111",
-            "L222",
-            "L333",
-            "L444",
-            "L555",
-        ],
+        choices=["L1", "L2", "L3", "L4", "L5"],
         required=True,
         help="Task identifier (e.g., L1, L2,...,L5)",
     )
@@ -250,6 +239,12 @@ def parse_args():
     optional_group = parser.add_argument_group("Optional arguments")
     optional_group.add_argument(
         "--collect_stats", action="store_true", help="Whether to collect statistics"
+    )
+    optional_group.add_argument(
+        "--experiment_num",
+        type=int,
+        default=None,
+        help="Experiment number for parallel runs",
     )
     args = parser.parse_args()
 

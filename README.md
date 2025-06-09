@@ -81,11 +81,14 @@ For any issues or troubleshooting, please refer to the repository's issue tracke
 
 Successors of algorithms that don't differ in their specifics are added in parentheses after the algorithm name. For example, since GC-DRACO and DRACO share the same column values, they're written on one line as DRACO (GC).
 
-| **Algorithm** | **Supervised** | **Reinforcement Learning** | **Discrete States** | **Continuous States** | **Discrete Actions** | **Continuous Actions** | **Model-Based** | **Model-Free** | **Action-Only** |
-|--------------|--------------|------------------------|------------------|------------------|--------------|--------------|--------------|--------------|--------------|
-| GRAQL       | ❌           | ✅                     | ✅                | ❌                | ✅                | ❌                | ❌           | ✅           | ❌           |
-| DRACO (GC)  | ❌           | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ❌           |
-| GRAML (GC, BG) | ✅        | ✅                     | ✅                | ✅                | ✅                | ✅                | ❌           | ✅           | ✅           |
+| **Algorithm**        | **Supervised** | **Reinforcement Learning** | **Discrete States** | **Continuous States** | **Discrete Actions** | **Continuous Actions** | **Model-Based** | **Model-Free** | **Action-Only** | **Supported Environments**                |
+|---------------------|----------------|---------------------------|---------------------|----------------------|----------------------|-----------------------|------------------|----------------|----------------|--------------------------------------------|
+| Graql               | ❌             | ✅                        | ✅                  | ❌                   | ✅                   | ❌                    | ❌               | ✅             | ❌             | Minigrid                                   |
+| Draco               | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | PointMaze, Panda Reach, Parking            |
+| GCDraco             | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | Panda Reach, Parking                       |
+| ExpertBasedGraml    | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | Panda Reach, Parking                       |
+| BGGraml             | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | Minigrid, PointMaze                        |
+| GCGraml             | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | Panda Reach, Parking                       |
 
 ## Supported Domains
 
@@ -230,20 +233,28 @@ A part of the contribution of this package is standardizing the evaluations of M
 consts.py provides a set of ODGR problems on which the framework can be evaluated.
 The 'evaluations' sub-package provides scripts to analyze the results of the all_experiments.py execution, done over the ODGR the problems defined at consts.py.
 
-In order to parallelize executions of odgr_executor.py, you can edit all_experiments.py with your combination of domains, environments and tasks.
-This script use multiprocessing to simultaniously execute many odgr_executor.py python executions as child processes.
+#### Running all_experiments.py
 
-It logs failures and successful executions for debugability.
+You can now run `all_experiments.py` with your desired combination of domains, environments, tasks, and recognizers directly from the command line, without editing the script:
 
-After execution, another level of abstraction for the results is created. For example, when running for Graql in the minigrid domain:
 ```sh
-outputs\summaries\detailed_summary_minigrid_Graql.txt
+python gr_libs/all_experiments.py \
+    --domains minigrid parking \
+    --envs MiniGrid-SimpleCrossingS13N4 Parking-S-14-PC- \
+    --tasks L1 L2 L3 L4 L5 \
+    --recognizers ExpertBasedGraml Graql \
+    --n 5
 ```
-Will show the accuracies for every ODGR problem, for every percentage and type of input in a table-like .txt format, whike:
-```sh
-outputs\summaries\compiled_summary_minigrid_Graql.txt
-```
-Will show the same results in a more compact summary.
+
+- `--domains`: List of domains to run experiments on.
+- `--envs`: List of environments (must be in the same order as domains).
+- `--tasks`: List of tasks (applied to all domain/env pairs).
+- `--recognizers`: List of recognizers/algorithms to evaluate.
+- `--n`: Number of times to execute each task (default: 5).
+
+This script uses multiprocessing to simultaneously execute many `odgr_executor.py` runs as child processes. It logs failures and successful executions for debugability.
+
+After execution, summary files are generated in `outputs/summaries/` for further analysis and plotting.
 
 ### Using analysis scripts
 The repository provides benchmark domains and scripts for analyzing experimental results. The `evaluation` directory contains tools for processing and visualizing the results from odgr_executor.py and all_experiments.py.

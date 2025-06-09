@@ -14,8 +14,12 @@ def run_graml_panda_tutorial():
         domain_name=PANDA, env_name="PandaMyReachDense"
     )
     recognizer.domain_learning_phase(
-        base_goals=[np.array([PandaProperty.sample_goal()]) for _ in range(1, 30)],
-        train_configs=[(SAC, 800000)],
+        {
+            "gc": {
+                "goals": [np.array([PandaProperty.sample_goal()]) for _ in range(30)],
+                "train_configs": [(SAC, 800000)],
+            }
+        }
     )
     recognizer.goals_adaptation_phase(
         dynamic_goals=[
