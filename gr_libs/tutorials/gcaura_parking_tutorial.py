@@ -104,7 +104,7 @@ def run_gcaura_parking_tutorial():
 
     assert (
         recognized_goal_in == in_subspace_goal
-    ), "In-subspace goal recognition failed, expected to recognize the parking spot 5 goal."
+    ), f"In-subspace goal recognition failed, expected to recognize the parking spot {in_subspace_goal}."
 
     # Test inference with out-of-subspace goal
     print(
@@ -126,7 +126,7 @@ def run_gcaura_parking_tutorial():
 
     assert (
         recognized_goal_out == out_subspace_goal1
-    ), "Out-of-subspace goal recognition failed, expected to recognize the parking spot 1 goal."
+    ), f"Out-of-subspace goal recognition failed, expected to recognize the parking spot {out_subspace_goal1}."
 
     # Try another out-of-subspace goal
     print("\nTesting inference with second out-of-subspace goal...")
@@ -158,7 +158,7 @@ def run_gcaura_parking_tutorial():
 
     assert (
         recognized_goal_out2 == out_subspace_goal2
-    ), "Second out-of-subspace goal recognition failed, expected to recognize the top right corner goal."
+    ), f"Second out-of-subspace goal recognition failed, expected to recognize the parking spot {out_subspace_goal2}."
 
     print("\nGCAura Parking tutorial completed successfully!")
 
