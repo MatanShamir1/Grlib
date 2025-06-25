@@ -1,5 +1,4 @@
 import os
-import copy
 
 import dill
 import numpy as np
@@ -16,10 +15,7 @@ from gr_libs.recognizer.recognizer import (
     LearningRecognizer,
     Recognizer,
 )
-from gr_libs.ml.consts import (
-    FINETUNE_LR,
-    FINETUNE_TIMESTEPS,
-)
+from gr_libs.ml.consts import FINETUNE_TIMESTEPS
 
 
 class GRAsRL(Recognizer):
@@ -240,7 +236,7 @@ class GCDraco(GRAsRL, LearningRecognizer, GaAdaptingRecognizer):
         base = problems["gc"]
         base_goals = base["goals"]
         train_configs = base["train_configs"]
-        super().domain_learning_phase(base_goals, train_configs)
+        super().domain_learning_phase(train_configs, base_goals)
         agent_kwargs = {
             "domain_name": self.env_prop.domain_name,
             "problem_name": self.env_prop.name,
@@ -266,70 +262,142 @@ class GCDraco(GRAsRL, LearningRecognizer, GaAdaptingRecognizer):
 
 class GCAura(GRAsRL, LearningRecognizer, GaAdaptingRecognizer):
     """
-    GCAura: goal-conditioned RL with urgent refinement.
-    Trains base GC policy over a goal_subspace, then per-goal fine-tunes if needed.
-    Dynamically registers a new "-Aura" gym env wrapping the base env with goal sub space handling.
+    GCAura uses goal-conditioned reinforcement learning with adaptive fine-tuning.
+
+    It trains a base goal-conditioned policy over a goal subspace in the domain learning phase.
+    During the goal adaptation phase, it checks if new goals are within the original goal subspace:
+    - If a goal is within the subspace, it uses the original trained model
+    - If a goal is outside the subspace, it fine-tunes the model for that specific goal
+
+    This approach combines the efficiency of goal-conditioned RL with the precision of
+    goal-specific fine-tuning when needed.
     """
 
-    def __init__(
-        self, domain_name: str, env_name: str, *args, goal_subspace=None, **kwargs
-    ):
-        # Dynamically register a new Aura env id
-        base_id = env_name
-        # aura_id = f"{base_id}-Aura"
-        if base_id not in registry.keys():
-            register(
-                id=base_id,
-                entry_point=kwargs.get("gc_entry_point", "gymnasium_robotics.envs.maze.point_maze:PointMazeEnv"),
-                kwargs={**kwargs.get("gc_kwargs", {})},
-                max_episode_steps=kwargs.get("gc_max_steps", 900),
-            )
-        # update env_name to use the new Aura id
-        super().__init__(domain_name, base_id, *args, **kwargs)
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        assert (
+            self.env_prop.gc_adaptable()
+            and not self.env_prop.is_state_discrete()
+            and not self.env_prop.is_action_discrete()
+        )
         if self.rl_agent_type is None:
             self.rl_agent_type = GCDeepRLAgent
         self.evaluation_function = kwargs.get("evaluation_function")
-        self.goal_subspace = goal_subspace
-        assert self.env_prop.gc_adaptable(), "Env must support GC adaptation"
+        if self.evaluation_function is None:
+            from gr_libs.metrics.metrics import mean_wasserstein_distance
 
-    def domain_learning_phase(self, base_goals, train_configs):
-        # Train base agent on goal_subspace
-        super().domain_learning_phase(base_goals, train_configs)
+            self.evaluation_function = mean_wasserstein_distance
+        assert callable(
+            self.evaluation_function
+        ), "Evaluation function must be a callable function."
+
+        # Store fine-tuning parameters
+        self.finetune_timesteps = kwargs.get("finetune_timesteps", FINETUNE_TIMESTEPS)
+
+        # Dictionary to store fine-tuned agents for specific goals
+        self.fine_tuned_agents = {}
+
+    def domain_learning_phase(self, problems):
+        base = problems["gc"]
+        train_configs = base["train_configs"]
+
+        # Store the goal subspace for later checks
+        self.original_train_configs = train_configs
+
+        super().domain_learning_phase(train_configs)
+
         agent_kwargs = {
             "domain_name": self.env_prop.domain_name,
             "problem_name": self.env_prop.name,
-            "algorithm": self.original_train_configs[0][0],
-            "num_timesteps": self.original_train_configs[0][1],
+            "algorithm": train_configs[0][0],
+            "num_timesteps": train_configs[0][1],
             "env_prop": self.env_prop,
         }
+
         agent = self.rl_agent_type(**agent_kwargs)
         agent.learn()
         self.agents[self.env_prop.name] = agent
-        self.base_agent = self.agents[self.env_prop.name]
         self.action_space = agent.env.action_space
 
-    def goals_adaptation_phase(self, dynamic_goals, adaptation_configs):
+    def _is_goal_in_subspace(self, goal):
+        """
+        Check if a goal is within the original training subspace.
+
+        Delegates to the environment property's implementation.
+
+        Args:
+            goal: The goal to check
+
+        Returns:
+            bool: True if the goal is within the training subspace
+        """
+        # Use the environment property's implementation
+        return self.env_prop.is_goal_in_subspace(goal)
+
+    def goals_adaptation_phase(self, dynamic_goals):
+        """
+        Adapt to new goals, fine-tuning if necessary.
+
+        For goals outside the original training subspace, fine-tune the model.
+
+        Args:
+            dynamic_goals: List of goals to adapt to
+        """
         self.active_goals = dynamic_goals
         self.active_problems = [
-            self.env_prop.goal_to_problem_str(g) for g in dynamic_goals
+            self.env_prop.goal_to_problem_str(goal) for goal in dynamic_goals
         ]
 
-        for goal, config in zip(dynamic_goals, adaptation_configs):
-            prob = self.env_prop.goal_to_problem_str(goal)
-            if self.env_prop.is_within_goal_subspace(goal):
-                # reuse base policy
-                self.agents[prob] = self.base_agent
-            else:
-                # clone + fine-tune outside-goal
-                ft = copy.deepcopy(self.base_agent)
-                ft.fine_tune(
-                    goal,
-                    num_timesteps=config[1] if len(config) > 1 else FINETUNE_TIMESTEPS,
-                    learning_rate=config[2] if len(config) > 2 else FINETUNE_LR,
+        # Check each goal and fine-tune if needed
+        for goal in dynamic_goals:
+            if not self._is_goal_in_subspace(goal):
+                print(f"Goal {goal} is outside the training subspace. Fine-tuning...")
+
+                # Create a new agent for this goal
+                agent_kwargs = {
+                    "domain_name": self.env_prop.domain_name,
+                    "problem_name": self.env_prop.name,
+                    "algorithm": self.original_train_configs[0][0],
+                    "num_timesteps": self.original_train_configs[0][1],
+                    "env_prop": self.env_prop,
+                }
+
+                # Create new agent with base model
+                fine_tuned_agent = self.rl_agent_type(**agent_kwargs)
+                fine_tuned_agent.learn()  # This loads the existing model
+
+                # Fine-tune for this specific goal
+                fine_tuned_agent.fine_tune(
+                    goal=goal,
+                    num_timesteps=self.finetune_timesteps,
                 )
-                self.agents[prob] = ft
+
+                # Store the fine-tuned agent
+                self.fine_tuned_agents[
+                    f"{self.env_prop.goal_to_str(goal)}_{self.finetune_timesteps}"
+                ] = fine_tuned_agent
+            else:
+                print(f"Goal {goal} is within the training subspace. Using base agent.")
 
     def choose_agent(self, problem_name: str) -> RLAgent:
-        # return the per-problem agent (base or fine-tuned)
-        return self.agents[problem_name]
+        """
+        Return the appropriate agent for the given problem.
+
+        If the goal has a fine-tuned agent, return that; otherwise return the base agent.
+
+        Args:
+            problem_name: The problem name to get agent for
+
+        Returns:
+            The appropriate agent (base or fine-tuned)
+        """
+        # Extract the goal from the problem name
+        goal = self.env_prop.str_to_goal(problem_name)
+        agent_name = f"{self.env_prop.goal_to_str(goal)}_{self.finetune_timesteps}"
+
+        # Check if we have a fine-tuned agent for this goal
+        if agent_name in self.fine_tuned_agents:
+            return self.fine_tuned_agents[agent_name]
+
+        # Otherwise return the base agent
+        return self.agents[self.env_prop.name]
