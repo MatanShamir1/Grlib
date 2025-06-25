@@ -105,7 +105,7 @@ def run_gcaura_panda_tutorial():
 
     assert str(recognized_goal_in) == str(
         in_subspace_goal
-    ), "In-subspace goal recognition failed. Expected goal does not match recognized goal."
+    ), f"In-subspace goal recognition failed. Expected goal does not match recognized goal {recognized_goal_in}."
 
     # Test inference with out-of-subspace goal
     print(
@@ -125,9 +125,9 @@ def run_gcaura_panda_tutorial():
     print(f"Goal recognized for out-of-subspace sequence: {recognized_goal_out}")
     print(f"Actual goal: {out_subspace_goal1}")
 
-    assert np.array_equal(
-        str(recognized_goal_out), str(out_subspace_goal1)
-    ), "Out-of-subspace goal recognition failed. Expected goal does not match recognized goal."
+    assert str(recognized_goal_out) == str(
+        out_subspace_goal1
+    ), f"Out-of-subspace goal recognition failed. Expected goal does not match recognized goal {recognized_goal_out}."
 
     # Try another out-of-subspace goal
     print("\nTesting inference with second out-of-subspace goal...")
@@ -157,9 +157,9 @@ def run_gcaura_panda_tutorial():
     )
     print(f"Actual goal: {out_subspace_goal2}")
 
-    assert np.array_equal(
-        str(recognized_goal_out2), str(out_subspace_goal2)
-    ), "Out-of-subspace goal recognition failed. Expected goal does not match recognized goal."
+    assert str(recognized_goal_out2) == str(
+        out_subspace_goal2
+    ), f"Out-of-subspace goal recognition failed. Expected goal does not match recognized goal {recognized_goal_out2}."
 
     print("\nGCAura tutorial completed successfully!")
 
