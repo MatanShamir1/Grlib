@@ -24,7 +24,6 @@ from stable_baselines3.common.base_class import BaseAlgorithm
 from gr_libs.ml.utils import device
 
 from gr_libs.ml.consts import (
-    FINETUNE_LR,
     FINETUNE_TIMESTEPS,
 )
 
@@ -242,26 +241,45 @@ class DeepRLAgent:
             self._model_file_path, env=self.env, device=device, **self.model_kwargs
         )
 
-    def learn(self):
+    def learn(self, goal=None, total_timesteps=None):
         """Train the agent."""
-        if os.path.exists(self._model_file_path):
-            print(f"Loading pre-existing model in {self._model_file_path}")
+        model_file_path = self._model_file_path
+        old_model_file_path = model_file_path
+        if goal is not None:
+            model_file_path = self._model_file_path.replace(
+                ".pth", f"_{goal}.pth"
+            ).replace(".zip", f"_{goal}.zip")
+            if total_timesteps is not None:
+                model_file_path = model_file_path.replace(
+                    ".pth", f"_{total_timesteps}.pth"
+                ).replace(".zip", f"_{total_timesteps}.zip")
+
+        self._model_file_path = model_file_path
+
+        if os.path.exists(model_file_path):
+            print(f"Loading pre-existing model in {model_file_path}")
             self.load_model()
         else:
-            print(f"No existing model in {self._model_file_path}, starting learning")
-            if self.exploration_rate is not None:
-                self._model = self.algorithm(
-                    "MultiInputPolicy",
-                    self.env,
-                    ent_coef=self.exploration_rate,
-                    verbose=1,
-                )
-            else:
-                self._model = self.algorithm("MultiInputPolicy", self.env, verbose=1)
+            print(f"No existing model in {model_file_path}, starting learning")
+            if total_timesteps is None:
+                total_timesteps = self.num_timesteps
+                if self.exploration_rate is not None:
+                    self._model = self.algorithm(
+                        "MultiInputPolicy",
+                        self.env,
+                        ent_coef=self.exploration_rate,
+                        verbose=1,
+                    )
+                else:
+                    self._model = self.algorithm(
+                        "MultiInputPolicy", self.env, verbose=1
+                    )
             self._model.learn(
-                total_timesteps=self.num_timesteps, progress_bar=True
+                total_timesteps=total_timesteps, progress_bar=True
             )  # comment this in a normal env
             self.save_model()
+
+        self._model_file_path = old_model_file_path
 
     def safe_env_reset(self):
         """
@@ -509,6 +527,69 @@ class DeepRLAgent:
         self.env.close()
         return observations
 
+    def fine_tune(
+        self,
+        goal: Any,
+        num_timesteps: int = FINETUNE_TIMESTEPS,
+    ) -> None:
+        """
+        Fine-tune this goal-conditioned agent on a single specified goal.
+        Overrides optimizer LR if provided, resets the env to the goal, and continues training.
+
+        Args:
+            goal: The specific goal to fine-tune on. Type depends on the environment.
+            num_timesteps: Number of timesteps for fine-tuning. Defaults to FINETUNE_TIMESTEPS.
+            learning_rate: Learning rate for fine-tuning. Defaults to FINETUNE_LR.
+        """
+        # Store original environment and problem
+        original_env = self.env
+        original_problem = self.problem_name
+        created_new_env = False
+
+        try:
+            # Try to create a goal-specific environment
+            if hasattr(self.env_prop, "goal_to_problem_str") and callable(
+                self.env_prop.goal_to_problem_str
+            ):
+                try:
+                    goal_problem = self.env_prop.goal_to_problem_str(goal)
+
+                    # Create the goal-specific environment
+                    env_kwargs = {"id": goal_problem, "render_mode": "rgb_array"}
+                    new_env = self.env_prop.create_vec_env(env_kwargs)
+
+                    # Update the model's environment
+                    self._model.set_env(new_env)
+                    self.env = new_env
+                    self.problem_name = goal_problem
+                    created_new_env = True
+                    print(f"Created a new environment for fine-tuning: {goal_problem}")
+                except Exception as e:
+                    print(f"Warning: Could not create goal-specific environment: {e}")
+
+            if not created_new_env:
+                print(
+                    (
+                        "Fine-tuning requires a goal-specific environment."
+                        "Please ensure that the environment with the specified goal exists."
+                    )
+                )
+
+            print(f"Fine-tuning for {num_timesteps} timesteps...")
+            self.learn(
+                goal=self.env_prop.goal_to_str(goal), total_timesteps=num_timesteps
+            )
+            print("Fine-tuning complete. Model saved.")
+
+        finally:
+            # Restore original environment if needed
+            if created_new_env:
+                self.env.close()
+                self._model.set_env(original_env)
+                self.env = original_env
+                self.problem_name = original_problem
+                print("Restored original environment.")
+
 
 class GCDeepRLAgent(DeepRLAgent):
     """
@@ -627,33 +708,6 @@ class GCDeepRLAgent(DeepRLAgent):
                 desired=goal_directed_goal,
             )
         return observations
-
-    def fine_tune(
-        self,
-        goal: Any,
-        num_timesteps: int = FINETUNE_TIMESTEPS,
-        learning_rate: float | None = FINETUNE_LR,
-    ) -> None:
-        """
-        Fine-tune this goal-conditioned agent on a single specified goal.
-        Overrides optimizer LR if provided, resets the env to the goal, and continues training.
-        """
-        # 1. Override learning rate
-        if learning_rate is not None:
-            for pg in self._model.optimizer.param_groups:
-                pg["lr"] = learning_rate
-
-        # 2. Reset env and force specific goal
-        obs = self.safe_env_reset()
-        self.env_prop.change_goal_to_specific_desired(obs, goal)
-
-        # 3. Continue training without resetting the global timestep counter
-        self._model.learn(
-            total_timesteps=num_timesteps,
-            reset_num_timesteps=False,
-            progress_bar=True,
-        )
-        self.save_model()
 
 
 def suppress_env_reset(env):
