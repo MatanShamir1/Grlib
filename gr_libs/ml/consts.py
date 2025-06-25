@@ -20,5 +20,4 @@ OPTIM_ALPHA = 0.99
 CLIP_EPS = 0.2
 RECURRENCE = 1
 TEXT = False
-FINETUNE_TIMESTEPS = 100_000  # for GCAura fine-tuning
-FINETUNE_LR = 1e-4            # default LR override
+FINETUNE_TIMESTEPS = 100000  # for GCAura fine-tuning
