@@ -30,7 +30,7 @@ def run_gcaura_parking_tutorial():
         finetune_timesteps=40000,  # Fine-tuning timesteps for out-of-subspace goals
     )
 
-    # Domain learning phase - train on the goal subspace (spots 1-10)
+    # Domain learning phase - train on the goal subspace
     print("\nStarting domain learning phase - training on goal subspace...")
     recognizer.domain_learning_phase(
         {
