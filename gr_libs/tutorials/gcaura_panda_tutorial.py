@@ -1,51 +1,50 @@
-from stable_baselines3 import SAC, PPO
+import numpy as np
+from stable_baselines3 import PPO, SAC
 
 from gr_libs import GCAura
 from gr_libs.environment._utils.utils import domain_to_env_property
-from gr_libs.environment.environment import POINT_MAZE
+from gr_libs.environment.environment import PANDA
 from gr_libs.metrics import mean_wasserstein_distance, stochastic_amplified_selection
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent
 from gr_libs.ml.utils.format import random_subset_with_order
 
 
-def run_gcaura_point_maze_tutorial():
+def run_gcaura_panda_tutorial():
     """
-    Tutorial for GCAura on the Point Maze environment with MultiGoals.
+    Tutorial for GCAura on the Panda environment.
 
     This tutorial demonstrates:
-    1. Training a goal-conditioned model on a goal subspace (center goal only)
+    1. Training a goal-conditioned model on a registered goal subspace (center area)
     2. Adapting to goals both inside and outside this subspace
-    3. Testing inference on all goals types
+    3. Testing inference on multiple goal types
     """
-    print("Starting GCAura tutorial with Point Maze MultiGoals environment...")
+    print("Starting GCAura tutorial with Panda environment...")
 
-    # Use the registered multigoals environment with 3 goals: [(2, 2), (9, 9), (5, 5)]
-    # But define our goal subspace to include ONLY the center goal (5, 5)
-    # This lets us properly test the subspace functionality
+    print(f"Using training subspace with center-area goals")
 
-    # Initialize the recognizer with the multigoals empty maze environment
+    # Initialize the recognizer with the center subspace environment
     recognizer = GCAura(
-        domain_name=POINT_MAZE,
-        env_name="PointMaze-EmptyEnvDense-11x11-MultiGoals-2x2-9x9-5x5",
+        domain_name=PANDA,
+        env_name="PandaMyReachDenseSubspaceCenterOnly-v3",  # Use the subspace environment
         evaluation_function=mean_wasserstein_distance,
-        finetune_timesteps=70000,  # Fine-tuning for out-of-subspace goals
+        finetune_timesteps=50000,
     )
 
-    # Domain learning phase - train on the center goal subspace only
-    print("\nStarting domain learning phase - training on center goal subspace...")
+    # Domain learning phase - train on the center goal subspace
+    print("\nStarting domain learning phase - training on registered goal subspace...")
     recognizer.domain_learning_phase(
         {
             "gc": {
-                "train_configs": [(SAC, 700000)],
+                "train_configs": [(SAC, 500000)],
             }
         }
     )
 
-    # Define adaptation goals - one in-subspace (center) and two out-of-subspace (corners)
-    # These all exist in the registered environment
-    in_subspace_goal = (5, 5)  # Center goal (in subspace)
-    out_subspace_goal1 = (9, 1)  # Bottom left corner (out of subspace)
-    out_subspace_goal2 = (1, 9)  # Top right corner (out of subspace)
+    # Define adaptation goals - mix of in-subspace and out-of-subspace goals
+    # Use predefined goals from our environment registration
+    in_subspace_goal = np.array([[0.0, 0.0, 0.1]])  # Center goal (in subspace)
+    out_subspace_goal1 = np.array([[-0.3, -0.3, 0.1]])  # Far corner (out of subspace)
+    out_subspace_goal2 = np.array([[0.2, 0.2, 0.1]])  # Far corner (out of subspace)
 
     print(
         "\nStarting goal adaptation phase with both in-subspace and out-of-subspace goals..."
@@ -54,41 +53,41 @@ def run_gcaura_point_maze_tutorial():
     # Goals adaptation phase with mixed goals
     recognizer.goals_adaptation_phase(
         dynamic_goals=[
-            in_subspace_goal,  # In subspace - will use base model
-            out_subspace_goal1,  # Out of subspace - will be fine-tuned
-            out_subspace_goal2,  # Out of subspace - will be fine-tuned
+            in_subspace_goal,
+            out_subspace_goal1,
+            out_subspace_goal2,
         ],
     )
 
     # Setup for testing
-    property_type = domain_to_env_property(POINT_MAZE)
-    env_property = property_type("PointMaze-EmptyEnvDense-11x11")
+    property_type = domain_to_env_property(PANDA)
+    env_property = property_type("PandaMyReachDense")
 
-    # Create test actor for in-subspace goal (center)
-    print("\nCreating test actor for in-subspace goal (center)...")
+    # Create test actor for in-subspace goal
+    print("\nCreating test actor for in-subspace goal...")
     problem_name_in = env_property.goal_to_problem_str(in_subspace_goal)
     actor_in = DeepRLAgent(
-        domain_name=POINT_MAZE,
+        domain_name=PANDA,
         problem_name=problem_name_in,
         env_prop=env_property,
         algorithm=PPO,
-        num_timesteps=700000,
+        num_timesteps=250000,
     )
     actor_in.learn()
 
-    # Create test actor for out-of-subspace goal (bottom left corner)
-    print("\nCreating test actor for out-of-subspace goal (bottom left corner)...")
+    # Create test actor for out-of-subspace goal
+    print("\nCreating test actor for out-of-subspace goal...")
     problem_name_out = env_property.goal_to_problem_str(out_subspace_goal1)
     actor_out = DeepRLAgent(
-        domain_name=POINT_MAZE,
+        domain_name=PANDA,
         problem_name=problem_name_out,
         env_prop=env_property,
         algorithm=PPO,
-        num_timesteps=500000,
+        num_timesteps=250000,
     )
     actor_out.learn()
 
-    # Test inference with in-subspace goal (center)
+    # Test inference with in-subspace goal
     print("\nTesting inference with in-subspace goal (should use base model)...")
     full_sequence_in = actor_in.generate_observation(
         action_selection_method=stochastic_amplified_selection,
@@ -106,9 +105,9 @@ def run_gcaura_point_maze_tutorial():
 
     assert str(recognized_goal_in) == str(
         in_subspace_goal
-    ), "In-subspace goal recognition failed, expected to recognize the center goal."
+    ), "In-subspace goal recognition failed. Expected goal does not match recognized goal."
 
-    # Test inference with out-of-subspace goal (bottom left corner)
+    # Test inference with out-of-subspace goal
     print(
         "\nTesting inference with out-of-subspace goal (should use fine-tuned model)..."
     )
@@ -126,19 +125,19 @@ def run_gcaura_point_maze_tutorial():
     print(f"Goal recognized for out-of-subspace sequence: {recognized_goal_out}")
     print(f"Actual goal: {out_subspace_goal1}")
 
-    assert str(recognized_goal_out) == str(
-        out_subspace_goal1
-    ), "Out-of-subspace goal recognition failed, expected to recognize the bottom left corner goal."
+    assert np.array_equal(
+        str(recognized_goal_out), str(out_subspace_goal1)
+    ), "Out-of-subspace goal recognition failed. Expected goal does not match recognized goal."
 
-    # Test with second out-of-subspace goal (top right corner)
-    print("\nTesting inference with second out-of-subspace goal (top right corner)...")
+    # Try another out-of-subspace goal
+    print("\nTesting inference with second out-of-subspace goal...")
     problem_name_out2 = env_property.goal_to_problem_str(out_subspace_goal2)
     actor_out2 = DeepRLAgent(
-        domain_name=POINT_MAZE,
+        domain_name=PANDA,
         problem_name=problem_name_out2,
         env_prop=env_property,
         algorithm=PPO,
-        num_timesteps=500000,
+        num_timesteps=250000,
     )
     actor_out2.learn()
 
@@ -158,12 +157,12 @@ def run_gcaura_point_maze_tutorial():
     )
     print(f"Actual goal: {out_subspace_goal2}")
 
-    assert str(recognized_goal_out2) == str(
-        out_subspace_goal2
-    ), "Second out-of-subspace goal recognition failed, expected to recognize the top right corner goal."
+    assert np.array_equal(
+        str(recognized_goal_out2), str(out_subspace_goal2)
+    ), "Out-of-subspace goal recognition failed. Expected goal does not match recognized goal."
 
-    print("\nGCAura Point Maze tutorial completed successfully!")
+    print("\nGCAura tutorial completed successfully!")
 
 
 if __name__ == "__main__":
-    run_gcaura_point_maze_tutorial()
+    run_gcaura_panda_tutorial()
