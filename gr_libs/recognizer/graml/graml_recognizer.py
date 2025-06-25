@@ -1,4 +1,4 @@
-""" Collection of recognizers that use GRAML methods: metric learning for ODGR. """
+"""Collection of recognizers that use GRAML methods: metric learning for ODGR."""
 
 import os
 from abc import abstractmethod
@@ -124,7 +124,7 @@ class Graml(LearningRecognizer):
         pass
 
     def domain_learning_phase(self, base_goals: list[str], train_configs: list):
-        super().domain_learning_phase(base_goals, train_configs)
+        super().domain_learning_phase(train_configs, base_goals)
         self.train_agents_on_base_goals(base_goals, train_configs)
         # train the network so it will find a metric for the observations of the base agents such that traces of agents to different goals are far from one another
         self.model_directory = get_lstm_model_dir(
@@ -343,7 +343,7 @@ class BGGraml(Graml):
         assert len(base_goals) == len(
             train_configs
         ), "base_goals and train_configs should have the same length"
-        super().domain_learning_phase(base_goals, train_configs)
+        super().domain_learning_phase(train_configs=train_configs, base_goals=base_goals)
 
     # In case we need goal-directed agent for every goal
     def train_agents_on_base_goals(self, base_goals: list[str], train_configs: list):
@@ -556,7 +556,7 @@ class GCGraml(Graml, GaAdaptingRecognizer):
         assert (
             len(train_configs) == 1
         ), "GCGraml should only have one train config for the base goals, it uses a single agent"
-        super().domain_learning_phase(base_goals, train_configs)
+        super().domain_learning_phase(train_configs=train_configs, base_goals=base_goals)
 
     # In case we need goal-directed agent for every goal
     def train_agents_on_base_goals(self, base_goals: list[str], train_configs: list):
