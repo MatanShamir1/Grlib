@@ -15,7 +15,7 @@ from gr_libs.ml.utils.storage import (
 )
 from gr_libs.problems.consts import PROBLEMS
 from gr_libs.recognizer._utils import recognizer_str_to_obj
-from gr_libs.recognizer.gr_as_rl.gr_as_rl_recognizer import Draco, GCDraco
+from gr_libs.recognizer.gr_as_rl.gr_as_rl_recognizer import Draco, GCDraco, GCAura
 from gr_libs.recognizer.graml.graml_recognizer import Graml
 from gr_libs.recognizer.recognizer import GaAgentTrainerRecognizer, LearningRecognizer
 
@@ -102,7 +102,11 @@ def run_odgr_problem(args):
             }
 
             # need to dump the whole plan for draco because it needs it for inference phase for checking likelihood.
-            if (recognizer_type == Draco or recognizer_type == GCDraco) and issubclass(
+            if (
+                recognizer_type == Draco
+                or recognizer_type == GCDraco
+                or recognizer_type == GCAura
+            ) and issubclass(
                 rl_agent_type, DeepRLAgent
             ):  # TODO remove this condition, remove the assumption.
                 generate_obs_kwargs["with_dict"] = True
@@ -224,6 +228,7 @@ def parse_args():
             "Graql",
             "Draco",
             "GCDraco",
+            "GCAura",
         ],
         required=True,
         help="Recognizer type. Follow readme.md and recognizer folder for more information and rules.",

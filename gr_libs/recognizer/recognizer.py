@@ -36,7 +36,7 @@ class LearningRecognizer(Recognizer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def domain_learning_phase(self, base_goals: list[str], train_configs: list):
+    def domain_learning_phase(self, train_configs: list, base_goals: list[str] = None):
         """
         Perform the domain learning phase.
 
@@ -70,18 +70,18 @@ class GaAgentTrainerRecognizer(Recognizer):
             None
         """
 
-    def domain_learning_phase(self, base_goals: list[str], train_configs: list):
+    def domain_learning_phase(self, train_configs: list, base_goals: list[str] = None):
         """
         Perform the domain learning phase.
 
         Args:
-            base_goals (List[str]): List of base goals.
             train_configs (List): List of training configurations.
+            base_goals (List[str]): List of base goals for the learning phase.
 
         Returns:
             None
         """
-        super().domain_learning_phase(base_goals, train_configs)
+        super().domain_learning_phase(train_configs, base_goals)
 
 
 class GaAdaptingRecognizer(Recognizer):

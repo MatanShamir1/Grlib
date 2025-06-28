@@ -1,4 +1,4 @@
-""" environment.py """
+"""environment.py"""
 
 import os
 import sys
@@ -13,6 +13,8 @@ from minigrid.core.world_object import Lava, Wall
 from minigrid.wrappers import ImgObsWrapper, RGBImgPartialObsWrapper
 from PIL import Image
 from stable_baselines3.common.vec_env import DummyVecEnv
+
+from gr_envs.wrappers.goal_wrapper import GoalRecognitionWrapper
 
 MINIGRID, PANDA, PARKING, POINT_MAZE = "minigrid", "panda", "parking", "point_maze"
 
@@ -111,6 +113,12 @@ class EnvProperty:
         """
 
     @abstractmethod
+    def goal_to_str(self, goal):
+        """
+        Convert a goal to a string representation.
+        """
+
+    @abstractmethod
     def goal_to_problem_str(self, goal):
         """
         Convert a goal to a problem string.
@@ -166,6 +174,29 @@ class EnvProperty:
         Change the goal to a specific desired goal.
         """
 
+    def is_goal_in_subspace(self, goal):
+        """
+        Check if a goal is within the specified goal subspace.
+
+        Args:
+            goal: The goal to check
+            goal_subspace: The goal subspace to check against
+
+        Returns:
+            bool: True if the goal is within the subspace, False otherwise
+        """
+        env = gym.make(id=self.name)
+        while env is not None and hasattr(env, "env"):
+            if isinstance(env, GoalRecognitionWrapper) and hasattr(
+                env, "is_goal_in_subspace"
+            ):
+                # If the environment has a goal recognition wrapper, use its method
+                return env.is_goal_in_subspace(goal)
+            # Traverse through wrappers to find the base environment
+            env = env.env
+
+        return True
+
 
 class GCEnvProperty(EnvProperty):
     """
@@ -194,16 +225,25 @@ class MinigridProperty(EnvProperty):
         super().__init__(name)
         self.domain_name = "minigrid"
 
+    def goal_to_str(self, goal):
+        """
+        Convert a goal to a string representation.
+        """
+        return f"{goal[0]}x{goal[1]}"
+
     def goal_to_problem_str(self, goal):
         """
         Convert a goal to a problem string.
         """
-        return self.name + f"-DynamicGoal-{goal[0]}x{goal[1]}-v0"
+        return self.name + f"-DynamicGoal-{self.goal_to_str(goal)}-v0"
 
-    def str_to_goal(self, problem_name):
+    def str_to_goal(self, problem_name=None):
         """
         Convert a problem name to a goal.
         """
+        if problem_name is None:
+            problem_name = self.name
+
         parts = problem_name.split("-")
         goal_part = [part for part in parts if "x" in part]
         width, height = goal_part[0].split("x")
@@ -325,30 +365,36 @@ class PandaProperty(GCEnvProperty):
         super().__init__(name)
         self.domain_name = "panda"
 
-    def str_to_goal(self, problem_name):
+    def str_to_goal(self, problem_name=None):
         """
         Convert a problem name to a goal.
         """
+        if problem_name is None:
+            return "general"
         try:
             numeric_part = problem_name.split("PandaMyReachDenseX")[1]
             components = [
                 component.replace("-v3", "").replace("y", ".").replace("M", "-")
                 for component in numeric_part.split("X")
             ]
-            floats = []
-            for component in components:
-                floats.append(float(component))
-            return np.array([floats], dtype=np.float32)
+            floats = [float(component) for component in components]
+            return np.array([floats])
         except Exception:
             return "general"
+
+    def goal_to_str(self, goal):
+        """
+        Convert a goal to a string representation.
+        """
+        return "X".join(
+            [str(float(g)).replace(".", "y").replace("-", "M") for g in goal[0]]
+        )
 
     def goal_to_problem_str(self, goal):
         """
         Convert a goal to a problem string.
         """
-        goal_str = "X".join(
-            [str(float(g)).replace(".", "y").replace("-", "M") for g in goal[0]]
-        )
+        goal_str = self.goal_to_str(goal)
         return f"PandaMyReachDenseX{goal_str}-v3"
 
     def gc_adaptable(self):
@@ -450,10 +496,34 @@ class ParkingProperty(GCEnvProperty):
         super().__init__(name)
         self.domain_name = "parking"
 
+    def str_to_goal(self, problem_name=None):
+        """
+        Convert a problem name to a goal.
+        """
+        if not problem_name:
+            problem_name = self.name
+        # Extract the goal from the part
+        return int(problem_name.split("GI-")[1].split("-v0")[0])
+
+    def goal_to_str(self, goal):
+        """
+        Convert a goal to a string representation.
+        """
+        if isinstance(goal, int):
+            return str(goal)
+        elif isinstance(goal, str):
+            return goal
+        else:
+            raise ValueError(
+                f"Unsupported goal type: {type(goal)}. Expected int or str."
+            )
+
     def goal_to_problem_str(self, goal):
         """
         Convert a goal to a problem string.
         """
+        if "-GI-" in self.name:
+            return self.name.split("-GI-")[0] + f"-GI-{goal}-v0"
         return self.name.split("-v0")[0] + f"-GI-{goal}-v0"
 
     def gc_adaptable(self):
@@ -536,9 +606,11 @@ class PointMazeProperty(EnvProperty):
         super().__init__(name)
         self.domain_name = "point_maze"
 
-    def str_to_goal(self):
+    def str_to_goal(self, problem_name=None):
         """Convert a problem name to a goal."""
-        parts = self.name.split("-")
+        if not problem_name:
+            problem_name = self.name
+        parts = problem_name.split("-")
         # Find the part containing the goal size (usually after "DynamicGoal")
         sizes_parts = [part for part in parts if "x" in part]
         goal_part = sizes_parts[1]
@@ -546,9 +618,15 @@ class PointMazeProperty(EnvProperty):
         width, height = goal_part.split("x")
         return (int(width), int(height))
 
+    def goal_to_str(self, goal):
+        """
+        Convert a goal to a string representation.
+        """
+        return f"{goal[0]}x{goal[1]}"
+
     def gc_adaptable(self):
         """Check if the environment is goal-conditioned adaptable."""
-        return False
+        return True
 
     def problem_list_to_str_tuple(self, problems):
         """Convert a list of problems to a string tuple."""
@@ -574,7 +652,12 @@ class PointMazeProperty(EnvProperty):
         """
         Convert a goal to a problem string.
         """
-        return self.name + f"-Goal-{goal[0]}x{goal[1]}"
+        possible_suffixes = ["-Goals-", "-Goal-", "-MultiGoals-", "-GoalConditioned-"]
+        for suffix in possible_suffixes:
+            if suffix in self.name:
+                return self.name.split(suffix)[0] + f"-Goal-{self.goal_to_str(goal)}"
+
+        return self.name + f"-Goal-{self.goal_to_str(goal)}"
 
     def change_done_by_specific_desired(self, obs, desired, old_success_done):
         """
@@ -591,6 +674,12 @@ class PointMazeProperty(EnvProperty):
         """
         assert isinstance(done, np.ndarray)
         return done[0]
+
+    def use_goal_directed_problem(self):
+        """
+        Check if the environment uses a goal-directed problem.
+        """
+        return True
 
     def is_success(self, info):
         """
