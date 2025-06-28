@@ -254,7 +254,12 @@ python gr_libs/all_experiments.py \
 
 This script uses multiprocessing to simultaneously execute many `odgr_executor.py` runs as child processes. It logs failures and successful executions for debugability.
 
-After execution, summary files are generated in `outputs/summaries/` for further analysis and plotting.
+After execution summary files are generated in `outputs/summaries/` for further analysis and plotting.
+
+another execution example:
+```sh
+python gr_libs/all_experiments.py --domains parking --envs Parking-S-14-PC- --tasks L1 L2 L3 L4 L5 --recognizers GCAura GCGraml GCDraco BGGraml Draco --n 5
+```
 
 ### Using analysis scripts
 The repository provides benchmark domains and scripts for analyzing experimental results. The `evaluation` directory contains tools for processing and visualizing the results from odgr_executor.py and all_experiments.py.

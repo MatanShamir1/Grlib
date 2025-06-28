@@ -12,10 +12,15 @@ This script provides a standardized way to visualize and compare the performance
 
 ## Usage
 
+Do note the paths should be of this format, as outputed by all_experiments.py, since the statistics are done on a large set of executions:
+```sh
+outputs\GCGraml\parking\Parking-S-14-PC-\L1\experiment_results\res_0.pkl
+```
+
 Run the script from the command line with the following arguments:
 
 ```bash
-python _generate_experiments_results.py \
+python generate_experiments_results.py \
     --domain <domain_name> \
     --env <environment_name> \
     --tasks <task1> <task2> ... <taskN> \
@@ -28,7 +33,7 @@ python _generate_experiments_results.py \
 
 **Example:**
 ```bash
-python _generate_experiments_results.py \
+python generate_experiments_results.py \
     --domain minigrid \
     --env MiniGrid-LavaCrossingS9N2 \
     --tasks L1 L2 L3 L4 L5 \
