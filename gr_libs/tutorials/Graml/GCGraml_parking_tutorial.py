@@ -8,7 +8,7 @@ from gr_libs.ml.utils.format import random_subset_with_order
 from gr_libs.recognizer.graml.graml_recognizer import GCGraml
 
 
-def run_graml_parking_tutorial():
+def run_GCGraml_parking_tutorial():
     recognizer = GCGraml(domain_name=PARKING, env_name="Parking-S-14-PC-")
 
     recognizer.domain_learning_phase(
@@ -51,4 +51,4 @@ def run_graml_parking_tutorial():
 
 
 if __name__ == "__main__":
-    run_graml_parking_tutorial()
+    run_GCGraml_parking_tutorial()

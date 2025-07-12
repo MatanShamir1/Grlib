@@ -343,7 +343,9 @@ class BGGraml(Graml):
         assert len(base_goals) == len(
             train_configs
         ), "base_goals and train_configs should have the same length"
-        super().domain_learning_phase(train_configs=train_configs, base_goals=base_goals)
+        super().domain_learning_phase(
+            train_configs=train_configs, base_goals=base_goals
+        )
 
     # In case we need goal-directed agent for every goal
     def train_agents_on_base_goals(self, base_goals: list[str], train_configs: list):
@@ -406,20 +408,28 @@ class MCTSBasedGraml(BGGraml, GaAdaptingRecognizer):
             list[list[tuple[np.ndarray, np.ndarray]]]: The generated sequences library.
         """
         problem_name = self.env_prop.goal_to_problem_str(goal)
-        img_path = os.path.join(
-            get_policy_sequences_result_path(
-                self.env_prop.domain_name, recognizer=self.__class__.__name__
-            ),
-            problem_name + "_MCTS",
+        img_path = (
+            os.path.join(
+                get_policy_sequences_result_path(
+                    domain_name=self.env_prop.domain_name,
+                    env_name=self.env_prop.name,
+                    recognizer=self.__class__.__name__,
+                ),
+                problem_name + "_MCTS",
+            )
+            if save_fig
+            else None
         )
-        return mcts_model.plan(
-            self.env_prop.name,
-            problem_name,
-            goal,
-            save_fig=save_fig,
-            img_path=img_path,
-            env_prop=self.env_prop,
-        )
+        return [
+            mcts_model.plan(
+                self.env_prop.domain_name,
+                problem_name,
+                goal,
+                save_fig=save_fig,
+                fig_path=img_path,
+                env_prop=self.env_prop,
+            )
+        ]
 
 
 class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
@@ -556,7 +566,9 @@ class GCGraml(Graml, GaAdaptingRecognizer):
         assert (
             len(train_configs) == 1
         ), "GCGraml should only have one train config for the base goals, it uses a single agent"
-        super().domain_learning_phase(train_configs=train_configs, base_goals=base_goals)
+        super().domain_learning_phase(
+            train_configs=train_configs, base_goals=base_goals
+        )
 
     # In case we need goal-directed agent for every goal
     def train_agents_on_base_goals(self, base_goals: list[str], train_configs: list):

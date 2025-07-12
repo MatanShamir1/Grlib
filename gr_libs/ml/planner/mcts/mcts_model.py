@@ -428,7 +428,7 @@ class MonteCarloTreeSearch:
             node = self.tree.parent(node)
 
     def generate_full_policy_sequence(
-        self, env_name, problem_name, save_fig=False, fig_path=None, env_prop=None
+        self, domain_name, problem_name, save_fig=False, fig_path=None, env_prop=None
     ):
         trace = []
         node, prev_node = self.tree.root, self.tree.root
@@ -450,7 +450,7 @@ class MonteCarloTreeSearch:
             prev_node = node
         if save_fig:
             assert fig_path is not None
-            save_figure(trace, env_name, problem_name, fig_path, env_prop)
+            save_figure(trace, domain_name, problem_name, fig_path, env_prop)
         else:
             assert fig_path is None
         return trace
@@ -467,7 +467,7 @@ def save_model_and_generate_policy(
         pickle.dump(monteCarloTreeSearch, file)
 
 
-def plan(env_name, problem_name, goal, save_fig=False, fig_path=None, env_prop=None):
+def plan(domain_name, problem_name, goal, save_fig=False, fig_path=None, env_prop=None):
     """
     Plan a path using Monte Carlo Tree Search (MCTS) algorithm.
 
@@ -481,7 +481,7 @@ def plan(env_name, problem_name, goal, save_fig=False, fig_path=None, env_prop=N
     """
     global newely_expanded
     model_dir = get_agent_model_dir(
-        env_name=env_name, model_name=problem_name, class_name="MCTS"
+        domain_name=domain_name, model_name=problem_name, class_name="MCTS"
     )
     model_file_path = os.path.join(model_dir, "mcts_model.pth")
     if os.path.exists(model_file_path):
@@ -493,9 +493,16 @@ def plan(env_name, problem_name, goal, save_fig=False, fig_path=None, env_prop=N
 
                 class RenameUnpickler(pickle.Unpickler):
                     def find_class(self, module, name):
-                        renamed_module = module
-                        if module.startswith("ml"):
-                            renamed_module = "gr_libs." + renamed_module
+                        # Replace 'grlib' at the start with 'gr_libs'
+                        if module.startswith("grlib"):
+                            renamed_module = module.replace("grlib", "gr_libs", 1)
+                        # Prepend 'gr_libs.' to 'ml...' modules
+                        elif module.startswith("ml"):
+                            renamed_module = "gr_libs." + module
+                        else:
+                            renamed_module = module
+                        # Replace any '.utils' subpackage with '._utils'
+                        renamed_module = renamed_module.replace(".utils", "._utils")
                         return super().find_class(renamed_module, name)
 
                 def renamed_load(file_obj):
@@ -508,7 +515,7 @@ def plan(env_name, problem_name, goal, save_fig=False, fig_path=None, env_prop=N
                 pickle.dump(monteCarloTreeSearch, file)
 
             return monteCarloTreeSearch.generate_full_policy_sequence(
-                env_name, problem_name, save_fig, fig_path
+                domain_name, problem_name, save_fig, fig_path, env_prop
             )
     if not os.path.exists(
         model_dir
@@ -516,7 +523,7 @@ def plan(env_name, problem_name, goal, save_fig=False, fig_path=None, env_prop=N
         os.makedirs(model_dir)
     steps = 10000
     print(
-        f"No tree found. Executing MCTS, starting with {steps} rollouts for each action."
+        f"No tree found at {model_file_path}. Executing MCTS, starting with {steps} rollouts for each action."
     )
     env = gym.make(id=problem_name)
     random.seed(2)
@@ -552,7 +559,7 @@ def plan(env_name, problem_name, goal, save_fig=False, fig_path=None, env_prop=N
                     monteCarloTreeSearch=mcts,
                 )
                 return mcts.generate_full_policy_sequence(
-                    env_name, problem_name, save_fig, fig_path, env_prop
+                    domain_name, problem_name, save_fig, fig_path, env_prop
                 )
             plan_pos, plan_dir = node.pos, dict_dir_id_to_str[node.state["direction"]]
             tree.root = node  # determine the root to be the node executed after the plan for this iteration.
@@ -585,5 +592,5 @@ def plan(env_name, problem_name, goal, save_fig=False, fig_path=None, env_prop=N
         monteCarloTreeSearch=monteCarloTreeSearch,
     )
     return mcts.generate_full_policy_sequence(
-        env_name, problem_name, save_fig, fig_path
+        domain_name, problem_name, save_fig, fig_path
     )

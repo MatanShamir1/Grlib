@@ -124,7 +124,7 @@ PROBLEMS = {
                         np.array([[0.2, 0.2, 0.1]]),
                     ],
                     "train_configs": [
-                        (SAC, 00000),
+                        (SAC, 200000),
                         (SAC, 200000),
                         (SAC, 300000),
                     ],

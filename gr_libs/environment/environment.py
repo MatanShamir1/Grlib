@@ -8,13 +8,12 @@ from contextlib import contextmanager
 
 import gymnasium as gym
 import numpy as np
+from gr_envs.wrappers.goal_wrapper import GoalRecognitionWrapper
 from gymnasium.envs.registration import register
 from minigrid.core.world_object import Lava, Wall
 from minigrid.wrappers import ImgObsWrapper, RGBImgPartialObsWrapper
 from PIL import Image
 from stable_baselines3.common.vec_env import DummyVecEnv
-
-from gr_envs.wrappers.goal_wrapper import GoalRecognitionWrapper
 
 MINIGRID, PANDA, PARKING, POINT_MAZE = "minigrid", "panda", "parking", "point_maze"
 
@@ -285,8 +284,8 @@ class MinigridProperty(EnvProperty):
         """
         Create a sequence image for the environment.
         """
-        if not os.path.exists(os.path.dirname(img_path)):
-            os.makedirs(os.path.dirname(img_path))
+        if not os.path.exists(img_path):
+            os.makedirs(img_path)
         env_id = (
             problem_name.split("-DynamicGoal-")[0]
             + "-DynamicGoal-"

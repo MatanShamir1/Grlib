@@ -393,6 +393,10 @@ class TabularQLearner(TabularRLAgent):
         self._save_conf_file()
 
     def simplify_observation(self, observation):
+        if not isinstance(observation, list):
+            raise TypeError(
+                f"Expected observation to be an iterable, got {type(observation)}"
+            )
         return [
             (obs["direction"], agent_pos_x, agent_pos_y, action)
             for ((obs, (agent_pos_x, agent_pos_y)), action) in observation
