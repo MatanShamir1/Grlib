@@ -513,6 +513,9 @@ class ExpertBasedGraml(BGGraml, GaAgentTrainerRecognizer):
             The result of the goals adaptation phase.
 
         """
+        assert len(dynamic_goals) == len(
+            dynamic_train_configs
+        ), "dynamic_goals and dynamic_train_configs should have the same length"
         self.dynamic_goals_problems = [
             self.env_prop.goal_to_problem_str(g) for g in dynamic_goals
         ]

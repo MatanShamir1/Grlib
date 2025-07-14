@@ -30,20 +30,15 @@ def run_GCGraml_PointMazeObstacles_tutorial():
         }
     )
 
-    recognizer.goals_adaptation_phase(
-        dynamic_goals=[(5, 5), (7, 4), (4, 7)],
-        dynamic_train_configs=[
-            (SAC, 200000) for _ in range(3)
-        ],  # for expert sequence generation.
-    )
+    recognizer.goals_adaptation_phase(dynamic_goals=[(5, 5), (7, 4), (4, 7)])
 
     property_type = domain_to_env_property(POINT_MAZE)
-    env_property = property_type("PointMaze-obstaclesEnvDense-11x11")
+    env_property = property_type("PointMaze-ObstaclesEnvDense-11x11")
 
     # TD3 is different from recognizer and expert algorithms, which are SAC #
     actor = DeepRLAgent(
         domain_name="point_maze",
-        problem_name="PointMaze-obstaclesEnvDense-11x11-Goal-5x5",
+        problem_name="PointMaze-ObstaclesEnvDense-11x11-Goal-5x5",
         env_prop=env_property,
         algorithm=TD3,
         num_timesteps=200000,
@@ -60,7 +55,7 @@ def run_GCGraml_PointMazeObstacles_tutorial():
     )
     closest_goal = recognizer.inference_phase(
         partial_sequence,
-        PointMazeProperty("PointMaze-obstaclesEnvDense-11x11-Goal-5x5").str_to_goal(),
+        PointMazeProperty("PointMaze-ObstaclesEnvDense-11x11-Goal-5x5").str_to_goal(),
         0.5,
     )
     print(

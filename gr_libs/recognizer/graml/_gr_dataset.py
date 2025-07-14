@@ -48,7 +48,7 @@ def generate_datasets(
     gc_goal_set=None,
 ):
     if gc_goal_set:
-        model_name = env_prop.name
+        model_name = "goal_conditioned"
     else:
         model_name = env_prop.problem_list_to_str_tuple(problems)
     dataset_directory = get_siamese_dataset_path(
@@ -112,7 +112,9 @@ def generate_datasets(
                     # needs to be different than agents[0] problem_name, it should be from the gc_goal_set.
                     # but the problem is with the panda because it
                     if env_prop.use_goal_directed_problem():
-                        first_agent_kwargs["goal_directed_problem"] = first_agent_goal
+                        first_agent_kwargs["goal_directed_problem"] = (
+                            env_prop.goal_to_problem_str(first_agent_goal)
+                        )
                     else:
                         first_agent_kwargs["goal_directed_goal"] = first_agent_goal
                     first_observation = agents[0].agent.generate_partial_observation(
@@ -145,7 +147,9 @@ def generate_datasets(
                 }
                 while second_observation == []:
                     if env_prop.use_goal_directed_problem() == True:
-                        second_agent_kwargs["goal_directed_problem"] = second_agent_goal
+                        second_agent_kwargs["goal_directed_problem"] = (
+                            env_prop.goal_to_problem_str(second_agent_goal)
+                        )
                     else:
                         second_agent_kwargs["goal_directed_goal"] = second_agent_goal
                     second_observation = agents[0].agent.generate_partial_observation(

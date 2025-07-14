@@ -300,7 +300,6 @@ PROBLEMS = {
                     "gc": {
                         "goals": [
                             (9, 1),
-                            (9, 9),
                             (1, 9),
                             (3, 3),
                             (3, 4),
@@ -308,7 +307,7 @@ PROBLEMS = {
                             (3, 7),
                             (2, 8),
                         ],
-                        "train_configs": [(SAC, 400000) for _ in range(8)],
+                        "train_configs": [(SAC, 400000)],
                     },
                     "bg": {
                         "goals": [(4, 4), (7, 3), (3, 7)],
@@ -325,7 +324,6 @@ PROBLEMS = {
                     "gc": {
                         "goals": [
                             (9, 1),
-                            (9, 9),
                             (1, 9),
                             (3, 3),
                             (3, 4),
@@ -333,7 +331,7 @@ PROBLEMS = {
                             (3, 7),
                             (2, 8),
                         ],
-                        "train_configs": [(SAC, 400000) for _ in range(8)],
+                        "train_configs": [(SAC, 400000)],
                     },
                     "bg": {
                         "goals": [(4, 4), (7, 3), (3, 7), (8, 2)],
@@ -350,7 +348,6 @@ PROBLEMS = {
                     "gc": {
                         "goals": [
                             (9, 1),
-                            (9, 9),
                             (1, 9),
                             (3, 3),
                             (3, 4),
@@ -358,7 +355,7 @@ PROBLEMS = {
                             (3, 7),
                             (2, 8),
                         ],
-                        "train_configs": [(SAC, 400000) for _ in range(8)],
+                        "train_configs": [(SAC, 400000)],
                     },
                     "bg": {
                         "goals": [(4, 4), (7, 3), (3, 7), (8, 2), (2, 8)],
@@ -375,7 +372,6 @@ PROBLEMS = {
                     "gc": {
                         "goals": [
                             (9, 1),
-                            (9, 9),
                             (1, 9),
                             (3, 3),
                             (3, 4),
@@ -383,7 +379,7 @@ PROBLEMS = {
                             (3, 7),
                             (2, 8),
                         ],
-                        "train_configs": [(SAC, 400000) for _ in range(8)],
+                        "train_configs": [(SAC, 400000)],
                     },
                     "bg": {
                         "goals": [(4, 4), (7, 3), (3, 7), (8, 2), (2, 8), (3, 4)],
@@ -400,7 +396,6 @@ PROBLEMS = {
                     "gc": {
                         "goals": [
                             (9, 1),
-                            (9, 9),
                             (1, 9),
                             (3, 3),
                             (3, 4),
@@ -408,7 +403,7 @@ PROBLEMS = {
                             (3, 7),
                             (2, 8),
                         ],
-                        "train_configs": [(SAC, 400000) for _ in range(8)],
+                        "train_configs": [(SAC, 400000)],
                     },
                     "bg": {
                         "goals": [
@@ -435,14 +430,13 @@ PROBLEMS = {
                     "gc": {
                         "goals": [
                             (5, 1),
-                            (9, 9),
                             (1, 5),
                             (6, 4),
                             (4, 6),
                             (6, 6),
                             (7, 7),
                         ],
-                        "train_configs": [(SAC, 400000) for _ in range(7)],
+                        "train_configs": [(SAC, 400000)],
                     },
                     "bg": {
                         "goals": [(5, 5), (7, 4), (4, 7)],
@@ -459,14 +453,13 @@ PROBLEMS = {
                     "gc": {
                         "goals": [
                             (5, 1),
-                            (9, 9),
                             (1, 5),
                             (6, 4),
                             (4, 6),
                             (6, 6),
                             (7, 7),
                         ],
-                        "train_configs": [(SAC, 400000) for _ in range(7)],
+                        "train_configs": [(SAC, 400000)],
                     },
                     "bg": {
                         "goals": [(5, 5), (3, 6), (7, 4)],
@@ -483,14 +476,13 @@ PROBLEMS = {
                     "gc": {
                         "goals": [
                             (5, 1),
-                            (9, 9),
                             (1, 5),
                             (6, 4),
                             (4, 6),
                             (6, 6),
                             (7, 7),
                         ],
-                        "train_configs": [(SAC, 400000) for _ in range(7)],
+                        "train_configs": [(SAC, 400000)],
                     },
                     "bg": {
                         "goals": [(5, 5), (3, 6), (7, 4), (4, 7)],
@@ -507,14 +499,13 @@ PROBLEMS = {
                     "gc": {
                         "goals": [
                             (5, 1),
-                            (9, 9),
                             (1, 5),
                             (6, 4),
                             (4, 6),
                             (6, 6),
                             (7, 7),
                         ],
-                        "train_configs": [(SAC, 400000) for _ in range(7)],
+                        "train_configs": [(SAC, 400000)],
                     },
                     "bg": {
                         "goals": [(3, 6), (6, 3), (7, 4), (4, 7), (8, 8)],
@@ -531,14 +522,13 @@ PROBLEMS = {
                     "gc": {
                         "goals": [
                             (5, 1),
-                            (9, 9),
                             (1, 5),
                             (6, 4),
                             (4, 6),
                             (6, 6),
                             (7, 7),
                         ],
-                        "train_configs": [(SAC, 400000) for _ in range(7)],
+                        "train_configs": [(SAC, 400000)],
                     },
                     "bg": {
                         "goals": [(5, 5), (3, 6), (6, 3), (7, 4), (4, 7), (8, 8)],
@@ -568,7 +558,7 @@ PROBLEMS = {
                             (11, 3),
                             (11, 5),
                         ],
-                        "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+                        "train_configs": [(QLEARNING, 100000)],
                     },
                     "bg": {
                         "goals": [(11, 1), (11, 11), (1, 11)],
@@ -594,7 +584,7 @@ PROBLEMS = {
                             (11, 3),
                             (11, 5),
                         ],
-                        "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+                        "train_configs": [(QLEARNING, 100000)],
                     },
                     "bg": {
                         "goals": [(11, 1), (11, 11), (1, 11), (5, 9)],
@@ -620,7 +610,7 @@ PROBLEMS = {
                             (11, 3),
                             (11, 5),
                         ],
-                        "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+                        "train_configs": [(QLEARNING, 100000)],
                     },
                     "bg": {
                         "goals": [(11, 1), (11, 11), (1, 11), (5, 9), (6, 1)],
@@ -646,7 +636,7 @@ PROBLEMS = {
                             (11, 3),
                             (11, 5),
                         ],
-                        "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+                        "train_configs": [(QLEARNING, 100000)],
                     },
                     "bg": {
                         "goals": [(11, 1), (11, 11), (1, 11), (5, 9), (6, 1), (11, 3)],
@@ -672,7 +662,7 @@ PROBLEMS = {
                             (11, 3),
                             (11, 5),
                         ],
-                        "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+                        "train_configs": [(QLEARNING, 100000)],
                     },
                     "bg": {
                         "goals": [
@@ -714,7 +704,7 @@ PROBLEMS = {
                             (5, 2),
                             (6, 5),
                         ],
-                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                        "train_configs": [(QLEARNING, 100000)],
                     },
                     "bg": {
                         "goals": [(1, 3), (6, 5), (4, 7)],
@@ -738,7 +728,7 @@ PROBLEMS = {
                             (5, 2),
                             (6, 5),
                         ],
-                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                        "train_configs": [(QLEARNING, 100000)],
                     },
                     "bg": {
                         "goals": [(1, 3), (6, 5), (4, 7), (2, 5)],
@@ -762,7 +752,7 @@ PROBLEMS = {
                             (5, 2),
                             (6, 5),
                         ],
-                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                        "train_configs": [(QLEARNING, 100000)],
                     },
                     "bg": {
                         "goals": [(1, 3), (6, 5), (4, 7), (2, 5), (5, 2)],
@@ -786,7 +776,7 @@ PROBLEMS = {
                             (5, 2),
                             (6, 5),
                         ],
-                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                        "train_configs": [(QLEARNING, 100000)],
                     },
                     "bg": {
                         "goals": [(1, 3), (6, 5), (4, 7), (2, 5), (5, 2), (4, 5)],
@@ -810,7 +800,7 @@ PROBLEMS = {
                             (5, 2),
                             (6, 5),
                         ],
-                        "train_configs": [(QLEARNING, 100000) for _ in range(7)],
+                        "train_configs": [(QLEARNING, 100000)],
                     },
                     "bg": {
                         "goals": [

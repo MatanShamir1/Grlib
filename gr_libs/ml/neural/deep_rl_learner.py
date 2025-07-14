@@ -21,11 +21,8 @@ import gymnasium as gym
 from stable_baselines3 import PPO, SAC, TD3
 from stable_baselines3.common.base_class import BaseAlgorithm
 
+from gr_libs.ml.consts import FINETUNE_TIMESTEPS
 from gr_libs.ml.utils import device
-
-from gr_libs.ml.consts import (
-    FINETUNE_TIMESTEPS,
-)
 
 # TODO do we need this?
 NETWORK_SETUP = {
@@ -493,7 +490,7 @@ class DeepRLAgent:
                             == success_done
                             # we want to make sure the episode is done only
                             #  when the agent has actually succeeded with the task.
-                        ), f"failed on goal: {obs['desired']}"
+                        ), f"failed on goal: {obs['desired_goal']}."
                     else:
                         # try again by breaking inner loop.
                         # everything is set up to be like the beginning of the function.
@@ -569,10 +566,8 @@ class DeepRLAgent:
 
             if not created_new_env:
                 print(
-                    (
-                        "Fine-tuning requires a goal-specific environment."
-                        "Please ensure that the environment with the specified goal exists."
-                    )
+                    "Fine-tuning requires a goal-specific environment."
+                    "Please ensure that the environment with the specified goal exists."
                 )
 
             print(f"Fine-tuning for {num_timesteps} timesteps...")

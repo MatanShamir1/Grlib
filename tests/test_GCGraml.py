@@ -9,8 +9,8 @@ def test_graml_panda_tutorial():
 def test_graml_parking_tutorial():
     run_GCGraml_parking_tutorial()
 
-def deactivated_test_graml_PointMazeObstacles_tutorial():
+def test_graml_PointMazeObstacles_tutorial():
     run_GCGraml_PointMazeObstacles_tutorial()
 
-def deactivated_test_graml_PointMazeFourRooms_tutorial():
+def test_graml_PointMazeFourRooms_tutorial():
     run_GCGraml_PointMazeFourRooms_tutorial()

@@ -23,7 +23,7 @@ def run_ExpertBasedGraml_LavaMinigrid_tutorial():
     recognizer.goals_adaptation_phase(
         dynamic_goals=[(1, 3), (6, 5), (4, 7), (2, 5)],
         dynamic_train_configs=[
-            (QLEARNING, 100000) for _ in range(3)
+            (QLEARNING, 100000) for _ in range(4)
         ],  # for expert sequence generation.
     )
 

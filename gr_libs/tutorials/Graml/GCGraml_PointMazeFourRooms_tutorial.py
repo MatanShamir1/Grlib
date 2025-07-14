@@ -17,12 +17,7 @@ def run_GCGraml_PointMazeFourRooms_tutorial():
         {"gc": {"goals": [(5, 5), (1, 9), (9, 1)], "train_configs": [(SAC, 700000)]}}
     )
 
-    recognizer.goals_adaptation_phase(
-        dynamic_goals=[(4, 4), (7, 3), (3, 7)],
-        dynamic_train_configs=[
-            (SAC, 200000) for _ in range(3)
-        ],  # for expert sequence generation.
-    )
+    recognizer.goals_adaptation_phase(dynamic_goals=[(4, 4), (7, 3), (3, 7)])
 
     property_type = domain_to_env_property(POINT_MAZE)
     env_property = property_type("PointMaze-FourRoomsEnvDense-11x11")
