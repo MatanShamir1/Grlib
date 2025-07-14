@@ -8,13 +8,12 @@ from contextlib import contextmanager
 
 import gymnasium as gym
 import numpy as np
+from gr_envs.wrappers.goal_wrapper import GoalRecognitionWrapper
 from gymnasium.envs.registration import register
 from minigrid.core.world_object import Lava, Wall
 from minigrid.wrappers import ImgObsWrapper, RGBImgPartialObsWrapper
 from PIL import Image
 from stable_baselines3.common.vec_env import DummyVecEnv
-
-from gr_envs.wrappers.goal_wrapper import GoalRecognitionWrapper
 
 MINIGRID, PANDA, PARKING, POINT_MAZE = "minigrid", "panda", "parking", "point_maze"
 
@@ -209,12 +208,6 @@ class GCEnvProperty(EnvProperty):
         Check if the environment uses a goal-directed problem.
         """
 
-    def problem_list_to_str_tuple(self, problems):
-        """
-        Convert a list of problems to a string tuple.
-        """
-        return "goal_conditioned"
-
 
 class MinigridProperty(EnvProperty):
     """
@@ -285,8 +278,8 @@ class MinigridProperty(EnvProperty):
         """
         Create a sequence image for the environment.
         """
-        if not os.path.exists(os.path.dirname(img_path)):
-            os.makedirs(os.path.dirname(img_path))
+        if not os.path.exists(img_path):
+            os.makedirs(img_path)
         env_id = (
             problem_name.split("-DynamicGoal-")[0]
             + "-DynamicGoal-"
@@ -476,6 +469,30 @@ class PandaProperty(GCEnvProperty):
         if desired is not None:
             obs["desired_goal"] = desired
 
+    def problem_list_to_str_tuple(self, problems):
+        """
+        Convert a list of problems to a string tuple.
+        """
+        if not isinstance(problems, list) or len(problems) == 1:
+            return "goal_conditioned"
+
+        def decode_goal_str(goal_str):
+            # Split by X, decode each component
+            components = [
+                float(s.replace("y", ".").replace("M", "-"))
+                for s in goal_str.split("X")
+            ]
+            return components
+
+        goal_strs = []
+        for s in problems:
+            # Extract the encoded goal part between 'PandaMyReachDenseX' and '-v3'
+            encoded = s.split("PandaMyReachDenseX")[1].split("-v3")[0]
+            decoded = decode_goal_str(encoded)
+            goal_strs.append(f"[{','.join(str(x) for x in decoded)}]")
+
+        return "_".join(goal_strs)
+
 
 class ParkingProperty(GCEnvProperty):
     """
@@ -589,8 +606,16 @@ class ParkingProperty(GCEnvProperty):
             desired is None
         ), "In ParkingProperty, giving a specific 'desired' is not supported."
 
+    def problem_list_to_str_tuple(self, problems):
+        """
+        Convert a list of problems to a string tuple.
+        """
+        if (not isinstance(problems, list)) or len(problems) == 1:
+            return "goal_conditioned"
+        return "_".join([f"[{s.split('-GI-')[-1].split('-v0')[0]}]" for s in problems])
 
-class PointMazeProperty(EnvProperty):
+
+class PointMazeProperty(GCEnvProperty):
     """Environment properties for the Point Maze domain."""
 
     def __init__(self, name):
@@ -630,7 +655,16 @@ class PointMazeProperty(EnvProperty):
 
     def problem_list_to_str_tuple(self, problems):
         """Convert a list of problems to a string tuple."""
-        return "_".join([f"[{s.split('-')[-1]}]" for s in problems])
+        if not isinstance(problems, list) or len(problems) == 1:
+            return "goal_conditioned"
+        else:
+            return "_".join([f"[{s.split('-')[-1]}]" for s in problems])
+
+    def use_goal_directed_problem(self):
+        """
+        Check if the environment uses a goal-directed problem.
+        """
+        return True
 
     def is_action_discrete(self):
         """Check if the action space is discrete."""
@@ -645,7 +679,7 @@ class PointMazeProperty(EnvProperty):
         Get the LSTM properties for the environment.
         """
         return LSTMProperties(
-            batch_size=32, input_size=6, hidden_size=8, num_samples=20000
+            batch_size=32, input_size=6, hidden_size=8, num_samples=10000
         )
 
     def goal_to_problem_str(self, goal):
@@ -659,27 +693,12 @@ class PointMazeProperty(EnvProperty):
 
         return self.name + f"-Goal-{self.goal_to_str(goal)}"
 
-    def change_done_by_specific_desired(self, obs, desired, old_success_done):
-        """
-        Change the 'done' flag based on a specific desired goal.
-        """
-        assert (
-            desired is None
-        ), "In PointMazeProperty, giving a specific 'desired' is not supported."
-        return old_success_done
-
     def is_done(self, done):
         """
         Check if the episode is done.
         """
         assert isinstance(done, np.ndarray)
         return done[0]
-
-    def use_goal_directed_problem(self):
-        """
-        Check if the environment uses a goal-directed problem.
-        """
-        return True
 
     def is_success(self, info):
         """
@@ -694,4 +713,13 @@ class PointMazeProperty(EnvProperty):
         """
         assert (
             desired is None
+        ), "In PointMazeProperty, giving a specific 'desired' is not supported."
+
+    def change_done_by_specific_desired(self, obs, desired, old_success_done):
+        """
+        Change the 'done' flag based on a specific desired goal.
+        """
+        assert (
+            desired is None
         ), "In ParkingProperty, giving a specific 'desired' is not supported."
+        return old_success_done

@@ -1,4 +1,4 @@
-from stable_baselines3 import SAC, PPO
+from stable_baselines3 import PPO, SAC
 
 from gr_libs import GCAura
 from gr_libs.environment._utils.utils import domain_to_env_property

@@ -9,10 +9,8 @@ from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent
 from gr_libs.ml.utils.format import random_subset_with_order
 
 
-def run_graml_panda_tutorial():
-    recognizer = GCGraml(  # TODO make these tutorials into pytests
-        domain_name=PANDA, env_name="PandaMyReachDense"
-    )
+def run_GCGraml_panda_tutorial():
+    recognizer = GCGraml(domain_name=PANDA, env_name="PandaMyReachDense")
     recognizer.domain_learning_phase(
         {
             "gc": {
@@ -58,4 +56,4 @@ def run_graml_panda_tutorial():
 
 
 if __name__ == "__main__":
-    run_graml_panda_tutorial()
+    run_GCGraml_panda_tutorial()

@@ -22,7 +22,7 @@ def download_and_extract_dataset(gr_cache_file_id, trained_agents_file_id, extra
 
 
 if __name__ == "__main__":
-    gr_cache_file_id = "1E44EbbwAJQNOFuJ6MENFMrQOdZAIyoBr"
-    trained_agents_file_id = "1avFFl7i84vaeEftMqkLpF1Trb9ImB8eT"
+    gr_cache_file_id = "1ELmEpgmrmfwSCbfcCW_BJoKgCBjXsZqF"
+    trained_agents_file_id = "12rBbaIa48sM-LPPucD5EEtV8dOsGGU7z"
     extract_to = path
     download_and_extract_dataset(gr_cache_file_id, trained_agents_file_id, extract_to)

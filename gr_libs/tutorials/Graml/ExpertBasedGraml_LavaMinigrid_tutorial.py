@@ -6,44 +6,34 @@ from gr_libs.ml.tabular.tabular_q_learner import TabularQLearner
 from gr_libs.ml.utils.format import random_subset_with_order
 
 
-def run_graml_minigrid_tutorial():
+def run_ExpertBasedGraml_LavaMinigrid_tutorial():
     recognizer = ExpertBasedGraml(
-        domain_name=MINIGRID, env_name="MiniGrid-SimpleCrossingS13N4"
+        domain_name=MINIGRID, env_name="MiniGrid-LavaCrossingS9N2"
     )
 
     recognizer.domain_learning_phase(
         {
             "bg": {
-                "goals": [
-                    (11, 1),
-                    (11, 11),
-                    (1, 11),
-                    (7, 11),
-                    (8, 1),
-                    (10, 6),
-                    (6, 9),
-                    (11, 3),
-                    (11, 5),
-                ],
-                "train_configs": [(QLEARNING, 100000) for _ in range(9)],
+                "goals": [(1, 3), (6, 5), (4, 7)],
+                "train_configs": [(QLEARNING, 100000) for _ in range(3)],
             }
         }
     )
 
     recognizer.goals_adaptation_phase(
-        dynamic_goals=[(11, 1), (11, 11), (1, 11)],
+        dynamic_goals=[(1, 3), (6, 5), (4, 7), (2, 5)],
         dynamic_train_configs=[
-            (QLEARNING, 100000) for _ in range(3)
+            (QLEARNING, 100000) for _ in range(4)
         ],  # for expert sequence generation.
     )
 
     property_type = domain_to_env_property(MINIGRID)
-    env_property = property_type("MiniGrid-SimpleCrossingS13N4")
+    env_property = property_type("MiniGrid-LavaCrossingS9N2")
 
     # TD3 is different from recognizer and expert algorithms, which are SAC #
     actor = TabularQLearner(
         domain_name="minigrid",
-        problem_name="MiniGrid-SimpleCrossingS13N4-DynamicGoal-11x1-v0",
+        problem_name="MiniGrid-LavaCrossingS9N2-DynamicGoal-4x7-v0",
         env_prop=env_property,
         algorithm=QLEARNING,
         num_timesteps=100000,
@@ -58,11 +48,11 @@ def run_graml_minigrid_tutorial():
     partial_sequence = random_subset_with_order(
         full_sequence, (int)(0.5 * len(full_sequence)), is_consecutive=False
     )
-    closest_goal = recognizer.inference_phase(partial_sequence, (11, 1), 0.5)
+    closest_goal = recognizer.inference_phase(partial_sequence, (4, 7), 0.5)
     print(
-        f"closest_goal returned by GRAML: {closest_goal}\nactual goal actor aimed towards: (11, 1)"
+        f"closest_goal returned by GRAML: {closest_goal}\nactual goal actor aimed towards: (4, 7)"
     )
 
 
 if __name__ == "__main__":
-    run_graml_minigrid_tutorial()
+    run_ExpertBasedGraml_LavaMinigrid_tutorial()

@@ -1,0 +1,4 @@
+from gr_libs.tutorials.Graml.MCTSBasedGraml_SimpleMinigrid_tutorial import run_MCTSBasedGraml_SimpleMinigrid_tutorial
+
+def test_graml_minigrid_tutorial():
+    run_MCTSBasedGraml_SimpleMinigrid_tutorial()

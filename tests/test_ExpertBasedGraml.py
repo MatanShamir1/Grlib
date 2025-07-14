@@ -1,0 +1,27 @@
+from gr_libs.tutorials.Graml.ExpertBasedGraml_SimpleMinigrid_tutorial import run_ExpertBasedGraml_SimpleMinigrid_tutorial
+from gr_libs.tutorials.Graml.ExpertBasedGraml_LavaMinigrid_tutorial import run_ExpertBasedGraml_LavaMinigrid_tutorial
+from gr_libs.tutorials.Graml.ExpertBasedGraml_panda_tutorial import run_ExpertBasedGraml_panda_tutorial
+from gr_libs.tutorials.Graml.ExpertBasedGraml_parking_tutorial import run_ExpertBasedGraml_parking_tutorial
+from gr_libs.tutorials.Graml.ExpertBasedGraml_PointMazeObstacles_tutorial import run_ExpertBasedGraml_PointMazeObstacles_tutorial
+from gr_libs.tutorials.Graml.ExpertBasedGraml_PointMazeFourRooms_tutorial import run_ExpertBasedGraml_PointMazeFourRooms_tutorial
+
+
+def test_ExpertBasedGraml_SimpleMinigrid_tutorial():
+    run_ExpertBasedGraml_SimpleMinigrid_tutorial()
+
+def test_ExpertBasedGraml_LavaMinigrid_tutorial():
+    run_ExpertBasedGraml_LavaMinigrid_tutorial()
+
+def test_graml_panda_tutorial():
+    run_ExpertBasedGraml_panda_tutorial()
+
+
+def test_graml_parking_tutorial():
+    run_ExpertBasedGraml_parking_tutorial()
+
+
+def test_graml_PointMazeObstacles_tutorial():
+    run_ExpertBasedGraml_PointMazeObstacles_tutorial()
+
+def test_graml_PointMazeFourRooms_tutorial():
+    run_ExpertBasedGraml_PointMazeFourRooms_tutorial()

@@ -17,6 +17,8 @@ def random_subset_with_order(sequence, subset_size, is_consecutive=True):
         list: A random subset of elements from the sequence.
 
     """
+    if not isinstance(sequence, list):
+        raise TypeError(f"Expected observation to be an iterable, got {type(sequence)}")
     if subset_size >= len(sequence):
         return sequence
     else:

@@ -82,12 +82,11 @@ For any issues or troubleshooting, please refer to the repository's issue tracke
 | **Algorithm**        | **Supervised** | **Reinforcement Learning** | **Discrete States** | **Continuous States** | **Discrete Actions** | **Continuous Actions** | **Model-Based** | **Model-Free** | **Action-Only** | **Goal Conditioned** | **Fine-Tuning** | **Supported Environments**                |
 |---------------------|----------------|---------------------------|---------------------|----------------------|----------------------|-----------------------|------------------|----------------|----------------|---------------------|-----------------|-------------------------------------------|
 | Graql               | ❌             | ✅                        | ✅                  | ❌                   | ✅                   | ❌                    | ❌               | ✅             | ❌             | ❌                  | ❌              | Minigrid                                   |
-| Draco               | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ❌                  | ❌              | PointMaze, Panda Reach, Parking            |
-| GCDraco             | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ❌              | Panda Reach, Parking                       |
-| GCAura              | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ✅              | PointMaze, Panda Reach, Parking            |
-| ExpertBasedGraml    | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ❌                  | ❌              | Panda Reach, Parking                       |
-| BGGraml             | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ❌                  | ❌              | Minigrid, PointMaze                        |
-| GCGraml             | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ✅                  | ❌              | Panda Reach, Parking                       |
+| Draco               | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ❌                  | ❌              | MinigridSimple, MinigridLava, PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking            |
+| GCDraco             | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ❌              | PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
+| GCAura              | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ✅              | PointMaze, PandaReach, Parking            |
+| ExpertBasedGraml    | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ❌                  | ❌              | MinigridSimple, MinigridLava, PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
+| GCGraml             | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ✅                  | ❌              | PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
 
 
 ## Supported Domains
@@ -98,6 +97,19 @@ For any issues or troubleshooting, please refer to the repository's issue tracke
 | PointMaze  | Continuous     | Continuous     |
 | Parking    | Continuous     | Continuous     |
 | Panda      | Continuous     | Continuous     |
+
+## Supported Environments
+
+| **Domain**  | **Environment name** | **GC Adaptable** |
+|------------|----------------|----------------|
+| Minigrid   | MiniGrid-SimpleCrossingS13N4       | ❌ |
+| Minigrid   | MiniGrid-LavaCrossingS9N2       | ❌ |
+| PointMaze  | PointMaze-FourRoomsEnvDense-11x11     | ✅ |
+| PointMaze  | PointMaze-ObstaclesEnvDense-11x11     | ✅ |
+| Parking    | Parking-S-14-PC-     | ✅ |
+| Panda      | PandaMyReachDense     | ✅ |
+
+Do note one can create other environments outside the supported environments, but they're not a part of the benchmark.
 
 ## Usage Guide
 
