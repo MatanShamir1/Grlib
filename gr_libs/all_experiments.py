@@ -32,9 +32,10 @@ args = parser.parse_args()
 
 # Build configs dynamically
 configs = {}
-for domain, env in zip(args.domains, args.envs):
+for domain in args.domains:
     configs.setdefault(domain, {})
-    configs[domain][env] = args.tasks
+    for env in args.envs:
+        configs[domain][env] = args.tasks
 
 recognizers = args.recognizers
 n = args.n
@@ -159,13 +160,13 @@ for key, result_list in results.items():
     domain, env, task, recognizer = key
     percentages = result_list[0].keys()
     detailed_summary[key] = {}
-    if (domain, recognizer) not in compiled_accuracies:
-        compiled_accuracies[(domain, recognizer)] = {}
+    if (domain, env, recognizer) not in compiled_accuracies:
+        compiled_accuracies[(domain, env, recognizer)] = {}
     for percentage in percentages:
         if percentage == "total":
             continue
-        if percentage not in compiled_accuracies[(domain, recognizer)].keys():
-            compiled_accuracies[(domain, recognizer)][percentage] = {}
+        if percentage not in compiled_accuracies[(domain, env, recognizer)].keys():
+            compiled_accuracies[(domain, env, recognizer)][percentage] = {}
         if percentage not in detailed_summary[key].keys():
             detailed_summary[key][percentage] = {}
         consecutive_accuracies = [
@@ -176,24 +177,24 @@ for key, result_list in results.items():
         ]
         if (
             "consecutive"
-            in compiled_accuracies[(domain, recognizer)][percentage].keys()
+            in compiled_accuracies[(domain, env, recognizer)][percentage].keys()
         ):
-            compiled_accuracies[(domain, recognizer)][percentage]["consecutive"].extend(
-                consecutive_accuracies
-            )
+            compiled_accuracies[(domain, env, recognizer)][percentage][
+                "consecutive"
+            ].extend(consecutive_accuracies)
         else:
-            compiled_accuracies[(domain, recognizer)][percentage][
+            compiled_accuracies[(domain, env, recognizer)][percentage][
                 "consecutive"
             ] = consecutive_accuracies
         if (
             "non_consecutive"
-            in compiled_accuracies[(domain, recognizer)][percentage].keys()
+            in compiled_accuracies[(domain, env, recognizer)][percentage].keys()
         ):
-            compiled_accuracies[(domain, recognizer)][percentage][
+            compiled_accuracies[(domain, env, recognizer)][percentage][
                 "non_consecutive"
             ].extend(non_consecutive_accuracies)
         else:
-            compiled_accuracies[(domain, recognizer)][percentage][
+            compiled_accuracies[(domain, env, recognizer)][percentage][
                 "non_consecutive"
             ] = non_consecutive_accuracies
         avg_consecutive_accuracy = np.mean(consecutive_accuracies)
@@ -227,24 +228,24 @@ for recognizer in recognizers:
     compiled_summary_file_path = os.path.join(
         "outputs",
         "summaries",
-        f"compiled_summary_{''.join(configs.keys())}_{recognizer}.txt",
+        f"compiled_summary_{''.join(configs.keys())}_{[''.join(configs[domain].keys()) for domain in configs.keys()][0]}_{recognizer}.txt",
     )
     with open(compiled_summary_file_path, "w") as f:
         for key, percentage_dict in compiled_summary.items():
-            domain, recog = key
+            domain, env, recog = key
             if recog != recognizer:
                 continue  # Only write results for this recognizer
             for percentage, cons_info in percentage_dict.items():
                 for is_cons, (avg_accuracy, std_dev) in cons_info.items():
                     f.write(
-                        f"{domain}\t{recog}\t{percentage}\t{is_cons}\t{avg_accuracy:.4f}\t{std_dev:.4f}\n"
+                        f"{domain}\t{env}\t{recog}\t{percentage}\t{is_cons}\t{avg_accuracy:.4f}\t{std_dev:.4f}\n"
                     )
     print(f"Compiled summary results written to {compiled_summary_file_path}")
 
     detailed_summary_file_path = os.path.join(
         "outputs",
         "summaries",
-        f"detailed_summary_{''.join(configs.keys())}_{recognizer}.txt",
+        f"detailed_summary_{''.join(configs.keys())}_{[''.join(configs[domain].keys()) for domain in configs.keys()][0]}_{recognizer}.txt",
     )
     with open(detailed_summary_file_path, "w") as f:
         for key, percentage_dict in detailed_summary.items():
