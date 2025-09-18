@@ -1,82 +1,6 @@
 # GRLib
 GRLib is a Python package that implements Goal Recognition (GR) algorithms using Markov Decision Processes (MDPs) to model decision-making processes. These implementations adhere to the Gymnasium API. All agents in these algorithms interact with environments registered to the Gym API as part of the initialization process of the `gr_envs` package, on which GRLib depends. More details on `gr_envs` can be found at: [GR Envs Repository](https://github.com/MatanShamir1/GREnvs).
 
-## Setup
-
-**Note:** If you are using Windows, use Git Bash for the following commands. Otherwise, any terminal or shell will work.
-
-`gr_libs` depends on `gr_envs`, which registers a set of Gym environments. Ensure your Python environment is set up with Python >= 3.11.
-
-### Setting Up a Python Environment (if needed)
-#### Using Pip
-1. **Find Your Python Installation:**  
-   To locate your Python 3.12 executable, run:
-   ```sh
-   py -3.12 -c "import sys; print(sys.executable)"
-   ```
-2. **Create a New Virtual Environment:**  
-   Using the path found above, create a new empty venv:
-   ```sh
-   C:/Users/path/to/Programs/Python/Python312/python.exe -m venv test_env
-   ```
-3. **Activate the Virtual Environment:**
-   ```sh
-   source test_env/Scripts/activate
-   ```
-4. **Verify the Active Environment:**  
-   Since there is no direct equivalent to `conda env list`, you can check your active environment via:
-   ```sh
-   echo $VIRTUAL_ENV
-   ```
-
-#### Using Conda
-If you prefer using Conda, follow these steps:
-
-1. **Create a New Conda Environment:**  
-   Replace `3.12` with your desired Python version if necessary.
-   ```sh
-   conda create -n new_env python=3.12
-   ```
-2. **Activate the Environment:**
-   ```sh
-   conda activate new_env
-   ```
-  
-  
-### Upgrade Basic Package Management Modules:
-   Run the following command (replace `/path/to/python.exe` with the actual path):
-   ```sh
-   /path/to/python.exe -m pip install --upgrade pip setuptools wheel versioneer
-   ```
-### Install the `GoalRecognitionLibs` Package:
-  The extras install the custom environments defined in `gr_envs`.
-  (For editable installation, add the `-e` flag by cloning the repo and cd'ing to it https://github.com/MatanShamir1/GRLib.git)
-  - **Minigrid Environment:**  
-    ```sh
-    pip install gr_libs[minigrid]
-    ```
-  - **Highway Environment (Parking):**  
-    ```sh
-    pip install gr_libs[highway]
-    ```
-  - **Maze Environment (Point-Maze):**  
-    ```sh
-    pip install gr_libs[maze]
-    ```
-  - **Panda Environment:**  
-    ```sh
-    pip install gr_libs[panda]
-    ```
-   (For editable installation, add the `-e` flag.)
-   ```sh
-   cd /path/to/clone/of/GoalRecognitionLibs
-   pip install -e .
-   ```
-
-## Issues & Troubleshooting
-
-For any issues or troubleshooting, please refer to the repository's issue tracker.
-
 ## Supported Algorithms
 
 | **Algorithm**        | **Supervised** | **Reinforcement Learning** | **Discrete States** | **Continuous States** | **Discrete Actions** | **Continuous Actions** | **Model-Based** | **Model-Free** | **Action-Only** | **Goal Conditioned** | **Fine-Tuning** | **Supported Environments**                |
@@ -111,16 +35,106 @@ For any issues or troubleshooting, please refer to the repository's issue tracke
 
 Do note one can create other environments outside the supported environments, but they're not a part of the benchmark.
 
+<details>
+<summary><strong>Setup (click to expand)</strong></summary>
+
+## Setup
+
+**Note:** If you are using Windows, use Git Bash for the following commands. Otherwise, any terminal or shell will work.
+
+`gr_libs` depends on `gr_envs`, which registers a set of Gym environments. Ensure your Python environment is set up with Python >= 3.11.
+
+### Setting Up a Python Environment (if needed)
+<details>
+<summary><strong>Using Pip (click to expand)</strong></summary>
+
+1. **Find Your Python Installation:**  
+   To locate your Python 3.12 executable, run:
+   ```sh
+   py -3.12 -c "import sys; print(sys.executable)"
+   ```
+2. **Create a New Virtual Environment:**  
+   Using the path found above, create a new empty venv:
+   ```sh
+   C:/Users/path/to/Programs/Python/Python312/python.exe -m venv test_env
+   ```
+3. **Activate the Virtual Environment:**
+   ```sh
+   source test_env/Scripts/activate
+   ```
+4. **Verify the Active Environment:**  
+   Since there is no direct equivalent to `conda env list`, you can check your active environment via:
+   ```sh
+   echo $VIRTUAL_ENV
+   ```
+
+</details>
+
+<details>
+<summary><strong>Using Conda (click to expand)</strong></summary>
+
+1. **Create a New Conda Environment:**  
+   Replace `3.12` with your desired Python version if necessary.
+   ```sh
+   conda create -n new_env python=3.12
+   ```
+2. **Activate the Environment:**
+   ```sh
+   conda activate new_env
+   ```
+
+</details>
+  
+  
+### Upgrade Basic Package Management Modules:
+   Run the following command (replace `/path/to/python.exe` with the actual path):
+   ```sh
+   /path/to/python.exe -m pip install --upgrade pip setuptools wheel versioneer
+   ```
+### Install the `gr-libs` Package:
+  The extras install the custom environments defined in `gr_envs`.
+  (For editable installation, add the `-e` flag by cloning the repo and cd'ing to it https://github.com/MatanShamir1/GRLib.git)
+  - **Minigrid Environment:**  
+    ```sh
+    pip install gr_libs[minigrid]
+    ```
+  - **Highway Environment (Parking):**  
+    ```sh
+    pip install gr_libs[highway]
+    ```
+  - **Maze Environment (Point-Maze):**  
+    ```sh
+    pip install gr_libs[maze]
+    ```
+  - **Panda Environment:**  
+    ```sh
+    pip install gr_libs[panda]
+    ```
+   (For editable installation, add the `-e` flag.)
+   ```sh
+   cd /path/to/clone/of/GoalRecognitionLibs
+   pip install -e .
+   ```
+
+</details>
+
+<details>
+<summary><strong>Usage Guide (click to expand)</strong></summary>
+
 ## Usage Guide
 
 After installing GRLib, you will have access to custom Gym environments, allowing you to set up and execute an Online Dynamic Goal Recognition (ODGR) scenario with the algorithm of your choice.
 
-Tutorials demonstrating basic ODGR scenarios is available in the sub-package `tutorials`. These tutorials walk through the initialization and deployment process, showcasing how different GR algorithms adapt to emerging goals in various Gym environments.
+<details>
+<summary><strong>Working with an initial dataset of trained agents</strong></summary>
 
-## Working with an initial dataset of trained agents
 gr_libs also includes a library of trained agents for the various supported environments within the package.
 
-## Dataset Download (New CLI)
+</details>
+
+<details>
+<summary><strong>Dataset Download (New CLI)</strong></summary>
+
 To download the dataset of trained agents and caches, use the new CLI tool after installing `gr_libs`:
 
 ```sh
@@ -165,7 +179,10 @@ docker run -it ghcr.io/MatanShamir1/gr_test_base:latest bash
 ```
 3. don't forget to install the package from within the container, go back to 'Setup' for that.
 
-### Method 1: Writing a Custom Script
+</details>
+
+<details>
+<summary><strong>Method 1: Writing a Custom Script</strong></summary>
 
 1. **Create a recognizer**
    
@@ -221,7 +238,10 @@ docker run -it ghcr.io/MatanShamir1/gr_test_base:latest bash
    print(f"Closest goal returned by Graql: {closest_goal}\nActual goal actor aimed towards: (11, 1)")
    ```
 
-### Method 2: Using a Configuration File
+</details>
+
+<details>
+<summary><strong>Method 2: Using a Configuration File</strong></summary>
 
 The `consts.py` file contains predefined ODGR problem configurations. You can use existing configurations or define new ones.
 
@@ -262,6 +282,13 @@ pickled results from which confidence of the results can be obtained, for offlin
 For GRAsRL outputs, for every possible goal, the likelihood of it being the true goal from the input sequence, based on the policy distance metric.
 
 For GRAML outputs, the embeddings of the sequences are pickled for every goal-directed sequence. Offline, since, since in the embdding space of GRAML's metric model- sequences towards the same sequences are close and vice versa, one could reproduce the most likely goal by measuring the elementwise vector distance of the embeddings, and retrieve a confidence of it.
+
+</details>
+
+</details>
+
+<details>
+<summary><strong>Running Experiments (click to expand)</strong></summary>
 
 ## Running Experiments
 
@@ -305,6 +332,8 @@ python gr_libs/all_experiments.py --domains parking --envs Parking-S-14-PC- --ta
 The repository provides benchmark domains and scripts for analyzing experimental results. The `evaluation` directory contains tools for processing and visualizing the results from odgr_executor.py and all_experiments.py.
 Please follow the README.md file in the 'evaluation' directory for more details.
 
+</details>
+
 ## For Developers
 Developers will need to work slightly different: instead of installing the packages, they need to clone the repos and either install them as editables or add their paths to PYTHONPATH so they will function as packages effectively.
 Additional packages to install as a developer:
@@ -312,3 +341,4 @@ Additional packages to install as a developer:
 pip install pre-commit
 pre-commit install
 ```
+These will activate pre-commit hooks to keep the code readable and organized.
