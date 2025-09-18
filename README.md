@@ -84,7 +84,7 @@ For any issues or troubleshooting, please refer to the repository's issue tracke
 | Graql               | ❌             | ✅                        | ✅                  | ❌                   | ✅                   | ❌                    | ❌               | ✅             | ❌             | ❌                  | ❌              | Minigrid                                   |
 | Draco               | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ❌                  | ❌              | MinigridSimple, MinigridLava, PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking            |
 | GCDraco             | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ❌              | PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
-| GCAura              | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ✅              | PointMaze, PandaReach, Parking            |
+| GCAura              | ❌             | ✅                        | ✅                  | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ✅              | PointMaze, PandaReach, Parking            |
 | ExpertBasedGraml    | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ❌                  | ❌              | MinigridSimple, MinigridLava, PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
 | GCGraml             | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ✅                  | ❌              | PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
 
@@ -119,12 +119,40 @@ Tutorials demonstrating basic ODGR scenarios is available in the sub-package `tu
 
 ## Working with an initial dataset of trained agents
 gr_libs also includes a library of trained agents for the various supported environments within the package.
-To get the dataset of trained agents, you can run:
+
+## Dataset Download (New CLI)
+To download the dataset of trained agents and caches, use the new CLI tool after installing `gr_libs`:
+
 ```sh
-pip install gdown
-python download_dataset.py
+download-grlib-dataset
 ```
-Alternatively, you can visit the google-drive links where download_dataset.py points to and manually download the zipped folders, and unzip them into the project directory.
+
+You can also specify a custom extraction directory:
+
+```sh
+download-grlib-dataset --extract_to /path/to/target/dir
+```
+
+This will download and extract the required files into the specified directory (by default, the package directory).
+
+You may also use the following alternative methods:
+
+- **Clone the repository and run the script directly:**
+  ```sh
+  git clone https://github.com/MatanShamir1/GRLib.git
+  cd GRLib
+  pip install gdown
+  python download_dataset.py
+  ```
+
+- **Manual download from Google Drive:**
+  - [Download gr_cache.zip](https://drive.google.com/uc?id=1ELmEpgmrmfwSCbfcCW_BJoKgCBjXsZqF)
+  - [Download trained_agents.zip](https://drive.google.com/uc?id=12rBbaIa48sM-LPPucD5EEtV8dOsGGU7z)
+  
+  After downloading, unzip both files into your desired directory within the package.
+  
+  After extraction, you should observe the folders `trained_agents` and `gr_cache` in your current working directory. These folders contain the necessary datasets for running experiments and using the provided tools.
+
 An alternative is to use our docker image, which includes the dataset in it.
 You can:
 1. pull the image:

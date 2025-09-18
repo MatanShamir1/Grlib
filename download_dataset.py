@@ -21,6 +21,16 @@ def download_and_extract_dataset(gr_cache_file_id, trained_agents_file_id, extra
     os.remove(output2)
 
 
+def download_and_extract_dataset_cli():
+    import argparse
+    parser = argparse.ArgumentParser(description="Download and extract the GRLib dataset.")
+    parser.add_argument('--extract_to', type=str, default=path, help='Directory to extract the dataset to (default: current package directory)')
+    parser.add_argument('--gr_cache_file_id', type=str, default="1ELmEpgmrmfwSCbfcCW_BJoKgCBjXsZqF", help='Google Drive file ID for gr_cache.zip')
+    parser.add_argument('--trained_agents_file_id', type=str, default="12rBbaIa48sM-LPPucD5EEtV8dOsGGU7z", help='Google Drive file ID for trained_agents.zip')
+    args = parser.parse_args()
+    download_and_extract_dataset(args.gr_cache_file_id, args.trained_agents_file_id, args.extract_to)
+
+
 if __name__ == "__main__":
     gr_cache_file_id = "1ELmEpgmrmfwSCbfcCW_BJoKgCBjXsZqF"
     trained_agents_file_id = "12rBbaIa48sM-LPPucD5EEtV8dOsGGU7z"
