@@ -1,43 +1,28 @@
 """
-A module GR algorithms can store hard-coded parameters anf functionalities
-that are environment-related.
+A module GR algorithms can store hard-coded parameters and functionalities
+that are environment-related. We try to import to this level every environment
+that is an extra, so that users that installed `gr_libs` with the extra
+`[minigrid]`, `[panda]`, `[highway]` or `[maze]` can use it directly
+from `gr_libs.environment` without having to import `gr_envs`.
+If the extra was not installed, a warning is raised.
 """
 
-import importlib.metadata
+import importlib
 import warnings
 
+# Track which extras/environments are available
+AVAILABLE_DOMS = {}
 
-def is_extra_installed(package: str, extra: str) -> bool:
-    """Check if an extra was installed for a given package.
-
-    Args:
-        package (str): The name of the package.
-        extra (str): The name of the extra to check.
-
-    Returns:
-        bool: True if the extra is installed, False otherwise.
-    """
+for extra, dom in zip(
+    ["minigrid", "panda", "highway", "maze"],
+    ["minigrid", "panda", "parking", "point_maze"],
+):
     try:
-        # Get metadata for the installed package
-        dist = importlib.metadata.metadata(package)
-        requires = dist.get_all(
-            "Requires-Dist", []
-        )  # Dependencies listed in the package metadata
-        return any(extra in req for req in requires)
-    except importlib.metadata.PackageNotFoundError:
-        return False  # The package is not installed
-
-
-# Check if `gr_libs[minigrid]` was installed
-for env in ["minigrid", "panda", "highway", "maze"]:
-    if is_extra_installed("gr_libs", f"gr_envs[{env}]"):
-        try:
-            importlib.import_module(f"gr_envs.{env}_scripts.envs")
-        except ImportError:
-            raise ImportError(
-                f"gr_envs[{env}] was not installed, but gr_libs[{env}] requires it! if you messed with gr_envs installation, you can reinstall gr_libs."
-            )
-    else:
+        importlib.import_module(f"gr_envs.{extra}_scripts.envs")
+        AVAILABLE_DOMS[dom] = True
+    except ImportError:
+        AVAILABLE_DOMS[dom] = False
         warnings.warn(
-            f"gr_libs[{env}] was not installed, skipping {env} imports.", RuntimeWarning
+            f"gr_envs[{extra}] is not installed. If you need it, install gr_libs with the [{extra}] extra.",
+            RuntimeWarning,
         )

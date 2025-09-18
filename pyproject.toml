@@ -16,6 +16,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "gr_envs",
+    "scipy",
     "dill",
     "opencv-python",
     "tensorboardX",

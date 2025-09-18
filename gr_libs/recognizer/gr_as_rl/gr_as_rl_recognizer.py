@@ -2,20 +2,20 @@ import os
 
 import dill
 import numpy as np
+from gymnasium.envs.registration import register, registry
 
 from gr_libs.metrics.metrics import kl_divergence_norm_softmax
 from gr_libs.ml.base import RLAgent
+from gr_libs.ml.consts import FINETUNE_TIMESTEPS
 from gr_libs.ml.neural.deep_rl_learner import DeepRLAgent, GCDeepRLAgent
 from gr_libs.ml.tabular.tabular_q_learner import TabularQLearner
 from gr_libs.ml.utils.storage import get_gr_as_rl_experiment_confidence_path
-from gymnasium.envs.registration import register, registry
 from gr_libs.recognizer.recognizer import (
     GaAdaptingRecognizer,
     GaAgentTrainerRecognizer,
     LearningRecognizer,
     Recognizer,
 )
-from gr_libs.ml.consts import FINETUNE_TIMESTEPS
 
 
 class GRAsRL(Recognizer):

@@ -1,8 +1,17 @@
 from abc import ABC, abstractmethod
 
+from gr_libs.environment import AVAILABLE_DOMS
 from gr_libs.environment._utils.utils import domain_to_env_property
 from gr_libs.environment.environment import SUPPORTED_DOMAINS
 from gr_libs.ml.base.rl_agent import RLAgent
+
+
+def require_env(domain_name: str):
+    if not AVAILABLE_DOMS.get(domain_name, False):
+        raise ImportError(
+            f"Environment '{domain_name}' is not available. "
+            f"Install gr_libs with the [{domain_name}] extra."
+        )
 
 
 class Recognizer(ABC):
@@ -15,6 +24,7 @@ class Recognizer(ABC):
         **kwargs,
     ):
         assert domain_name in SUPPORTED_DOMAINS
+        require_env(domain_name)
         self.rl_agent_type = rl_agent_type
         self.domain_name = domain_name
         self.env_prop_type = domain_to_env_property(self.domain_name)
