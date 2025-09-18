@@ -10,8 +10,6 @@ import gymnasium as gym
 import numpy as np
 from gr_envs.wrappers.goal_wrapper import GoalRecognitionWrapper
 from gymnasium.envs.registration import register
-from minigrid.core.world_object import Lava, Wall
-from minigrid.wrappers import ImgObsWrapper, RGBImgPartialObsWrapper
 from PIL import Image
 from stable_baselines3.common.vec_env import DummyVecEnv
 
@@ -285,6 +283,10 @@ class MinigridProperty(EnvProperty):
             + "-DynamicGoal-"
             + problem_name.split("-DynamicGoal-")[1]
         )
+        # keep this here so the environment module will not fail on import if minigrid is not installed as an extra
+        from minigrid.core.world_object import Lava, Wall
+        from minigrid.wrappers import ImgObsWrapper, RGBImgPartialObsWrapper
+
         register(
             id=env_id,
             entry_point="gr_envs.minigrid_scripts.envs:CustomColorEnv",
