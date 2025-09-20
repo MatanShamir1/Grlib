@@ -108,7 +108,7 @@ To download the dataset of trained agents and caches, use the new CLI tool after
 download-gr-libs-dataset
 ```
 
-You can also specify a custom extraction directory:
+You can also specify a custom extraction directory,:
 
 ```sh
 download-gr-libs-dataset --extract_to /path/to/target/dir
@@ -302,6 +302,32 @@ Please follow the README.md file in the 'evaluation' directory for more details.
 
 </details>
 
+## Supported Gym Environments (packages)
+
+| **Environment Class**  | **Action Space** | **State Space** | **Package Name** |
+|------------|----------------|----------------|----------------|
+| Minigrid   | Discrete       | Discrete       | minigrid           |
+| PointMaze  | Continuous     | Continuous     | gymnasium-robotics |
+| Parking    | Continuous     | Continuous     | highway-env        |
+| Panda      | Continuous     | Continuous     | panda-gym          |
+
+## Supported Environments Instances
+
+| **Environment Class**  | **Specific Environment ID**                | **GC Adaptable** | **Agent Demo**                                   |
+|-----------------------|---------------------------------------------|------------------|--------------------------------------------------|
+| Minigrid              | MiniGrid-SimpleCrossingS13N4                | ❌               | <img src="gifs/minigrid_walls.png" width="120"/> |
+| Minigrid              | MiniGrid-LavaCrossingS9N2                   | ❌               | <img src="gifs/minigrid_lava.png" width="120"/>  |
+| PointMaze             | PointMaze-FourRoomsEnvDense-11x11           | ✅               | <img src="gifs/point_maze.gif" width="120"/>     |
+| PointMaze             | PointMaze-ObstaclesEnvDense-11x11           | ✅               | <img src="gifs/point_maze_obstacles.gif" width="120"/> |
+| Parking               | Parking-S-14-PC-                            | ✅               | <img src="gifs/parking.gif" width="120"/>        |
+| Panda                 | PandaMyReachDense                           | ✅               | <img src="gifs/panda.gif" width="120"/>          |
+
+> **Note:** If viewing on GitHub, GIFs may not animate in the table preview. For best results, view the README in a Markdown viewer that supports HTML tags.
+
+Do note one can create other environments outside the supported environments, but they're not a part of the benchmark.
+
+The demos were produced by running odgr_executor.py with a '--collect_stats' flag.
+
 ## Supported Algorithms
 
 | **Algorithm**        | **Supervised** | **Reinforcement Learning** | **Discrete States** | **Continuous States** | **Discrete Actions** | **Continuous Actions** | **Model-Based** | **Model-Free** | **Action-Only** | **Goal Conditioned** | **Fine-Tuning** | **Supported Environments**                |
@@ -309,32 +335,10 @@ Please follow the README.md file in the 'evaluation' directory for more details.
 | Graql               | ❌             | ✅                        | ✅                  | ❌                   | ✅                   | ❌                    | ❌               | ✅             | ❌             | ❌                  | ❌              | Minigrid                                   |
 | Draco               | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ❌                  | ❌              | MinigridSimple, MinigridLava, PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking            |
 | GCDraco             | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ❌              | PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
-| GCAura              | ❌             | ✅                        | ✅                  | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ✅              | PointMaze, PandaReach, Parking            |
+| GCAura              | ❌             | ✅                        | ✅                  | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ✅              | ✅              | PointMaze, PandaReach, Parking            |
 | ExpertBasedGraml    | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ❌                  | ❌              | MinigridSimple, MinigridLava, PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
 | GCGraml             | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ✅                  | ❌              | PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
 
-
-## Supported Domains
-
-| **Domain**  | **Action Space** | **State Space** |
-|------------|----------------|----------------|
-| Minigrid   | Discrete       | Discrete       |
-| PointMaze  | Continuous     | Continuous     |
-| Parking    | Continuous     | Continuous     |
-| Panda      | Continuous     | Continuous     |
-
-## Supported Environments
-
-| **Domain**  | **Environment name** | **GC Adaptable** |
-|------------|----------------|----------------|
-| Minigrid   | MiniGrid-SimpleCrossingS13N4       | ❌ |
-| Minigrid   | MiniGrid-LavaCrossingS9N2       | ❌ |
-| PointMaze  | PointMaze-FourRoomsEnvDense-11x11     | ✅ |
-| PointMaze  | PointMaze-ObstaclesEnvDense-11x11     | ✅ |
-| Parking    | Parking-S-14-PC-     | ✅ |
-| Panda      | PandaMyReachDense     | ✅ |
-
-Do note one can create other environments outside the supported environments, but they're not a part of the benchmark.
 
 ## For Developers
 Developers will need to work slightly different: instead of installing the packages, they need to clone the repos and either install them as editables or add their paths to PYTHONPATH so they will function as packages effectively.
@@ -346,6 +350,8 @@ pre-commit install
 These will activate pre-commit hooks to keep the code readable and organized.
 <details>
 <summary><strong>Using docker (click to expand)</strong></summary>
-Naviagte to the README.md under the CI folder for more information on managing docker images with datasets.
-In the 'actions' folder, you can find which docker images are being used in the CI pipeline and it's possible to imitate the behavior there locally.
+
+For details on the CI pipeline docker images and usage, see the [View CI documentation](https://github.com/MatanShamir1/gr_libs/blob/main/CI/README.md)
+
+If you want to browse the folder directly on GitHub, use this link: [View .github/actions folder on GitHub](https://github.com/MatanShamir1/gr_libs/tree/main/.github/actions)
 </details>
