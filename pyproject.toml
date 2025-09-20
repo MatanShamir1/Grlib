@@ -39,7 +39,7 @@ maze = ["gr_envs[maze]"]
 panda = ["gr_envs[panda]"]
 
 [project.scripts]
-download-grlib-dataset = "gr_libs.download_dataset:download_and_extract_dataset_cli"
+download-gr-libs-dataset = "gr_libs.download_dataset:download_and_extract_dataset_cli"
 
 [tool.setuptools]
 packages = {find = {}}

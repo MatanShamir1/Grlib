@@ -1,39 +1,5 @@
-# GRLib
-GRLib is a Python package that implements Goal Recognition (GR) algorithms using Markov Decision Processes (MDPs) to model decision-making processes. These implementations adhere to the Gymnasium API. All agents in these algorithms interact with environments registered to the Gym API as part of the initialization process of the `gr_envs` package, on which GRLib depends. More details on `gr_envs` can be found at: [GR Envs Repository](https://github.com/MatanShamir1/GREnvs).
-
-## Supported Algorithms
-
-| **Algorithm**        | **Supervised** | **Reinforcement Learning** | **Discrete States** | **Continuous States** | **Discrete Actions** | **Continuous Actions** | **Model-Based** | **Model-Free** | **Action-Only** | **Goal Conditioned** | **Fine-Tuning** | **Supported Environments**                |
-|---------------------|----------------|---------------------------|---------------------|----------------------|----------------------|-----------------------|------------------|----------------|----------------|---------------------|-----------------|-------------------------------------------|
-| Graql               | ❌             | ✅                        | ✅                  | ❌                   | ✅                   | ❌                    | ❌               | ✅             | ❌             | ❌                  | ❌              | Minigrid                                   |
-| Draco               | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ❌                  | ❌              | MinigridSimple, MinigridLava, PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking            |
-| GCDraco             | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ❌              | PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
-| GCAura              | ❌             | ✅                        | ✅                  | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ✅              | PointMaze, PandaReach, Parking            |
-| ExpertBasedGraml    | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ❌                  | ❌              | MinigridSimple, MinigridLava, PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
-| GCGraml             | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ✅                  | ❌              | PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
-
-
-## Supported Domains
-
-| **Domain**  | **Action Space** | **State Space** |
-|------------|----------------|----------------|
-| Minigrid   | Discrete       | Discrete       |
-| PointMaze  | Continuous     | Continuous     |
-| Parking    | Continuous     | Continuous     |
-| Panda      | Continuous     | Continuous     |
-
-## Supported Environments
-
-| **Domain**  | **Environment name** | **GC Adaptable** |
-|------------|----------------|----------------|
-| Minigrid   | MiniGrid-SimpleCrossingS13N4       | ❌ |
-| Minigrid   | MiniGrid-LavaCrossingS9N2       | ❌ |
-| PointMaze  | PointMaze-FourRoomsEnvDense-11x11     | ✅ |
-| PointMaze  | PointMaze-ObstaclesEnvDense-11x11     | ✅ |
-| Parking    | Parking-S-14-PC-     | ✅ |
-| Panda      | PandaMyReachDense     | ✅ |
-
-Do note one can create other environments outside the supported environments, but they're not a part of the benchmark.
+# gr-libs
+gr-libs is a Python package that implements Goal Recognition (GR) algorithms using Markov Decision Processes (MDPs) to model decision-making processes. These implementations adhere to the Gymnasium API. All agents in these algorithms interact with environments registered to the Gym API as part of the initialization process of the `gr-envs` package, on which gr-libs depends. More details on `gr-envs` can be found at: [GR Envs Repository](https://github.com/MatanShamir1/gr_envs).
 
 <details>
 <summary><strong>Setup (click to expand)</strong></summary>
@@ -41,6 +7,7 @@ Do note one can create other environments outside the supported environments, bu
 ## Setup
 
 **Note:** If you are using Windows, use Git Bash for the following commands. Otherwise, any terminal or shell will work.
+You will need Microsoft Visual C++ 14.0 or greater. If you experiment issues while trying to download the package, you can download the latest version of it here: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
 `gr_libs` depends on `gr_envs`, which registers a set of Gym environments. Ensure your Python environment is set up with Python >= 3.11.
 
@@ -93,7 +60,7 @@ Do note one can create other environments outside the supported environments, bu
    ```
 ### Install the `gr-libs` Package:
   The extras install the custom environments defined in `gr_envs`.
-  (For editable installation, add the `-e` flag by cloning the repo and cd'ing to it https://github.com/MatanShamir1/GRLib.git)
+  (For editable installation, add the `-e` flag by cloning the repo and cd'ing to it https://github.com/MatanShamir1/gr_libs.git)
   - **Minigrid Environment:**  
     ```sh
     pip install gr_libs[minigrid]
@@ -123,7 +90,7 @@ Do note one can create other environments outside the supported environments, bu
 
 ## Usage Guide
 
-After installing GRLib, you will have access to custom Gym environments, allowing you to set up and execute an Online Dynamic Goal Recognition (ODGR) scenario with the algorithm of your choice.
+After installing gr_libs, you will have access to custom Gym environments, allowing you to set up and execute an Online Dynamic Goal Recognition (ODGR) scenario with the algorithm of your choice.
 
 <details>
 <summary><strong>Working with an initial dataset of trained agents</strong></summary>
@@ -138,13 +105,13 @@ gr_libs also includes a library of trained agents for the various supported envi
 To download the dataset of trained agents and caches, use the new CLI tool after installing `gr_libs`:
 
 ```sh
-download-grlib-dataset
+download-gr-libs-dataset
 ```
 
 You can also specify a custom extraction directory:
 
 ```sh
-download-grlib-dataset --extract_to /path/to/target/dir
+download-gr-libs-dataset --extract_to /path/to/target/dir
 ```
 
 This will download and extract the required files into the specified directory (by default, the package directory).
@@ -153,8 +120,8 @@ You may also use the following alternative methods:
 
 - **Clone the repository and run the script directly:**
   ```sh
-  git clone https://github.com/MatanShamir1/GRLib.git
-  cd GRLib
+  git clone https://github.com/MatanShamir1/gr_libs.git
+  cd gr_libs
   pip install gdown
   python download_dataset.py
   ```
@@ -167,17 +134,18 @@ You may also use the following alternative methods:
   
   After extraction, you should observe the folders `trained_agents` and `gr_cache` in your current working directory. These folders contain the necessary datasets for running experiments and using the provided tools.
 
-An alternative is to use our docker image, which includes the dataset in it.
-You can:
+- **Use our docker image, which includes the dataset in it:**
+First, make sure you have docker downloaded, installed and that the docker daemon is running.
+Then,
 1. pull the image:
 ```sh
-docker pull ghcr.io/MatanShamir1/gr_test_base:latest
+docker pull ghcr.io/matanshamir1/gr_image:latest
 ```
 2. run a container:
 ```sh
-docker run -it ghcr.io/MatanShamir1/gr_test_base:latest bash
+docker run -it ghcr.io/matanshamir1/gr_image:latest bash
 ```
-3. don't forget to install the package from within the container, go back to 'Setup' for that.
+3. You end up with a container that has the datasets in it, but doesn't have the packages. Install the package from within the container, go back to 'Setup' for that.
 
 </details>
 
@@ -334,6 +302,40 @@ Please follow the README.md file in the 'evaluation' directory for more details.
 
 </details>
 
+## Supported Algorithms
+
+| **Algorithm**        | **Supervised** | **Reinforcement Learning** | **Discrete States** | **Continuous States** | **Discrete Actions** | **Continuous Actions** | **Model-Based** | **Model-Free** | **Action-Only** | **Goal Conditioned** | **Fine-Tuning** | **Supported Environments**                |
+|---------------------|----------------|---------------------------|---------------------|----------------------|----------------------|-----------------------|------------------|----------------|----------------|---------------------|-----------------|-------------------------------------------|
+| Graql               | ❌             | ✅                        | ✅                  | ❌                   | ✅                   | ❌                    | ❌               | ✅             | ❌             | ❌                  | ❌              | Minigrid                                   |
+| Draco               | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ❌                  | ❌              | MinigridSimple, MinigridLava, PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking            |
+| GCDraco             | ❌             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ❌              | PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
+| GCAura              | ❌             | ✅                        | ✅                  | ✅                   | ✅                    | ❌               | ✅             | ❌             | ✅                  | ✅              | PointMaze, PandaReach, Parking            |
+| ExpertBasedGraml    | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ❌                  | ❌              | MinigridSimple, MinigridLava, PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
+| GCGraml             | ✅             | ✅                        | ✅                  | ✅                   | ✅                   | ✅                    | ❌               | ✅             | ✅             | ✅                  | ❌              | PointMazeObstacles, PointMazeFourRooms, PandaReach, Parking                       |
+
+
+## Supported Domains
+
+| **Domain**  | **Action Space** | **State Space** |
+|------------|----------------|----------------|
+| Minigrid   | Discrete       | Discrete       |
+| PointMaze  | Continuous     | Continuous     |
+| Parking    | Continuous     | Continuous     |
+| Panda      | Continuous     | Continuous     |
+
+## Supported Environments
+
+| **Domain**  | **Environment name** | **GC Adaptable** |
+|------------|----------------|----------------|
+| Minigrid   | MiniGrid-SimpleCrossingS13N4       | ❌ |
+| Minigrid   | MiniGrid-LavaCrossingS9N2       | ❌ |
+| PointMaze  | PointMaze-FourRoomsEnvDense-11x11     | ✅ |
+| PointMaze  | PointMaze-ObstaclesEnvDense-11x11     | ✅ |
+| Parking    | Parking-S-14-PC-     | ✅ |
+| Panda      | PandaMyReachDense     | ✅ |
+
+Do note one can create other environments outside the supported environments, but they're not a part of the benchmark.
+
 ## For Developers
 Developers will need to work slightly different: instead of installing the packages, they need to clone the repos and either install them as editables or add their paths to PYTHONPATH so they will function as packages effectively.
 Additional packages to install as a developer:
@@ -342,3 +344,8 @@ pip install pre-commit
 pre-commit install
 ```
 These will activate pre-commit hooks to keep the code readable and organized.
+<details>
+<summary><strong>Using docker (click to expand)</strong></summary>
+Naviagte to the README.md under the CI folder for more information on managing docker images with datasets.
+In the 'actions' folder, you can find which docker images are being used in the CI pipeline and it's possible to imitate the behavior there locally.
+</details>

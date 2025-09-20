@@ -6,12 +6,6 @@ runs:
     - name: Check out the repository
       uses: actions/checkout@v4
 
-    # - name: Copy dataset into working directory
-    #   run: |
-    #     mkdir -p "${{ github.workspace }}/dataset"
-    #     cp -r /preloaded_data/* "${{ github.workspace }}/dataset/"
-      # shell: bash
-
     - name: Show working dir and contents
       run: |
         pwd
